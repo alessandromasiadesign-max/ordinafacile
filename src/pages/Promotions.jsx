@@ -9,7 +9,7 @@ import { Plus, Pencil, Tag, Copy } from "lucide-react";
 import AddPromotionDialog from "../components/promotions/AddPromotionDialog";
 import EditPromotionDialog from "../components/promotions/EditPromotionDialog";
 import StatusToggle from "../components/ui/status-toggle";
-import { useToast } from "../components/ui/toast";
+import { useToast } from "../components/ui/use-toast";
 
 export default function Promotions() {
   const [restaurant, setRestaurant] = useState(null);
@@ -58,8 +58,7 @@ export default function Promotions() {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
       toast({
         title: "✅ Template applicato!",
-        description: "Promozione creata (disattivata). Modificala e attivala quando vuoi.",
-        type: "success"
+        description: "Promozione creata (disattivata). Modificala e attivala quando vuoi."
       });
       setActiveTab('mine'); 
     },

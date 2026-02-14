@@ -47,48 +47,48 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Dashboard from './pages/Dashboard';
-import Orders from './pages/Orders';
-import MenuManagement from './pages/MenuManagement';
-import Settings from './pages/Settings';
-import RestaurantPublic from './pages/RestaurantPublic';
-import MasterDashboard from './pages/MasterDashboard';
-import Promotions from './pages/Promotions';
-import PrintOrders from './pages/PrintOrders';
-import Events from './pages/Events';
-import OrderHistory from './pages/OrderHistory';
-import EventMenu from './pages/EventMenu';
-import SubscriptionSettings from './pages/SubscriptionSettings';
-import RenewSubscription from './pages/RenewSubscription';
-import Locations from './pages/Locations';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
 import Cookies from './pages/Cookies';
-import app from './pages/_app';
+import Dashboard from './pages/Dashboard';
+import EventMenu from './pages/EventMenu';
+import Events from './pages/Events';
+import Locations from './pages/Locations';
+import MasterDashboard from './pages/MasterDashboard';
+import MenuManagement from './pages/MenuManagement';
+import OrderHistory from './pages/OrderHistory';
+import Orders from './pages/Orders';
+import PrintOrders from './pages/PrintOrders';
+import Privacy from './pages/Privacy';
+import Promotions from './pages/Promotions';
+import RenewSubscription from './pages/RenewSubscription';
+import RestaurantPublic from './pages/RestaurantPublic';
+import Settings from './pages/Settings';
+import SubscriptionSettings from './pages/SubscriptionSettings';
 import SupportRequests from './pages/SupportRequests';
+import Terms from './pages/Terms';
+import app from './pages/_app';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Dashboard": Dashboard,
-    "Orders": Orders,
-    "MenuManagement": MenuManagement,
-    "Settings": Settings,
-    "RestaurantPublic": RestaurantPublic,
-    "MasterDashboard": MasterDashboard,
-    "Promotions": Promotions,
-    "PrintOrders": PrintOrders,
-    "Events": Events,
-    "OrderHistory": OrderHistory,
-    "EventMenu": EventMenu,
-    "SubscriptionSettings": SubscriptionSettings,
-    "RenewSubscription": RenewSubscription,
-    "Locations": Locations,
-    "Terms": Terms,
-    "Privacy": Privacy,
     "Cookies": Cookies,
-    "_app": app,
+    "Dashboard": Dashboard,
+    "EventMenu": EventMenu,
+    "Events": Events,
+    "Locations": Locations,
+    "MasterDashboard": MasterDashboard,
+    "MenuManagement": MenuManagement,
+    "OrderHistory": OrderHistory,
+    "Orders": Orders,
+    "PrintOrders": PrintOrders,
+    "Privacy": Privacy,
+    "Promotions": Promotions,
+    "RenewSubscription": RenewSubscription,
+    "RestaurantPublic": RestaurantPublic,
+    "Settings": Settings,
+    "SubscriptionSettings": SubscriptionSettings,
     "SupportRequests": SupportRequests,
+    "Terms": Terms,
+    "_app": app,
 }
 
 export const pagesConfig = {
