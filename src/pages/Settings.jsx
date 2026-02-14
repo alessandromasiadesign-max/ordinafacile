@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -190,16 +189,16 @@ export default function Settings() {
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Impostazioni Ristorante</h1>
-          <p className="text-gray-500 mt-1">Configura i dettagli del tuo ristorante</p>
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Impostazioni Ristorante</h1>
+          <p className="text-sm md:text-base text-gray-500 mt-1">Configura i dettagli del tuo ristorante</p>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Store className="w-5 h-5" />
+          <Card className="mb-4 md:mb-6">
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                <Store className="w-4 h-4 md:w-5 md:h-5" />
                 Informazioni Generali
               </CardTitle>
             </CardHeader>
@@ -294,11 +293,11 @@ export default function Settings() {
           </Card>
 
           {/* Configurazione Fiscale */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Configurazione Fiscale</CardTitle>
+          <Card className="mb-4 md:mb-6">
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="text-base md:text-lg">Configurazione Fiscale</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 md:p-6">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Ragione Sociale</Label>
@@ -414,11 +413,11 @@ export default function Settings() {
           </Card>
 
           {/* Social Media */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Social Media</CardTitle>
+          <Card className="mb-4 md:mb-6">
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="text-base md:text-lg">Social Media</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 md:p-6">
               <div className="space-y-2">
                 <Label>Link Pagina Facebook</Label>
                 <Input
@@ -434,11 +433,11 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Personalizzazione Pagina</CardTitle>
+          <Card className="mb-4 md:mb-6">
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="text-base md:text-lg">Personalizzazione Pagina</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 md:p-6">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Logo Ristorante</Label>
@@ -604,11 +603,11 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Orari di Apertura</CardTitle>
+          <Card className="mb-4 md:mb-6">
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="text-base md:text-lg">Orari di Apertura</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 p-4 md:p-6">
               {['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'].map(day => (
                 <div key={day} className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 items-center">
                   <Label className="capitalize text-sm font-medium">{day}</Label>
@@ -626,11 +625,11 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Modalità Ordini</CardTitle>
+          <Card className="mb-4 md:mb-6">
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="text-base md:text-lg">Modalità Ordini</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 md:p-6">
               <div className="space-y-3">
                 <Label>Modalità disponibili</Label>
                 
@@ -703,14 +702,14 @@ export default function Settings() {
           )}
 
           {/* New: Promozioni in Evidenza */}
-          <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Promozioni in Evidenza</CardTitle>
-                <p className="text-sm text-gray-500">
+          <Card className="mb-4 md:mb-6">
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-base md:text-lg">Promozioni in Evidenza</CardTitle>
+                <p className="text-xs md:text-sm text-gray-500 mt-1">
                   Seleziona fino a 2 promozioni da mostrare in homepage
                 </p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 md:p-6">
                 <PromotionSelector
                   selectedIds={formData.promozioni_evidenza || []}
                   onChange={(ids) => setFormData(prev => ({ ...prev, promozioni_evidenza: ids }))}
@@ -728,10 +727,10 @@ export default function Settings() {
             }))}
           />
 
-          <div className="flex justify-end mt-6">
+          <div className="flex justify-end mt-6 sticky bottom-0 bg-gray-50 py-4 -mx-4 px-4 md:static md:bg-transparent md:py-0 md:mx-0 md:px-0">
             <Button 
               type="submit" 
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 w-full md:w-auto text-sm md:text-base"
               disabled={saveMutation.isPending || uploading.logo || uploading.header || uploading.background}
             >
               <Save className="w-4 h-4 mr-2" />
