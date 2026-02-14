@@ -44,7 +44,7 @@ export const ToastProvider = ({ children }) => {
   );
 };
 
-const Toast = ({ id, title, description, type, onClose }) => {
+export const Toast = ({ id, title, description, type, onClose }) => {
   const icons = {
     success: <CheckCircle2 className="w-5 h-5" />,
     error: <AlertCircle className="w-5 h-5" />,
