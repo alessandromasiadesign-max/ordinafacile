@@ -21,7 +21,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Check } from 'lucide-react';
 import StatusToggle from "../ui/status-toggle";
-import { useToast } from "../ui/toast";
+import { useToast } from "../ui/use-toast";
 
 export default function EditPromotionDialog({ open, onClose, promotion }) {
   const [formData, setFormData] = useState(null);

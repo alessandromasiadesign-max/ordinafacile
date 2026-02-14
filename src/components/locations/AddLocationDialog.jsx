@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { useToast } from "../ui/toast";
+import { useToast } from "../ui/use-toast";
 
 export default function AddLocationDialog({ open, onClose, restaurantId }) {
   const [formData, setFormData] = useState({
