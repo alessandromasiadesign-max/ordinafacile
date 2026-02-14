@@ -14,7 +14,7 @@ import { Check, Upload, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import LazyImage from "../ui/lazy-image";
-import { useToast } from "../ui/toast";
+import { useToast } from "../ui/use-toast";
 
 export default function AddEventDialog({ open, onClose, restaurantId }) {
   const [formData, setFormData] = useState({

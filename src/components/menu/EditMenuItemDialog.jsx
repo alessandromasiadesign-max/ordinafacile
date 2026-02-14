@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, X, Check } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { useToast } from "../ui/toast";
+import { useToast } from "../ui/use-toast";
 import LazyImage from "../ui/lazy-image";
 
 import ModifierManager from "./ModifierManager";
