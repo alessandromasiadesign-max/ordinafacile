@@ -28,7 +28,7 @@ import {
 import AddLocationDialog from "../components/locations/AddLocationDialog";
 import EditLocationDialog from "../components/locations/EditLocationDialog";
 import StatusToggle from "../components/ui/status-toggle";
-import { useToast } from "../components/ui/toast";
+import { useToast } from "../components/ui/use-toast";
 
 export default function Locations() {
   const [restaurant, setRestaurant] = useState(null);
