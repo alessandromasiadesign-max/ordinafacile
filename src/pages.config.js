@@ -66,6 +66,7 @@ import SubscriptionSettings from './pages/SubscriptionSettings';
 import SupportRequests from './pages/SupportRequests';
 import Terms from './pages/Terms';
 import app from './pages/_app';
+import Landing from './pages/Landing';
 import __Layout from './Layout.jsx';
 
 
@@ -89,6 +90,7 @@ export const PAGES = {
     "SupportRequests": SupportRequests,
     "Terms": Terms,
     "_app": app,
+    "Landing": Landing,
 }
 
 export const pagesConfig = {
