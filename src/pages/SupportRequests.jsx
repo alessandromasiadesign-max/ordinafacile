@@ -24,7 +24,7 @@ import {
 import { Headphones, Mail, Phone, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-import { useToast } from "../components/ui/toast";
+import { useToast } from "../components/ui/use-toast";
 
 const statusColors = {
   aperta: "bg-blue-100 text-blue-800 border-blue-300",
