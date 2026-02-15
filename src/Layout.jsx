@@ -92,7 +92,6 @@ const navigationItems = [
 ];
 
 export default function Layout({ children }) {
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const location = useLocation();
   const [restaurant, setRestaurant] = useState(null);
   const [user, setUser] = useState(null);
@@ -152,7 +151,7 @@ export default function Layout({ children }) {
   }
 
   return (
-    <SidebarProvider open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+    <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50">
         <style>{`
           :root {
@@ -217,7 +216,7 @@ export default function Layout({ children }) {
                             location.pathname === createPageUrl("MasterDashboard") ? 'bg-red-50 text-red-700' : ''
                           }`}
                         >
-                          <Link to={createPageUrl("MasterDashboard")} className="flex items-center gap-3 px-3 py-2" onClick={() => setIsSidebarOpen(false)}>
+                          <Link to={createPageUrl("MasterDashboard")} className="flex items-center gap-3 px-3 py-2">
                             <Users className="w-4 h-4" />
                             <span className="font-medium">Master Dashboard</span>
                           </Link>
@@ -230,7 +229,7 @@ export default function Layout({ children }) {
                             location.pathname === createPageUrl("SubscriptionSettings") ? 'bg-red-50 text-red-700' : ''
                           }`}
                         >
-                          <Link to={createPageUrl("SubscriptionSettings")} className="flex items-center gap-3 px-3 py-2" onClick={() => setIsSidebarOpen(false)}>
+                          <Link to={createPageUrl("SubscriptionSettings")} className="flex items-center gap-3 px-3 py-2">
                             <CreditCard className="w-4 h-4" />
                             <span className="font-medium">Gestione Abbonamenti</span>
                           </Link>
@@ -243,7 +242,7 @@ export default function Layout({ children }) {
                             location.pathname === createPageUrl("SupportRequests") ? 'bg-red-50 text-red-700' : ''
                           }`}
                         >
-                          <Link to={createPageUrl("SupportRequests")} className="flex items-center gap-3 px-3 py-2" onClick={() => setIsSidebarOpen(false)}>
+                          <Link to={createPageUrl("SupportRequests")} className="flex items-center gap-3 px-3 py-2">
                             <Headphones className="w-4 h-4" />
                             <span className="font-medium">Richieste Assistenza</span>
                           </Link>
@@ -256,10 +255,7 @@ export default function Layout({ children }) {
                       {item.special === "support" ? (
                         <SidebarMenuButton
                           className="hover:bg-green-50 hover:text-green-700 transition-colors duration-200 rounded-lg mb-1 cursor-pointer"
-                          onClick={() => {
-                            setShowSupportDialog(true);
-                            setIsSidebarOpen(false);
-                          }}
+                          onClick={() => setShowSupportDialog(true)}
                         >
                           <div className="flex items-center gap-3 px-3 py-2">
                             <item.icon className="w-4 h-4" />
@@ -273,7 +269,7 @@ export default function Layout({ children }) {
                             location.pathname === item.url ? 'bg-red-50 text-red-700' : ''
                           }`}
                         >
-                          <Link to={item.url} className="flex items-center gap-3 px-3 py-2" onClick={() => setIsSidebarOpen(false)}>
+                          <Link to={item.url} className="flex items-center gap-3 px-3 py-2">
                             <item.icon className="w-4 h-4" />
                             <span className="font-medium">{item.title}</span>
                           </Link>

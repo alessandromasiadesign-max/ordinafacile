@@ -51,6 +51,7 @@ import Cookies from './pages/Cookies';
 import Dashboard from './pages/Dashboard';
 import EventMenu from './pages/EventMenu';
 import Events from './pages/Events';
+import Landing from './pages/Landing';
 import Locations from './pages/Locations';
 import MasterDashboard from './pages/MasterDashboard';
 import MenuManagement from './pages/MenuManagement';
@@ -66,7 +67,6 @@ import SubscriptionSettings from './pages/SubscriptionSettings';
 import SupportRequests from './pages/SupportRequests';
 import Terms from './pages/Terms';
 import app from './pages/_app';
-import Landing from './pages/Landing';
 import __Layout from './Layout.jsx';
 
 
@@ -75,6 +75,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "EventMenu": EventMenu,
     "Events": Events,
+    "Landing": Landing,
     "Locations": Locations,
     "MasterDashboard": MasterDashboard,
     "MenuManagement": MenuManagement,
@@ -90,7 +91,6 @@ export const PAGES = {
     "SupportRequests": SupportRequests,
     "Terms": Terms,
     "_app": app,
-    "Landing": Landing,
 }
 
 export const pagesConfig = {
