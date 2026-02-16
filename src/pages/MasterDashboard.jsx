@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,10 @@ import {
   X,
   Headphones,
   Eye,
-  MessageSquare
+  MessageSquare,
+  Phone,
+  Settings,
+  Save
 } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -35,6 +39,10 @@ export default function MasterDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [platformSettings, setPlatformSettings] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: restaurants = [], isLoading } = useQuery({
     queryKey: ['all-restaurants'],
@@ -52,6 +60,51 @@ export default function MasterDashboard() {
     queryKey: ['all-support-requests'],
     queryFn: () => base44.entities.TechnicalSupport.list("-created_date"),
     initialData: [],
+  });
+
+  useEffect(() => {
+    loadPlatformSettings();
+  }, []);
+
+  const loadPlatformSettings = async () => {
+    try {
+      const settings = await base44.entities.PlatformSettings.list();
+      if (settings.length > 0) {
+        setPlatformSettings(settings[0]);
+        setPhoneNumber(settings[0].telefono_assistenza || "");
+      }
+    } catch (error) {
+      console.error("Errore caricamento impostazioni:", error);
+    }
+  };
+
+  const savePhoneMutation = useMutation({
+    mutationFn: async () => {
+      if (platformSettings) {
+        return base44.entities.PlatformSettings.update(platformSettings.id, {
+          telefono_assistenza: phoneNumber
+        });
+      } else {
+        return base44.entities.PlatformSettings.create({
+          telefono_assistenza: phoneNumber
+        });
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "✅ Numero salvato!",
+        description: "Il numero di assistenza è stato aggiornato",
+        type: "success"
+      });
+      loadPlatformSettings();
+    },
+    onError: (error) => {
+      toast({
+        title: "❌ Errore",
+        description: "Impossibile salvare il numero",
+        type: "error"
+      });
+    }
   });
 
   const filteredRestaurants = restaurants.filter(r =>
@@ -152,6 +205,14 @@ export default function MasterDashboard() {
             {openSupportRequests > 0 && (
               <Badge className="ml-2 bg-red-500">{openSupportRequests}</Badge>
             )}
+          </Button>
+          <Button
+            variant={activeTab === "settings" ? "default" : "ghost"}
+            onClick={() => setActiveTab("settings")}
+            className={activeTab === "settings" ? "bg-red-600 hover:bg-red-700" : ""}
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            Impostazioni
           </Button>
         </div>
 
@@ -427,6 +488,42 @@ export default function MasterDashboard() {
 
         {activeTab === "support" && (
           <SupportRequestsSection supportRequests={supportRequests} restaurants={restaurants} />
+        )}
+
+        {activeTab === "settings" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Impostazioni Piattaforma</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="phone">Numero di Telefono Assistenza</Label>
+                  <p className="text-sm text-gray-500 mb-2">
+                    Questo numero sarà visibile ai ristoratori per chiamate di assistenza urgente
+                  </p>
+                  <div className="flex gap-3">
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="Es: +39 123 456 7890"
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={() => savePhoneMutation.mutate()}
+                      disabled={savePhoneMutation.isPending || !phoneNumber}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      {savePhoneMutation.isPending ? "Salvataggio..." : "Salva"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

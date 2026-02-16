@@ -100,10 +100,23 @@ export default function Layout({ children }) {
   const [subscriptionExpiring, setSubscriptionExpiring] = useState(false);
   const [subscriptionExpired, setSubscriptionExpired] = useState(false);
   const [showSupportDialog, setShowSupportDialog] = useState(false);
+  const [supportPhone, setSupportPhone] = useState(null);
 
   useEffect(() => {
     loadUserData();
+    loadSupportPhone();
   }, []);
+
+  const loadSupportPhone = async () => {
+    try {
+      const settings = await base44.entities.PlatformSettings.list();
+      if (settings.length > 0 && settings[0].telefono_assistenza) {
+        setSupportPhone(settings[0].telefono_assistenza);
+      }
+    } catch (error) {
+      console.error("Errore caricamento telefono assistenza:", error);
+    }
+  };
 
   const loadUserData = async () => {
     try {
@@ -177,6 +190,21 @@ export default function Layout({ children }) {
               </div>
             </div>
           </SidebarHeader>
+
+          {supportPhone && (
+            <div className="px-4 py-3 bg-green-50 border-b border-green-200">
+              <p className="text-xs font-medium text-green-900 mb-2">
+                📞 Assistenza Telefonica
+              </p>
+              <a
+                href={`tel:${supportPhone}`}
+                className="flex items-center gap-2 text-sm font-semibold text-green-700 hover:text-green-900 transition-colors"
+              >
+                <Phone className="w-4 h-4" />
+                {supportPhone}
+              </a>
+            </div>
+          )}
 
           {subscriptionExpiring && (
             <div className="p-4 bg-yellow-50 border-b border-yellow-200">
