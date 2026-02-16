@@ -705,9 +705,10 @@ export default function Settings() {
           </Card>
 
           {formData.modalita_consegna?.includes("consegna") && (
-            <DeliveryZones
+            <DeliveryZonesMap
               zones={formData.zone_consegna || []}
               onZonesChange={(zones) => handleChange("zone_consegna", zones)}
+              restaurantCoords={formData.coordinate_ristorante}
               restaurantAddress={formData.indirizzo && formData.citta ? `${formData.indirizzo}, ${formData.citta}` : null}
             />
           )}
