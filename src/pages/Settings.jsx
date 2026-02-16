@@ -248,44 +248,48 @@ export default function Settings() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="telefono">Telefono</Label>
+                  <Label htmlFor="telefono">Telefono *</Label>
                   <Input
                     id="telefono"
                     type="tel"
                     value={formData.telefono}
                     onChange={(e) => handleChange("telefono", e.target.value)}
                     placeholder="Es: 081 1234567"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">Email *</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleChange("email", e.target.value)}
                     placeholder="info@ristorante.it"
+                    required
                   />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="indirizzo">Indirizzo</Label>
+                  <Label htmlFor="indirizzo">Indirizzo *</Label>
                   <Input
                     id="indirizzo"
                     value={formData.indirizzo}
                     onChange={(e) => handleChange("indirizzo", e.target.value)}
                     placeholder="Via Roma, 123"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="citta">Città</Label>
+                  <Label htmlFor="citta">Città *</Label>
                   <Input
                     id="citta"
                     value={formData.citta}
                     onChange={(e) => handleChange("citta", e.target.value)}
                     placeholder="Napoli"
+                    required
                   />
                 </div>
               </div>
@@ -300,7 +304,7 @@ export default function Settings() {
             <CardContent className="space-y-4 p-4 md:p-6">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Ragione Sociale</Label>
+                  <Label>Ragione Sociale *</Label>
                   <Input
                     value={formData.configurazione_fiscale?.ragione_sociale || ""}
                     onChange={(e) => setFormData(prev => ({
@@ -310,10 +314,11 @@ export default function Settings() {
                         ragione_sociale: e.target.value
                       }
                     }))}
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Partita IVA</Label>
+                  <Label>Partita IVA *</Label>
                   <Input
                     value={formData.configurazione_fiscale?.partita_iva || ""}
                     onChange={(e) => setFormData(prev => ({
@@ -323,13 +328,14 @@ export default function Settings() {
                         partita_iva: e.target.value
                       }
                     }))}
+                    required
                   />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Codice Fiscale</Label>
+                  <Label>Codice Fiscale *</Label>
                   <Input
                     value={formData.configurazione_fiscale?.codice_fiscale || ""}
                     onChange={(e) => setFormData(prev => ({
@@ -339,6 +345,7 @@ export default function Settings() {
                         codice_fiscale: e.target.value
                       }
                     }))}
+                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -367,7 +374,7 @@ export default function Settings() {
               </div>
 
               <div className="space-y-2">
-                <Label>Indirizzo Fiscale</Label>
+                <Label>Indirizzo Fiscale *</Label>
                 <Input
                   value={formData.configurazione_fiscale?.indirizzo_fiscale || ""}
                   onChange={(e) => setFormData(prev => ({
@@ -377,12 +384,13 @@ export default function Settings() {
                       indirizzo_fiscale: e.target.value
                     }
                   }))}
+                  required
                 />
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>PEC</Label>
+                  <Label>PEC *</Label>
                   <Input
                     type="email"
                     value={formData.configurazione_fiscale?.pec || ""}
@@ -393,10 +401,11 @@ export default function Settings() {
                         pec: e.target.value
                       }
                     }))}
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Codice SDI</Label>
+                  <Label>Codice SDI *</Label>
                   <Input
                     value={formData.configurazione_fiscale?.sdi || ""}
                     onChange={(e) => setFormData(prev => ({
@@ -406,6 +415,7 @@ export default function Settings() {
                         sdi: e.target.value
                       }
                     }))}
+                    required
                   />
                 </div>
               </div>
