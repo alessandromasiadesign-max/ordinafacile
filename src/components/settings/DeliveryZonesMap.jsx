@@ -18,10 +18,12 @@ function MapUpdater({ center }) {
   return null;
 }
 
-export default function DeliveryZonesMap({ zones = [], onZonesChange, restaurantCoords }) {
+export default function DeliveryZonesMap({ zones = [], onZonesChange, restaurantCoords, restaurantAddress }) {
   const [mapMode, setMapMode] = useState("concentric");
   const [concentricZones, setConcentricZones] = useState([]);
   const [polygonZones, setPolygonZones] = useState([]);
+  const [coordinates, setCoordinates] = useState(restaurantCoords);
+  const [geocoding, setGeocoding] = useState(false);
   const [newZone, setNewZone] = useState({
     nome: "",
     raggio_km: 0,
@@ -29,7 +31,33 @@ export default function DeliveryZonesMap({ zones = [], onZonesChange, restaurant
     ordine_minimo: 0
   });
 
-  const defaultCenter = restaurantCoords || { lat: 40.8518, lng: 14.2681 };
+  const defaultCenter = coordinates || { lat: 40.8518, lng: 14.2681 };
+
+  useEffect(() => {
+    if (restaurantAddress && !coordinates) {
+      geocodeAddress(restaurantAddress);
+    }
+  }, [restaurantAddress]);
+
+  const geocodeAddress = async (address) => {
+    setGeocoding(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+      );
+      const data = await response.json();
+      if (data && data.length > 0) {
+        const coords = {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon)
+        };
+        setCoordinates(coords);
+      }
+    } catch (error) {
+      console.error("Geocoding error:", error);
+    }
+    setGeocoding(false);
+  };
 
   useEffect(() => {
     if (zones.length > 0) {
@@ -49,7 +77,7 @@ export default function DeliveryZonesMap({ zones = [], onZonesChange, restaurant
     const zone = {
       ...newZone,
       tipo: 'concentric',
-      center: restaurantCoords
+      center: coordinates
     };
 
     const updated = [...concentricZones, zone].sort((a, b) => a.raggio_km - b.raggio_km);
@@ -90,9 +118,15 @@ export default function DeliveryZonesMap({ zones = [], onZonesChange, restaurant
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!restaurantCoords && (
+        {!restaurantAddress && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
-            ⚠️ Inserisci prima l'indirizzo del ristorante e salva per visualizzare la mappa
+            ⚠️ Inserisci prima l'indirizzo del ristorante nella sezione "Informazioni Generali" e salva
+          </div>
+        )}
+
+        {geocoding && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+            🔍 Ricerca delle coordinate per l'indirizzo...
           </div>
         )}
 
@@ -109,7 +143,7 @@ export default function DeliveryZonesMap({ zones = [], onZonesChange, restaurant
           </Select>
         </div>
 
-        {restaurantCoords && (
+        {coordinates && (
           <div className="h-96 rounded-lg overflow-hidden border-2 border-gray-200">
             <MapContainer 
               center={[defaultCenter.lat, defaultCenter.lng]} 
@@ -138,6 +172,16 @@ export default function DeliveryZonesMap({ zones = [], onZonesChange, restaurant
                 />
               ))}
             </MapContainer>
+          </div>
+        )}
+
+        {!coordinates && restaurantAddress && !geocoding && (
+          <div className="h-96 rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-100 flex items-center justify-center">
+            <div className="text-center text-gray-500">
+              <MapPin className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <p>Impossibile geocodificare l'indirizzo</p>
+              <p className="text-sm mt-1">Verifica che l'indirizzo sia corretto</p>
+            </div>
           </div>
         )}
 
@@ -219,7 +263,7 @@ export default function DeliveryZonesMap({ zones = [], onZonesChange, restaurant
                 <Button
                   onClick={addConcentricZone}
                   className="w-full"
-                  disabled={!restaurantCoords}
+                  disabled={!coordinates}
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Aggiungi Zona Concentrica

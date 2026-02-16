@@ -20,8 +20,6 @@ import {
   CreditCard,
   Building2,
   Headphones,
-  Moon,
-  Sun,
   Ticket,
 } from "lucide-react";
 import {
@@ -102,10 +100,6 @@ export default function Layout({ children }) {
   const [subscriptionExpiring, setSubscriptionExpiring] = useState(false);
   const [subscriptionExpired, setSubscriptionExpired] = useState(false);
   const [showSupportDialog, setShowSupportDialog] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
-  });
 
   useEffect(() => {
     loadUserData();
@@ -153,19 +147,13 @@ export default function Layout({ children }) {
     base44.auth.logout();
   };
 
-  const toggleDarkMode = () => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
-    localStorage.setItem('darkMode', JSON.stringify(newMode));
-  };
-
   if (subscriptionExpired && location.pathname !== createPageUrl("RenewSubscription")) {
     return null;
   }
 
   return (
     <SidebarProvider>
-      <div className={`min-h-screen flex w-full ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className="min-h-screen flex w-full bg-gray-50">
         <style>{`
           :root {
             --primary: #e74c3c;
@@ -175,17 +163,17 @@ export default function Layout({ children }) {
           }
         `}</style>
 
-        <Sidebar className={`border-r ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200'}`}>
-          <SidebarHeader className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} p-4`}>
+        <Sidebar className="border-r border-gray-200">
+          <SidebarHeader className="border-b border-gray-200 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
                 <Store className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className={`font-bold truncate ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                <h2 className="font-bold text-gray-900 truncate">
                   {restaurant?.nome || "Ordina Facile"}
                 </h2>
-                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Gestione Ordini</p>
+                <p className="text-xs text-gray-500">Gestione Ordini</p>
               </div>
             </div>
           </SidebarHeader>
@@ -329,26 +317,18 @@ export default function Layout({ children }) {
             )}
           </SidebarContent>
 
-          <SidebarFooter className={`border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} p-4`}>
-            <Button
-              onClick={toggleDarkMode}
-              variant="outline"
-              className={`w-full mb-3 ${darkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : ''}`}
-            >
-              {darkMode ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
-              {darkMode ? 'Modalità Chiara' : 'Modalità Scura'}
-            </Button>
+          <SidebarFooter className="border-t border-gray-200 p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`}>
-                <span className={`font-medium text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-gray-600 font-medium text-sm">
                   {user?.full_name?.charAt(0) || "U"}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className={`font-medium text-sm truncate ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                <p className="font-medium text-gray-900 text-sm truncate">
                   {user?.full_name || "Utente"}
                 </p>
-                <p className={`text-xs truncate ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{user?.email}</p>
+                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                 {isMasterAccount && (
                   <p className="text-xs text-red-600 font-semibold">Admin Master</p>
                 )}
@@ -365,10 +345,10 @@ export default function Layout({ children }) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col">
-          <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b px-6 py-4 md:hidden`}>
+          <header className="bg-white border-b border-gray-200 px-6 py-4 md:hidden">
             <div className="flex items-center gap-4">
-              <SidebarTrigger className={`p-2 rounded-lg transition-colors duration-200 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`} />
-              <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{restaurant?.nome || "Ordina Facile"}</h1>
+              <SidebarTrigger className="hover:bg-gray-100 p-2 rounded-lg transition-colors duration-200" />
+              <h1 className="text-xl font-semibold text-gray-900">{restaurant?.nome || "Ordina Facile"}</h1>
             </div>
           </header>
 
