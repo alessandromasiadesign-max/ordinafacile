@@ -28,6 +28,16 @@ export default function PrintOrders() {
     refetchInterval: autoPrint ? 10000 : false,
   });
 
+  const { data: printers = [] } = useQuery({
+    queryKey: ['printers', restaurant?.id],
+    queryFn: async () => {
+      if (!restaurant) return [];
+      return base44.entities.Printer.filter({ restaurant_id: restaurant.id });
+    },
+    enabled: !!restaurant,
+    initialData: [],
+  });
+
   useEffect(() => {
     loadRestaurant();
     checkPrinterConnection();
@@ -296,8 +306,35 @@ export default function PrintOrders() {
               </div>
             </div>
 
+            {printers.length > 0 && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Stampanti Configurate</Label>
+                {printers.map(printer => (
+                  <div key={printer.id} className={`p-4 border-2 rounded-lg ${printer.attiva ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Printer className={`w-5 h-5 ${printer.attiva ? 'text-green-600' : 'text-gray-400'}`} />
+                        <div>
+                          <div className="font-semibold">{printer.nome}</div>
+                          <div className="text-sm text-gray-600">
+                            {printer.tipo === 'wifi' && printer.indirizzo_ip && `WiFi: ${printer.indirizzo_ip}`}
+                            {printer.tipo === 'bluetooth' && printer.mac_address && `BT: ${printer.mac_address}`}
+                            {printer.modello && ` • ${printer.modello}`}
+                            {printer.larghezza_carta && ` • ${printer.larghezza_carta}`}
+                          </div>
+                        </div>
+                      </div>
+                      {printer.predefinita && (
+                        <Badge className="bg-blue-500">Predefinita</Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
-              <strong>💡 Consiglio:</strong> Per ottenere i migliori risultati, usa una stampante termica da 80mm compatibile ESC/POS
+              <strong>💡 Consiglio:</strong> Per ottenere i migliori risultati, usa una stampante termica da 80mm compatibile ESC/POS. Configura le stampanti nella sezione Impostazioni.
             </div>
           </CardContent>
         </Card>

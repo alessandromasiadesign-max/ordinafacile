@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Save, Store, Upload, X, Check } from "lucide-react";
 import DeliveryZones from "../components/settings/DeliveryZones";
+import DeliveryZonesMap from "../components/settings/DeliveryZonesMap";
 import PromotionSelector from "../components/settings/PromotionSelector"; // Added import for PromotionSelector
 import PaymentSettings from "../components/settings/PaymentSettings"; // Added import for PaymentSettings
 
