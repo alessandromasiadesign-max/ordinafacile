@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -52,6 +51,7 @@ export default function Orders() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("tutti");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [lastOrderCount, setLastOrderCount] = useState(0);
   const queryClient = useQueryClient();
 
   const { data: orders = [], isLoading } = useQuery({
@@ -76,6 +76,41 @@ export default function Orders() {
 
   useEffect(() => {
     loadRestaurant();
+  }, []);
+
+  // Notifica sonora per nuovi ordini
+  useEffect(() => {
+    if (!restaurant) return;
+
+    const unsubscribe = base44.entities.Order.subscribe((event) => {
+      if (event.type === 'create' && event.data.restaurant_id === restaurant.id) {
+        // Riproduce suono di notifica
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwPUKnk77ZkHQU7k9n0y3csBSF1yPDckUELFF+27OukVRULRp/h8r9vIQYshM/z2Io3CBxqvvHlnU8NEFCp5O+2ZB0FO5PZ9Mt3LAUgdcjw3JBBC');
+        audio.volume = 0.7;
+        audio.play().catch(e => console.log('Audio play failed:', e));
+
+        // Mostra notifica browser se supportata
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('Nuovo Ordine! 🍕', {
+            body: `Ordine #${event.data.numero_ordine} da ${event.data.cliente_nome}`,
+            icon: '/favicon.ico',
+            tag: event.data.id
+          });
+        }
+
+        // Aggiorna la lista ordini
+        queryClient.invalidateQueries({ queryKey: ['orders'] });
+      }
+    });
+
+    return unsubscribe;
+  }, [restaurant, queryClient]);
+
+  // Richiede permesso notifiche al primo caricamento
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
   }, []);
 
   const loadRestaurant = async () => {

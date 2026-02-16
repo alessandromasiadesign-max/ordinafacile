@@ -49,6 +49,7 @@
  */
 import Cookies from './pages/Cookies';
 import Dashboard from './pages/Dashboard';
+import DiscountCodes from './pages/DiscountCodes';
 import EventMenu from './pages/EventMenu';
 import Events from './pages/Events';
 import Landing from './pages/Landing';
@@ -67,13 +68,13 @@ import SubscriptionSettings from './pages/SubscriptionSettings';
 import SupportRequests from './pages/SupportRequests';
 import Terms from './pages/Terms';
 import app from './pages/_app';
-import DiscountCodes from './pages/DiscountCodes';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Cookies": Cookies,
     "Dashboard": Dashboard,
+    "DiscountCodes": DiscountCodes,
     "EventMenu": EventMenu,
     "Events": Events,
     "Landing": Landing,
@@ -92,7 +93,6 @@ export const PAGES = {
     "SupportRequests": SupportRequests,
     "Terms": Terms,
     "_app": app,
-    "DiscountCodes": DiscountCodes,
 }
 
 export const pagesConfig = {
