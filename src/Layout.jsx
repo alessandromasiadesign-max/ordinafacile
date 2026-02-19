@@ -21,6 +21,7 @@ import {
   Building2,
   Headphones,
   Ticket,
+  Phone,
 } from "lucide-react";
 import {
   Sidebar,
