@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
-import ChatBot from "../components/layout/ChatBot.jsx";
+import ChatBot from "./components/layout/ChatBot.jsx";
 import TechnicalSupportDialog from "../components/support/TechnicalSupportDialog";
 import {
   LayoutDashboard,
