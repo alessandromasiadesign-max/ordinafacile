@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import ChatBot from "./components/layout/ChatBot.jsx";
-import TechnicalSupportDialog from "../components/support/TechnicalSupportDialog";
+import TechnicalSupportDialog from "./components/support/TechnicalSupportDialog.jsx";
 import {
   LayoutDashboard,
   ShoppingBag,
