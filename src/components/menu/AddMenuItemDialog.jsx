@@ -1,3 +1,5 @@
+﻿import { Core } from '@/api/integrations';
+import { MenuItem } from '@/api/entities';
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -11,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { useToast } from "../ui/use-toast";
 import ImageUpload from "../ui/image-upload";
 
@@ -32,7 +33,7 @@ const ALLERGENI = [
   { value: "molluschi", label: "Molluschi", icon: "🦪" }
 ];
 
-export default function AddMenuItemDialog({ open, onClose, category, restaurantId }) {
+export default function AddMenuItemDialog({ open, onClose, category, restaurantId, eventId }) {
   const [formData, setFormData] = useState({
     nome: "",
     descrizione: "",
@@ -45,21 +46,22 @@ export default function AddMenuItemDialog({ open, onClose, category, restaurantI
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.MenuItem.create(data),
+    mutationFn: (data) => MenuItem.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menuItems'] });
       toast({
-        title: "✅ Prodotto creato!",
+        title: "Prodotto creato",
         description: "Il prodotto è stato aggiunto al menu con successo",
         type: "success"
       });
       onClose();
       setFormData({ nome: "", descrizione: "", prezzo: 0, immagine_url: "", allergeni: [] });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Errore creazione prodotto:', error);
       toast({
-        title: "❌ Errore",
-        description: "Impossibile creare il prodotto",
+        title: "Errore",
+        description: error?.message || "Impossibile creare il prodotto",
         type: "error"
       });
     }
@@ -71,7 +73,7 @@ export default function AddMenuItemDialog({ open, onClose, category, restaurantI
 
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await Core.UploadFile({ file });
       setFormData(prev => ({ ...prev, immagine_url: file_url }));
     } catch (error) {
       alert("Errore caricamento immagine");
@@ -90,11 +92,17 @@ export default function AddMenuItemDialog({ open, onClose, category, restaurantI
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const price = Number(formData.prezzo);
     createMutation.mutate({
-      ...formData,
       restaurant_id: restaurantId,
+      event_id: eventId || null,
       category_id: category.id,
-      disponibile: true
+      name: formData.nome,
+      description: formData.descrizione,
+      price: Number.isFinite(price) ? price : 0,
+      image_url: formData.immagine_url,
+      allergens: Array.isArray(formData.allergeni) ? formData.allergeni : [],
+      is_available: true,
     });
   };
 
@@ -161,7 +169,7 @@ export default function AddMenuItemDialog({ open, onClose, category, restaurantI
                     className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-all ${
                       formData.allergeni.includes(allergene.value)
                         ? 'bg-red-50 border-2 border-red-500'
-                        : 'bg-gray-50 border-2 border-gray-200 hover:border-gray-300'
+                        : 'bg-muted border-2 border-border hover:border-muted-foreground'
                     }`}
                     onClick={() => toggleAllergene(allergene.value)}
                   >
@@ -170,7 +178,7 @@ export default function AddMenuItemDialog({ open, onClose, category, restaurantI
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Seleziona gli allergeni presenti in questo prodotto
               </p>
             </div>

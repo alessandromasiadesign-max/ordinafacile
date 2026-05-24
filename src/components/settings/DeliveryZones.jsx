@@ -43,7 +43,7 @@ export default function DeliveryZones({ zones = [], onZonesChange, restaurantAdd
       </CardHeader>
       <CardContent className="space-y-4">
         {!restaurantAddress && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
+          <div className="bg-yellow-50 border border-yellow-200 dark:bg-yellow-950/30 dark:border-yellow-900 rounded-lg p-4 text-sm text-yellow-800 dark:text-yellow-100">
             ⚠️ Inserisci prima l'indirizzo del ristorante nella sezione "Informazioni Generali"
           </div>
         )}
@@ -52,10 +52,10 @@ export default function DeliveryZones({ zones = [], onZonesChange, restaurantAdd
           <div className="space-y-3">
             <Label className="text-sm font-medium">Zone Configurate</Label>
             {zones.map((zone, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                 <div className="flex-1">
                   <div className="font-semibold">{zone.nome}</div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-muted-foreground">
                     Fino a {zone.distanza_max_km} km • €{zone.costo.toFixed(2)} consegna
                     {zone.ordine_minimo > 0 && ` • Min. €${zone.ordine_minimo.toFixed(2)}`}
                   </div>
@@ -129,7 +129,7 @@ export default function DeliveryZones({ zones = [], onZonesChange, restaurantAdd
           </div>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+        <div className="bg-blue-50 border border-blue-200 dark:bg-blue-950/30 dark:border-blue-900 rounded-lg p-4 text-sm text-blue-800 dark:text-blue-100">
           <strong>💡 Suggerimento:</strong> Crea zone concentriche (es: 0-3km, 3-5km, 5-10km) con costi crescenti per ottimizzare le consegne
         </div>
       </CardContent>

@@ -15,8 +15,8 @@ export default function ImageUpload({
 }) {
   return (
     <div className={`space-y-2 ${className}`}>
-      <label className="text-sm font-medium text-gray-700">{label}</label>
-      <p className="text-xs text-gray-500 mb-2">
+      <label className="text-sm font-medium text-foreground">{label}</label>
+      <p className="text-xs text-muted-foreground mb-2">
         📸 Formato: {recommendedFormat} | Risoluzione: {recommendedResolution} | Max: {maxSize}
       </p>
       
@@ -39,11 +39,11 @@ export default function ImageUpload({
         </div>
       ) : (
         <label className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center cursor-pointer hover:border-red-400 hover:bg-red-50 transition-all">
-          <Upload className="w-10 h-10 text-gray-400 mb-2" />
-          <span className="text-sm text-gray-600 font-medium">
+          <Upload className="w-10 h-10 text-muted-foreground mb-2" />
+          <span className="text-sm text-muted-foreground font-medium">
             {uploading ? "Caricamento..." : "Clicca per caricare"}
           </span>
-          <span className="text-xs text-gray-400 mt-1">
+          <span className="text-xs text-muted-foreground mt-1">
             {recommendedFormat} (max {maxSize})
           </span>
           <input

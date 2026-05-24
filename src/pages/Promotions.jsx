@@ -1,5 +1,6 @@
+﻿import { Restaurant, Promotion } from '@/api/entities';
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { supabase } from '@/api/supabaseClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,11 +20,35 @@ export default function Promotions() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const normalizePromotion = (p) => ({
+    ...p,
+    nome: p?.nome ?? p?.name,
+    descrizione: p?.descrizione ?? p?.description,
+    tipo_sconto: p?.tipo_sconto ?? p?.discount_type,
+    valore_sconto: p?.valore_sconto ?? p?.discount_value,
+    codice: p?.codice ?? p?.code,
+    regole: p?.regole ?? {
+      ordine_minimo: Number(p?.min_order ?? 0) || 0,
+      data_inizio: p?.valid_from ? String(p.valid_from).slice(0, 10) : "",
+      data_fine: p?.valid_until ? String(p.valid_until).slice(0, 10) : "",
+      giorni_settimana: [],
+      orario_inizio: "",
+      orario_fine: "",
+      solo_primo_ordine: false,
+      max_utilizzi_totali: 0,
+      max_utilizzi_cliente: 1,
+      cumulabile: false,
+    },
+    attivazione: p?.attivazione ?? ((p?.code ?? p?.codice) ? 'codice' : 'automatica'),
+    attiva: p?.attiva ?? p?.is_active,
+  });
+
   const { data: promotions = [], isLoading } = useQuery({
     queryKey: ['promotions', restaurant?.id],
     queryFn: async () => {
       if (!restaurant) return [];
-      return base44.entities.Promotion.filter({ restaurant_id: restaurant.id });
+      const rows = await Promotion.filter({ restaurant_id: restaurant.id }, '-created_at');
+      return (rows || []).map(normalizePromotion);
     },
     enabled: !!restaurant,
     initialData: [],
@@ -35,12 +60,21 @@ export default function Promotions() {
 
   const loadRestaurant = async () => {
     try {
-      const user = await base44.auth.me();
-      const restaurants = await base44.entities.Restaurant.filter({
-        user_id: user.id
-      });
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user?.id) return;
+      const isAdmin = user?.app_metadata?.role === 'admin' || user?.user_metadata?.role === 'admin';
+      const storedId = localStorage.getItem('selected_restaurant_id');
+
+      const restaurants = isAdmin
+        ? await Restaurant.list('-created_at')
+        : await Restaurant.filter({ user_id: user.id });
+
       if (restaurants.length > 0) {
-        setRestaurant(restaurants[0]);
+        const selected = restaurants.find((r) => r.id === storedId) || restaurants[0];
+        if (selected?.id) {
+          localStorage.setItem('selected_restaurant_id', selected.id);
+        }
+        setRestaurant(selected);
       }
     } catch (error) {
       console.error("Errore:", error);
@@ -48,16 +82,27 @@ export default function Promotions() {
   };
 
   const createFromTemplateMutation = useMutation({
-    mutationFn: (template) => base44.entities.Promotion.create({
-      ...template,
+    mutationFn: (template) => Promotion.create({
       restaurant_id: restaurant.id,
-      utilizzi_attuali: 0,
-      attiva: false
+      name: template?.name ?? template?.nome,
+      description: template?.description ?? template?.descrizione ?? null,
+      discount_type: (() => {
+        const v = String(template?.discount_type ?? template?.tipo_sconto ?? '').trim();
+        if (v === 'percentuale') return 'percentage';
+        if (v === 'fisso') return 'fixed';
+        return v || null;
+      })(),
+      discount_value: template?.discount_value ?? template?.valore_sconto ?? null,
+      code: template?.code ?? template?.codice ?? null,
+      min_order: Number(template?.min_order ?? template?.regole?.ordine_minimo ?? 0) || 0,
+      is_active: false,
+      valid_from: template?.valid_from ?? (template?.regole?.data_inizio ? new Date(template.regole.data_inizio).toISOString() : null),
+      valid_until: template?.valid_until ?? (template?.regole?.data_fine ? new Date(template.regole.data_fine).toISOString() : null),
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
       toast({
-        title: "✅ Template applicato!",
+        title: "Template applicato",
         description: "Promozione creata (disattivata). Modificala e attivala quando vuoi."
       });
       setActiveTab('mine'); 
@@ -65,7 +110,7 @@ export default function Promotions() {
   });
 
   const toggleActiveMutation = useMutation({
-    mutationFn: ({ id, attiva }) => base44.entities.Promotion.update(id, { attiva }),
+    mutationFn: ({ id, attiva }) => Promotion.update(id, { is_active: attiva }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
     },
@@ -235,29 +280,29 @@ export default function Promotions() {
   ];
 
   return (
-    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Gestione Promozioni</h1>
-            <p className="text-sm md:text-base text-gray-500 mt-1">Crea e gestisci sconti e offerte speciali</p>
+            <h1 className="text-2xl md:text-3xl font-bold">Gestione Promozioni</h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-1">Crea e gestisci sconti e offerte speciali</p>
           </div>
           {/* Removed the old Template Pronti and Nuova Promozione buttons */}
         </div>
 
         {/* Tabs - New UI element for navigation */}
-        <div className="flex gap-2 mb-4 md:mb-6 bg-white p-2 rounded-lg shadow-sm overflow-x-auto">
+        <div className="flex gap-2 mb-4 md:mb-6 bg-background p-2 rounded-lg shadow-sm border border-border overflow-x-auto">
           <Button
             variant={activeTab === 'mine' ? 'default' : 'ghost'}
             onClick={() => setActiveTab('mine')}
-            className={`text-xs md:text-sm whitespace-nowrap ${activeTab === 'mine' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+            className={activeTab === 'mine' ? 'bg-red-600 hover:bg-red-700' : ''}
           >
             Le Tue Promo
           </Button>
           <Button
             variant={activeTab === 'templates' ? 'default' : 'ghost'}
             onClick={() => setActiveTab('templates')}
-            className={`text-xs md:text-sm whitespace-nowrap ${activeTab === 'templates' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+            className={activeTab === 'templates' ? 'bg-red-600 hover:bg-red-700' : ''}
           >
             Predefinite
           </Button>
@@ -267,7 +312,7 @@ export default function Promotions() {
               setActiveTab('create');
               setShowAddDialog(true);
             }}
-            className={`text-xs md:text-sm whitespace-nowrap ${activeTab === 'create' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+            className={activeTab === 'create' ? 'bg-red-600 hover:bg-red-700' : ''}
           >
             <Plus className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
             Crea Nuova
@@ -279,9 +324,9 @@ export default function Promotions() {
           promotions.length === 0 ? (
             <Card>
               <CardContent className="p-12 text-center">
-                <Tag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <Tag className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                 <h2 className="text-2xl font-bold mb-2">Nessuna promozione attiva</h2>
-                <p className="text-gray-600 mb-6">
+                <p className="text-muted-foreground mb-6">
                   Crea la tua prima promozione o scegli un template
                 </p>
                 <div className="flex gap-3 justify-center">
@@ -311,11 +356,11 @@ export default function Promotions() {
                     <div className="flex-1">
                       <CardTitle className="text-xl mb-2">{promo.nome}</CardTitle>
                       <div className="flex flex-wrap gap-2">
-                        <Badge className={promo.attiva ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+                        <Badge className={promo.attiva ? "bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-100" : "bg-slate-100 text-slate-800 dark:bg-slate-900/40 dark:text-slate-100"}>
                           {promo.attiva ? "Attiva" : "Disattivata"}
                         </Badge>
                         <Badge variant="outline">
-                          {promo.attivazione === "automatica" ? "Automatica" : `Codice: ${promo.codice}`}
+                          {promo.attivazione === 'codice' ? `Codice: ${promo.codice}` : 'Automatica'}
                         </Badge>
                         {promo.regole?.cumulabile && (
                           <Badge variant="outline" className="bg-blue-50 text-blue-700">
@@ -334,12 +379,12 @@ export default function Promotions() {
                   </CardHeader>
                   <CardContent>
                     {promo.descrizione && (
-                      <p className="text-gray-600 mb-4">{promo.descrizione}</p>
+                      <p className="text-muted-foreground mb-4">{promo.descrizione}</p>
                     )}
                     
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Sconto:</span>
+                        <span className="text-muted-foreground">Sconto:</span>
                         <span className="font-bold text-red-600">
                           {promo.tipo_sconto === "percentuale" 
                             ? `${promo.valore_sconto}%`
@@ -350,20 +395,20 @@ export default function Promotions() {
                       
                       {promo.regole?.ordine_minimo > 0 && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Ordine minimo:</span>
+                          <span className="text-muted-foreground">Ordine minimo:</span>
                           <span>€{promo.regole.ordine_minimo.toFixed(2)}</span>
                         </div>
                       )}
                       
                       {promo.regole?.solo_primo_ordine && (
-                        <div className="text-gray-600">
+                        <div className="text-muted-foreground">
                           ✓ Solo primo ordine
                         </div>
                       )}
 
                       {promo.regole?.giorni_settimana && promo.regole.giorni_settimana.length > 0 && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Giorni:</span>
+                          <span className="text-muted-foreground">Giorni:</span>
                           <span className="text-xs">
                             {promo.regole.giorni_settimana.map(g => 
                               g.substring(0, 3).charAt(0).toUpperCase() + g.substring(1, 3)
@@ -374,7 +419,7 @@ export default function Promotions() {
 
                       {(promo.regole?.orario_inizio || promo.regole?.orario_fine) && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Orario:</span>
+                          <span className="text-muted-foreground">Orario:</span>
                           <span className="text-xs">
                             {promo.regole.orario_inizio || "00:00"} - {promo.regole.orario_fine || "23:59"}
                           </span>
@@ -383,14 +428,14 @@ export default function Promotions() {
                       
                       {promo.regole?.max_utilizzi_totali > 0 && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Utilizzi:</span>
+                          <span className="text-muted-foreground">Utilizzi:</span>
                           <span>{promo.utilizzi_attuali} / {promo.regole.max_utilizzi_totali}</span>
                         </div>
                       )}
                       
                       {promo.regole?.data_fine && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Valida fino al:</span>
+                          <span className="text-muted-foreground">Valida fino al:</span>
                           <span>{new Date(promo.regole.data_fine).toLocaleDateString('it-IT')}</span>
                         </div>
                       )}
@@ -418,13 +463,13 @@ export default function Promotions() {
           // The outer Card wrapper for templates has been removed as per the outline
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {promotionTemplates.map((template, idx) => (
-              <Card key={idx} className="hover:shadow-lg transition-shadow bg-white">
+              <Card key={idx} className="hover:shadow-lg transition-shadow bg-background">
                 <CardContent className="p-4">
                   <h3 className="font-bold text-lg mb-2">{template.nome}</h3>
-                  <p className="text-sm text-gray-600 mb-3">{template.descrizione}</p>
+                  <p className="text-sm text-muted-foreground mb-3">{template.descrizione}</p>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Sconto:</span>
+                      <span className="text-muted-foreground">Sconto:</span>
                       <span className="font-bold text-red-600">
                         {template.tipo_sconto === "percentuale" 
                           ? `${template.valore_sconto}%`
@@ -433,12 +478,12 @@ export default function Promotions() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Codice:</span>
+                      <span className="text-muted-foreground">Codice:</span>
                       <Badge variant="outline">{template.codice}</Badge>
                     </div>
                     {template.regole.ordine_minimo > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Minimo:</span>
+                        <span className="text-muted-foreground">Minimo:</span>
                         <span>€{template.regole.ordine_minimo.toFixed(2)}</span>
                       </div>
                     )}

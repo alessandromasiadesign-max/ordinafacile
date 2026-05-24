@@ -11,17 +11,26 @@ import { it } from "date-fns/locale";
 import { Phone, MapPin, Package, Truck } from "lucide-react";
 
 const statusColors = {
-  nuovo: "bg-yellow-100 text-yellow-800",
-  confermato: "bg-blue-100 text-blue-800",
-  in_preparazione: "bg-purple-100 text-purple-800",
-  pronto: "bg-green-100 text-green-800",
-  in_consegna: "bg-indigo-100 text-indigo-800",
-  completato: "bg-gray-100 text-gray-800",
-  annullato: "bg-red-100 text-red-800"
+  nuovo: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-100",
+  confermato: "bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-100",
+  in_preparazione: "bg-purple-100 text-purple-800 dark:bg-purple-950/30 dark:text-purple-100",
+  pronto: "bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-100",
+  in_consegna: "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-100",
+  completato: "bg-slate-100 text-slate-800 dark:bg-slate-900/40 dark:text-slate-100",
+  annullato: "bg-red-100 text-red-800 dark:bg-red-950/30 dark:text-red-100"
 };
 
 export default function OrderDetailsModal({ order, onClose }) {
   if (!order) return null;
+
+  const createdAt = order.created_date || order.created_at;
+  const tipoConsegna = (() => {
+    const raw = order.tipo_consegna;
+    if (raw === 'delivery') return 'consegna';
+    if (raw === 'pickup') return 'asporto';
+    if (raw === 'table') return 'tavolo';
+    return raw;
+  })();
 
   return (
     <Dialog open={!!order} onOpenChange={() => onClose()}>
@@ -38,34 +47,34 @@ export default function OrderDetailsModal({ order, onClose }) {
         <div className="space-y-6">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <h3 className="font-semibold text-sm text-gray-500">Cliente</h3>
+              <h3 className="font-semibold text-sm text-muted-foreground">Cliente</h3>
               <div className="space-y-1">
                 <p className="font-medium">{order.cliente_nome}</p>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Phone className="w-4 h-4" />
                   {order.cliente_telefono}
                 </div>
                 {order.cliente_email && (
-                  <p className="text-sm text-gray-600">{order.cliente_email}</p>
+                  <p className="text-sm text-muted-foreground">{order.cliente_email}</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <h3 className="font-semibold text-sm text-gray-500">Dettagli Ordine</h3>
+              <h3 className="font-semibold text-sm text-muted-foreground">Dettagli Ordine</h3>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  {order.tipo_consegna === "consegna" ? (
+                  {tipoConsegna === "consegna" ? (
                     <Truck className="w-4 h-4" />
                   ) : (
                     <Package className="w-4 h-4" />
                   )}
-                  <span className="capitalize">{order.tipo_consegna}</span>
+                  <span className="capitalize">{tipoConsegna}</span>
                 </div>
-                <p className="text-sm text-gray-600">
-                  {format(new Date(order.created_date), "d MMMM yyyy, HH:mm", { locale: it })}
+                <p className="text-sm text-muted-foreground">
+                  {createdAt ? format(new Date(createdAt), "d MMMM yyyy, HH:mm", { locale: it }) : ''}
                 </p>
-                {order.tipo_consegna === "consegna" && order.cliente_indirizzo && (
+                {tipoConsegna === "consegna" && order.cliente_indirizzo && (
                   <div className="flex items-start gap-2 text-sm">
                     <MapPin className="w-4 h-4 mt-0.5" />
                     <span>{order.cliente_indirizzo}</span>
@@ -79,16 +88,19 @@ export default function OrderDetailsModal({ order, onClose }) {
             <h3 className="font-semibold mb-3">Prodotti</h3>
             <div className="space-y-2">
               {order.items?.map((item, index) => (
-                <div key={index} className="flex justify-between items-start p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="flex justify-between items-start p-3 bg-muted rounded-lg">
                   <div className="flex-1">
                     <div className="font-medium">{item.nome}</div>
                     {item.modificatori && item.modificatori.length > 0 && (
-                      <div className="text-sm text-gray-600 mt-1">
-                        {item.modificatori.join(', ')}
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {item.modificatori
+                          .map((m) => (typeof m === 'string' ? m : (m?.label ?? '')))
+                          .filter(Boolean)
+                          .join(', ')}
                       </div>
                     )}
                     {item.note && (
-                      <div className="text-sm text-gray-500 italic mt-1">
+                      <div className="text-sm text-muted-foreground italic mt-1">
                         Note: {item.note}
                       </div>
                     )}
@@ -97,7 +109,7 @@ export default function OrderDetailsModal({ order, onClose }) {
                     <div className="font-medium">
                       {item.quantita}x €{item.prezzo_unitario.toFixed(2)}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       €{(item.quantita * item.prezzo_unitario).toFixed(2)}
                     </div>
                   </div>
@@ -109,7 +121,7 @@ export default function OrderDetailsModal({ order, onClose }) {
           {order.note && (
             <div>
               <h3 className="font-semibold mb-2">Note</h3>
-              <p className="text-gray-600 p-3 bg-yellow-50 rounded-lg">
+              <p className="text-muted-foreground p-3 bg-yellow-50 dark:bg-yellow-950/30 rounded-lg">
                 {order.note}
               </p>
             </div>

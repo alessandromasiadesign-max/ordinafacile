@@ -1,3 +1,5 @@
+﻿import { Core } from '@/api/integrations';
+import { TechnicalSupport, PlatformSettings } from '@/api/entities';
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -12,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Upload, X, Send } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { supabase } from '@/api/supabaseClient';
 
 export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
   const [formData, setFormData] = useState({
@@ -34,11 +36,11 @@ export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
 
   const loadUserData = async () => {
     try {
-      const user = await base44.auth.me();
+      const user = (await supabase.auth.getUser()).data.user;
       setFormData(prev => ({
         ...prev,
-        nome_contatto: user.full_name || "",
-        email_contatto: user.email || ""
+        nome_contatto: user?.user_metadata?.full_name || user?.email || "",
+        email_contatto: user?.email || ""
       }));
     } catch (error) {
       console.error("Errore caricamento dati utente:", error);
@@ -47,21 +49,24 @@ export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const user = await base44.auth.me();
-      
+      if (!restaurant?.id) {
+        throw new Error("Ristorante non configurato");
+      }
+      const user = (await supabase.auth.getUser()).data.user;
+
       // Crea la richiesta
-      const request = await base44.entities.TechnicalSupport.create({
+      const request = await TechnicalSupport.create({
         ...data,
         restaurant_id: restaurant.id,
-        user_id: user.id
+        user_id: user?.id
       });
 
       // Invia email all'admin
       try {
-        const settings = await base44.entities.PlatformSettings.list();
+        const settings = await PlatformSettings.list();
         const emailAssistenza = settings[0]?.email_assistenza || "supporto@ordinafacile.it";
         
-        await base44.integrations.Core.SendEmail({
+        await Core.SendEmail({
           to: emailAssistenza,
           subject: `🆘 Nuova Richiesta Assistenza - ${restaurant.nome}`,
           body: `
@@ -92,6 +97,9 @@ export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
       onClose();
       resetForm();
     },
+    onError: (error) => {
+      alert(error?.message || "Errore invio richiesta");
+    },
   });
 
   const resetForm = () => {
@@ -112,7 +120,7 @@ export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
     setUploading(true);
     try {
       const uploadPromises = files.map(file => 
-        base44.integrations.Core.UploadFile({ file })
+        Core.UploadFile({ file })
       );
       const results = await Promise.all(uploadPromises);
       const urls = results.map(r => r.file_url);
@@ -135,6 +143,10 @@ export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!restaurant?.id) {
+      alert("Configura prima il ristorante in Impostazioni.");
+      return;
+    }
     if (!formData.descrizione || !formData.email_contatto) {
       alert("Compila i campi obbligatori");
       return;
@@ -149,7 +161,7 @@ export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
           <DialogTitle className="text-2xl flex items-center gap-2">
             🆘 Richiedi Assistenza
           </DialogTitle>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-muted-foreground mt-2">
             Hai bisogno di aiuto? Compila il form e ti contatteremo presto!
           </p>
         </DialogHeader>
@@ -198,7 +210,7 @@ export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
                 required
                 className="text-base"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 💡 Più dettagli fornisci, più velocemente potremo aiutarti!
               </p>
             </div>
@@ -214,7 +226,7 @@ export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
 
             <div className="space-y-2">
               <Label>Screenshot (opzionale - max 3 immagini)</Label>
-              <p className="text-xs text-gray-500 mb-2">
+              <p className="text-xs text-muted-foreground mb-2">
                 📸 Allega screenshot se può aiutarci a capire meglio il problema
               </p>
               
@@ -238,12 +250,12 @@ export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
               )}
 
               {formData.screenshot_urls.length < 3 && (
-                <label className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center cursor-pointer hover:border-gray-400 transition-colors">
-                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-500">
+                <label className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center cursor-pointer hover:border-muted-foreground transition-colors">
+                  <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                  <span className="text-sm text-muted-foreground">
                     {uploading ? "Caricamento..." : "Clicca per caricare"}
                   </span>
-                  <span className="text-xs text-gray-400 mt-1">
+                  <span className="text-xs text-muted-foreground mt-1">
                     PNG, JPG (max 2MB ciascuna)
                   </span>
                   <input

@@ -1,3 +1,4 @@
+﻿import { Core } from '@/api/integrations';
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -12,10 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { useToast } from "../ui/use-toast";
 
-export default function EditLocationDialog({ open, onClose, location }) {
+export default function EditLocationDialog({ open, onClose }) {
   const [formData, setFormData] = useState(location || {});
   const [uploading, setUploading] = useState(false);
   const queryClient = useQueryClient();
@@ -28,7 +28,7 @@ export default function EditLocationDialog({ open, onClose, location }) {
   }, [location]);
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Location.update(id, data),
+    mutationFn: ({ id, data }) => Location.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
       onClose();
@@ -46,7 +46,7 @@ export default function EditLocationDialog({ open, onClose, location }) {
 
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await Core.UploadFile({ file });
       setFormData(prev => ({ ...prev, immagine_url: file_url }));
     } catch (error) {
       alert("Errore caricamento immagine");
@@ -129,7 +129,7 @@ export default function EditLocationDialog({ open, onClose, location }) {
 
             <div className="space-y-2">
               <Label>Immagine Sede</Label>
-              <p className="text-xs text-gray-500 mb-2">
+              <p className="text-xs text-muted-foreground mb-2">
                 📸 Formato consigliato: JPG/PNG | Risoluzione: 1200x600px | Max 2MB
               </p>
               {formData.immagine_url ? (
@@ -150,9 +150,9 @@ export default function EditLocationDialog({ open, onClose, location }) {
                   </Button>
                 </div>
               ) : (
-                <label className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center cursor-pointer hover:border-gray-400">
-                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-500">
+                <label className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center cursor-pointer hover:border-foreground/30">
+                  <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                  <span className="text-sm text-muted-foreground">
                     {uploading ? "Caricamento..." : "Carica Immagine"}
                   </span>
                   <input
@@ -193,8 +193,8 @@ export default function EditLocationDialog({ open, onClose, location }) {
                 <div 
                   className={`flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all ${
                     (formData.modalita_consegna || []).includes("consegna") 
-                      ? 'border-red-500 bg-red-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
+                      : 'border-border hover:border-foreground/30'
                   }`}
                   onClick={() => toggleModalita("consegna")}
                 >
@@ -207,8 +207,8 @@ export default function EditLocationDialog({ open, onClose, location }) {
                 <div 
                   className={`flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all ${
                     (formData.modalita_consegna || []).includes("asporto") 
-                      ? 'border-red-500 bg-red-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
+                      : 'border-border hover:border-foreground/30'
                   }`}
                   onClick={() => toggleModalita("asporto")}
                 >
@@ -223,7 +223,7 @@ export default function EditLocationDialog({ open, onClose, location }) {
 
             <div className="border-t pt-4">
               <Label className="text-lg font-semibold mb-3 block">Configurazione Fiscale</Label>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 rounded-lg p-4 mb-4">
                 <div className="flex items-center space-x-2 mb-2">
                   <Checkbox
                     checked={!formData.configurazione_fiscale || formData.configurazione_fiscale.usa_principale !== false}
@@ -237,7 +237,7 @@ export default function EditLocationDialog({ open, onClose, location }) {
                   />
                   <Label>Usa dati fiscali della sede principale</Label>
                 </div>
-                <p className="text-xs text-blue-700">
+                <p className="text-xs text-blue-700 dark:text-blue-100">
                   {(!formData.configurazione_fiscale || formData.configurazione_fiscale.usa_principale !== false)
                     ? "La sede userà i dati fiscali del ristorante principale"
                     : "Configura dati fiscali specifici per questa sede"}
@@ -278,7 +278,7 @@ export default function EditLocationDialog({ open, onClose, location }) {
               )}
 
               <Label className="text-lg font-semibold mb-3 block">Configurazione Pagamenti</Label>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 rounded-lg p-4 mb-4">
                 <div className="flex items-center space-x-2 mb-2">
                   <Checkbox
                     checked={!formData.configurazione_pagamenti || formData.configurazione_pagamenti.usa_principale !== false}
@@ -292,7 +292,7 @@ export default function EditLocationDialog({ open, onClose, location }) {
                   />
                   <Label>Usa configurazione pagamenti principale</Label>
                 </div>
-                <p className="text-xs text-blue-700">
+                <p className="text-xs text-blue-700 dark:text-blue-100">
                   {(!formData.configurazione_pagamenti || formData.configurazione_pagamenti.usa_principale !== false)
                     ? "I pagamenti verranno accreditati al conto principale"
                     : "Configura conto bancario/PayPal specifico per questa sede"}

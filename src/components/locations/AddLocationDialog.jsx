@@ -1,3 +1,5 @@
+﻿import { Core } from '@/api/integrations';
+import { Restaurant } from '@/api/entities';
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -12,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { supabase } from '@/api/supabaseClient';
 import { useToast } from "../ui/use-toast";
 
 export default function AddLocationDialog({ open, onClose, restaurantId }) {
@@ -37,18 +39,32 @@ export default function AddLocationDialog({ open, onClose, restaurantId }) {
       domenica: ""
     },
     modalita_consegna: [],
-    attiva: true
   });
+
   const [uploading, setUploading] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Location.create(data),
+    mutationFn: async (data) => {
+      const user = (await supabase.auth.getUser()).data.user;
+      const trimmedName = String(data?.nome ?? '').trim();
+      return Restaurant.create({
+        user_id: user.id,
+        nome: trimmedName,
+        name: trimmedName,
+        address: data.indirizzo,
+        city: data.citta,
+        zip: data.cap,
+        phone: data.telefono,
+        email: data.email,
+        image_url: data.immagine_url,
+      });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['locations'] });
+      queryClient.invalidateQueries({ queryKey: ['restaurants'] });
       toast({
-        title: "✅ Sede aggiunta!",
+        title: "Sede aggiunta",
         type: "success"
       });
       onClose();
@@ -67,17 +83,29 @@ export default function AddLocationDialog({ open, onClose, restaurantId }) {
           lunedi: "", martedi: "", mercoledi: "", giovedi: "", venerdi: "", sabato: "", domenica: ""
         },
         modalita_consegna: [],
-        attiva: true
       });
     },
+    onError: (error) => {
+      toast({
+        title: "Errore creazione sede",
+        description: error?.message || "Verifica i dati inseriti",
+        type: "error"
+      });
+    }
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createMutation.mutate({
-      ...formData,
-      restaurant_id: restaurantId
-    });
+    const trimmedName = String(formData?.nome ?? '').trim();
+    if (!trimmedName) {
+      toast({
+        title: 'Nome sede obbligatorio',
+        description: 'Inserisci il nome della sede prima di continuare',
+        type: 'error',
+      });
+      return;
+    }
+    createMutation.mutate(formData);
   };
 
   const handleImageUpload = async (e) => {
@@ -86,7 +114,7 @@ export default function AddLocationDialog({ open, onClose, restaurantId }) {
 
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await Core.UploadFile({ file });
       setFormData(prev => ({ ...prev, immagine_url: file_url }));
     } catch (error) {
       alert("Errore caricamento immagine");
@@ -175,8 +203,8 @@ export default function AddLocationDialog({ open, onClose, restaurantId }) {
 
             <div className="space-y-2">
               <Label>Immagine Sede</Label>
-              <p className="text-xs text-gray-500 mb-2">
-                📸 Formato consigliato: JPG/PNG | Risoluzione: 1200x600px | Max 2MB
+              <p className="text-xs text-muted-foreground mb-2">
+                Formato consigliato: JPG/PNG | Risoluzione: 1200x600px | Max 2MB
               </p>
               {formData.immagine_url ? (
                 <div className="relative group">
@@ -196,9 +224,9 @@ export default function AddLocationDialog({ open, onClose, restaurantId }) {
                   </Button>
                 </div>
               ) : (
-                <label className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center cursor-pointer hover:border-gray-400">
-                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-500">
+                <label className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center cursor-pointer hover:border-foreground/30">
+                  <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                  <span className="text-sm text-muted-foreground">
                     {uploading ? "Caricamento..." : "Carica Immagine"}
                   </span>
                   <input
@@ -238,34 +266,52 @@ export default function AddLocationDialog({ open, onClose, restaurantId }) {
             <div className="border-t pt-4">
               <Label className="text-lg font-semibold mb-3 block">Modalità Ordini</Label>
               <div className="flex gap-4">
-                <div 
-                  className={`flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                    formData.modalita_consegna.includes("consegna") 
-                      ? 'border-red-500 bg-red-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                <label
+                  htmlFor="modalita-consegna"
+                  className={`flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all flex items-center ${
+                    formData.modalita_consegna.includes("consegna")
+                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
+                      : 'border-border hover:border-foreground/30'
                   }`}
-                  onClick={() => toggleModalita("consegna")}
                 >
-                  <Checkbox 
+                  <Checkbox
+                    id="modalita-consegna"
                     checked={formData.modalita_consegna.includes("consegna")}
+                    onCheckedChange={(checked) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        modalita_consegna: checked
+                          ? (prev.modalita_consegna.includes("consegna") ? prev.modalita_consegna : [...prev.modalita_consegna, "consegna"])
+                          : prev.modalita_consegna.filter(m => m !== "consegna")
+                      }));
+                    }}
                     className="mr-2"
                   />
-                  Consegna a Domicilio
-                </div>
-                <div 
-                  className={`flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                    formData.modalita_consegna.includes("asporto") 
-                      ? 'border-red-500 bg-red-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                  <span>Consegna a Domicilio</span>
+                </label>
+                <label
+                  htmlFor="modalita-asporto"
+                  className={`flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all flex items-center ${
+                    formData.modalita_consegna.includes("asporto")
+                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
+                      : 'border-border hover:border-foreground/30'
                   }`}
-                  onClick={() => toggleModalita("asporto")}
                 >
-                  <Checkbox 
+                  <Checkbox
+                    id="modalita-asporto"
                     checked={formData.modalita_consegna.includes("asporto")}
+                    onCheckedChange={(checked) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        modalita_consegna: checked
+                          ? (prev.modalita_consegna.includes("asporto") ? prev.modalita_consegna : [...prev.modalita_consegna, "asporto"])
+                          : prev.modalita_consegna.filter(m => m !== "asporto")
+                      }));
+                    }}
                     className="mr-2"
                   />
-                  Asporto
-                </div>
+                  <span>Asporto</span>
+                </label>
               </div>
             </div>
 
@@ -277,7 +323,7 @@ export default function AddLocationDialog({ open, onClose, restaurantId }) {
                 />
                 <Label>Usa menu condiviso (stesso del ristorante principale)</Label>
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {formData.menu_condiviso 
                   ? "Questa sede userà lo stesso menu del ristorante principale"
                   : "Questa sede avrà un menu personalizzato. Potrai clonare il menu principale e modificarlo."
@@ -286,7 +332,7 @@ export default function AddLocationDialog({ open, onClose, restaurantId }) {
             </div>
 
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
-              <p className="font-semibold text-amber-900 mb-1">💰 Abbonamento Sede</p>
+              <p className="font-semibold text-amber-900 mb-1">Abbonamento Sede</p>
               <p className="text-amber-800">
                 Ogni sede aggiuntiva richiede un abbonamento pari al 50% del piano base.
                 L'abbonamento verrà attivato dopo il pagamento.
@@ -297,8 +343,8 @@ export default function AddLocationDialog({ open, onClose, restaurantId }) {
             <Button type="button" variant="outline" onClick={onClose}>
               Annulla
             </Button>
-            <Button type="submit" className="bg-red-600 hover:bg-red-700">
-              Crea Sede
+            <Button type="submit" className="bg-red-600 hover:bg-red-700" disabled={createMutation.isPending}>
+              {createMutation.isPending ? "Creazione in corso..." : "Crea Sede"}
             </Button>
           </DialogFooter>
         </form>

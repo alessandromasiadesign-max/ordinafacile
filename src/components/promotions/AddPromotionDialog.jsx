@@ -1,3 +1,4 @@
+﻿import { Promotion } from '@/api/entities';
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -18,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Check } from 'lucide-react';
 import StatusToggle from "../ui/status-toggle";
 import { useToast } from "../ui/use-toast";
@@ -48,11 +48,11 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Promotion.create(data),
+    mutationFn: (data) => Promotion.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
       toast({
-        title: "✅ Promozione creata!",
+        title: "Promozione creata",
         type: "success"
       });
       onClose();
@@ -77,16 +77,61 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
         }
       });
     },
+    onError: (error) => {
+      console.error('Errore creazione promozione:', {
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code,
+        raw: error,
+      });
+      const details = [
+        error?.message,
+        error?.details,
+        error?.hint,
+        error?.code ? `code: ${error.code}` : null,
+      ].filter(Boolean).join(' | ');
+      toast({
+        title: "Errore",
+        description: details || "Impossibile creare la promozione",
+        type: "error",
+      });
+    },
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createMutation.mutate({
-      ...formData,
+
+    if (!restaurantId) {
+      toast({
+        title: "Errore",
+        description: "Ristorante non caricato",
+        type: "error",
+      });
+      return;
+    }
+
+    const discountTypeDb = (() => {
+      const v = String(formData.tipo_sconto ?? '').trim();
+      if (v === 'percentuale') return 'percentage';
+      if (v === 'fisso') return 'fixed';
+      return v || null;
+    })();
+
+    const payload = {
       restaurant_id: restaurantId,
-      utilizzi_attuali: 0,
-      attiva: true
-    });
+      name: formData.nome,
+      description: formData.descrizione || null,
+      discount_type: discountTypeDb,
+      discount_value: Number(formData.valore_sconto ?? 0),
+      code: formData.codice || null,
+      min_order: Number(formData?.regole?.ordine_minimo ?? 0) || 0,
+      is_active: true,
+      valid_from: formData?.regole?.data_inizio ? new Date(formData.regole.data_inizio).toISOString() : null,
+      valid_until: formData?.regole?.data_fine ? new Date(formData.regole.data_fine).toISOString() : null,
+    };
+
+    createMutation.mutate(payload);
   };
 
   const toggleGiorno = (giorno) => {
@@ -202,7 +247,7 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                   placeholder={formData.attivazione === "automatica" ? "Opzionale" : "BENVENUTO10"}
                   required={formData.attivazione === "codice"}
                   disabled={formData.attivazione === "automatica"}
-                  className={formData.attivazione === "automatica" ? "bg-gray-100" : ""}
+                  className={formData.attivazione === "automatica" ? "bg-muted" : ""}
                 />
               </div>
             </div>
@@ -295,7 +340,7 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                       className={`px-4 py-2 rounded-lg border-2 cursor-pointer transition-all ${
                         formData.regole.giorni_settimana.includes(giorno.value)
                           ? 'border-red-500 bg-red-50 text-red-700'
-                          : 'border-gray-200 hover:border-gray-300'
+                          : 'border-border hover:border-muted-foreground'
                       }`}
                       onClick={() => toggleGiorno(giorno.value)}
                     >
@@ -303,7 +348,7 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                         <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
                           formData.regole.giorni_settimana.includes(giorno.value)
                             ? 'border-red-500 bg-red-500'
-                            : 'border-gray-300'
+                            : 'border-border'
                         }`}>
                           {formData.regole.giorni_settimana.includes(giorno.value) && (
                             <Check className="w-3 h-3 text-white" />
@@ -314,7 +359,7 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {formData.regole.giorni_settimana.length === 0 
                     ? "Valida tutti i giorni" 
                     : "Valida solo nei giorni selezionati"}
@@ -346,7 +391,7 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                 </div>
               </div>
               {(formData.regole.orario_inizio || formData.regole.orario_fine) && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   Promo valida dalle {formData.regole.orario_inizio || "00:00"} alle {formData.regole.orario_fine || "23:59"}
                 </p>
               )}
@@ -356,7 +401,7 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                   className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
                     formData.regole.solo_primo_ordine 
                       ? 'border-red-500 bg-red-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-border hover:border-muted-foreground'
                   }`}
                   onClick={() => setFormData(prev => ({
                     ...prev,
@@ -366,7 +411,7 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                     formData.regole.solo_primo_ordine 
                       ? 'border-red-500 bg-red-500' 
-                      : 'border-gray-300'
+                      : 'border-border'
                   }`}>
                     {formData.regole.solo_primo_ordine && <Check className="w-3 h-3 text-white" />}
                   </div>
@@ -379,7 +424,7 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                   className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
                     formData.regole.cumulabile 
                       ? 'border-red-500 bg-red-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-border hover:border-muted-foreground'
                   }`}
                   onClick={() => setFormData(prev => ({
                     ...prev,
@@ -389,7 +434,7 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                     formData.regole.cumulabile 
                       ? 'border-red-500 bg-red-500' 
-                      : 'border-gray-300'
+                      : 'border-border'
                   }`}>
                     {formData.regole.cumulabile && <Check className="w-3 h-3 text-white" />}
                   </div>

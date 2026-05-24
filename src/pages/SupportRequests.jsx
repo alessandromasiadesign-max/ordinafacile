@@ -1,5 +1,5 @@
+﻿import { Restaurant, TechnicalSupport, PlatformSettings } from '@/api/entities';
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,15 +27,15 @@ import { it } from "date-fns/locale";
 import { useToast } from "../components/ui/use-toast";
 
 const statusColors = {
-  aperta: "bg-blue-100 text-blue-800 border-blue-300",
-  in_lavorazione: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  completata: "bg-green-100 text-green-800 border-green-300"
+  aperta: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950/30 dark:text-blue-100 dark:border-blue-900",
+  in_lavorazione: "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-950/30 dark:text-yellow-100 dark:border-yellow-900",
+  completata: "bg-green-100 text-green-800 border-green-300 dark:bg-green-950/30 dark:text-green-100 dark:border-green-900"
 };
 
 const statusLabels = {
-  aperta: "📋 Aperta",
-  in_lavorazione: "🔧 In Lavorazione",
-  completata: "✅ Completata"
+  aperta: "Aperta",
+  in_lavorazione: "In lavorazione",
+  completata: "Completata"
 };
 
 export default function SupportRequests() {
@@ -44,30 +44,46 @@ export default function SupportRequests() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const normalizeRestaurant = (r) => ({
+    ...r,
+    nome: r?.nome,
+  });
+
+  const normalizeRequest = (req) => ({
+    ...req,
+    created_date: req?.created_date ?? req?.created_at,
+  });
+
   const { data: requests = [], isLoading } = useQuery({
     queryKey: ['support-requests'],
-    queryFn: () => base44.entities.TechnicalSupport.list("-created_date"),
+    queryFn: async () => {
+      const rows = await TechnicalSupport.list("-created_at");
+      return (rows || []).map(normalizeRequest);
+    },
     initialData: [],
   });
 
   const { data: restaurants = [] } = useQuery({
     queryKey: ['all-restaurants'],
-    queryFn: () => base44.entities.Restaurant.list(),
+    queryFn: async () => {
+      const rows = await Restaurant.list("-created_at");
+      return (rows || []).map(normalizeRestaurant);
+    },
     initialData: [],
   });
 
   const { data: settings = [] } = useQuery({
     queryKey: ['platform-settings'],
-    queryFn: () => base44.entities.PlatformSettings.list(),
+    queryFn: () => PlatformSettings.list(),
     initialData: [],
   });
 
   const updateRequestMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.TechnicalSupport.update(id, data),
+    mutationFn: ({ id, data }) => TechnicalSupport.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['support-requests'] });
       toast({
-        title: "✅ Richiesta aggiornata",
+        title: "Richiesta aggiornata",
         type: "success"
       });
     },
@@ -76,11 +92,11 @@ export default function SupportRequests() {
   const updateSettingsMutation = useMutation({
     mutationFn: async (email) => {
       if (settings.length > 0) {
-        return base44.entities.PlatformSettings.update(settings[0].id, {
+        return PlatformSettings.update(settings[0].id, {
           email_assistenza: email
         });
       } else {
-        return base44.entities.PlatformSettings.create({
+        return PlatformSettings.create({
           email_assistenza: email
         });
       }
@@ -88,7 +104,7 @@ export default function SupportRequests() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['platform-settings'] });
       toast({
-        title: "✅ Email salvata",
+        title: "Email salvata",
         description: "L'indirizzo email è stato aggiornato",
         type: "success"
       });
@@ -105,11 +121,11 @@ export default function SupportRequests() {
   const completedRequests = requests.filter(r => r.stato === "completata");
 
   return (
-    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Richieste Assistenza</h1>
-          <p className="text-gray-500 mt-1">Gestisci le richieste di supporto dei ristoratori</p>
+          <h1 className="text-3xl font-bold">Richieste Assistenza</h1>
+          <p className="text-muted-foreground mt-1">Gestisci le richieste di supporto dei ristoratori</p>
         </div>
 
         <Card className="mb-6">
@@ -133,7 +149,7 @@ export default function SupportRequests() {
                 Salva Email
               </Button>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               Le richieste di assistenza verranno inviate a questo indirizzo
             </p>
           </CardContent>
@@ -142,7 +158,7 @@ export default function SupportRequests() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-500">Aperte</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Aperte</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600">{openRequests.length}</div>
@@ -150,7 +166,7 @@ export default function SupportRequests() {
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-500">In Lavorazione</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">In Lavorazione</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-yellow-600">{inProgressRequests.length}</div>
@@ -158,7 +174,7 @@ export default function SupportRequests() {
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-500">Completate</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Completate</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">{completedRequests.length}</div>
@@ -180,7 +196,7 @@ export default function SupportRequests() {
                       </Badge>
                     </div>
 
-                    <div className="space-y-2 text-sm text-gray-600 mb-4">
+                    <div className="space-y-2 text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4" />
                         <span className="font-medium">{request.nome_contatto}</span>
@@ -199,16 +215,23 @@ export default function SupportRequests() {
                       )}
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        <span>{format(new Date(request.created_date), "d MMM yyyy, HH:mm", { locale: it })}</span>
+                        <span>
+                          {(() => {
+                            if (!request?.created_date) return '—';
+                            const d = new Date(request.created_date);
+                            if (Number.isNaN(d.getTime())) return '—';
+                            return format(d, "d MMM yyyy, HH:mm", { locale: it });
+                          })()}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="bg-gray-50 p-4 rounded-lg mb-3">
+                    <div className="bg-muted p-4 rounded-lg mb-3">
                       <p className="text-sm whitespace-pre-wrap">{request.descrizione}</p>
                     </div>
 
                     {request.disponibilita_oraria && (
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         <span className="font-medium">Disponibilità:</span> {request.disponibilita_oraria}
                       </p>
                     )}
@@ -258,7 +281,7 @@ export default function SupportRequests() {
                 {request.note_admin && (
                   <div className="mt-4 pt-4 border-t">
                     <p className="text-sm font-medium mb-1">Note interne:</p>
-                    <p className="text-sm text-gray-600 bg-yellow-50 p-3 rounded border border-yellow-200">
+                    <p className="text-sm text-muted-foreground bg-yellow-50 dark:bg-yellow-950/30 p-3 rounded border border-yellow-200 dark:border-yellow-900">
                       {request.note_admin}
                     </p>
                   </div>
@@ -270,9 +293,9 @@ export default function SupportRequests() {
           {requests.length === 0 && !isLoading && (
             <Card>
               <CardContent className="p-12 text-center">
-                <Headphones className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <Headphones className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
                 <h2 className="text-xl font-bold mb-2">Nessuna richiesta</h2>
-                <p className="text-gray-500">Le richieste di assistenza appariranno qui</p>
+                <p className="text-muted-foreground">Le richieste di assistenza appariranno qui</p>
               </CardContent>
             </Card>
           )}

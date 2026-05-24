@@ -1,7 +1,7 @@
+﻿import { SubscriptionDiscountCode, DiscountUsage } from '@/api/entities';
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Ticket, Edit2, Trash2 } from "lucide-react";
@@ -28,35 +28,44 @@ export default function DiscountCodes() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const normalizeCode = (c) => ({
+    ...c,
+    attivo: c?.attivo ?? c?.is_active,
+    created_date: c?.created_date ?? c?.created_at,
+  });
+
   const { data: codes = [], isLoading } = useQuery({
     queryKey: ['discount-codes'],
-    queryFn: () => base44.entities.SubscriptionDiscountCode.list("-created_date"),
+    queryFn: async () => {
+      const rows = await SubscriptionDiscountCode.list("-created_at");
+      return (rows || []).map(normalizeCode);
+    },
     initialData: [],
   });
 
   const { data: usages = [] } = useQuery({
     queryKey: ['discount-usages'],
-    queryFn: () => base44.entities.DiscountUsage.list(),
+    queryFn: () => DiscountUsage.list(),
     initialData: [],
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.SubscriptionDiscountCode.delete(id),
+    mutationFn: (id) => SubscriptionDiscountCode.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['discount-codes'] });
       toast({
-        title: "✅ Codice eliminato",
+        title: "Codice eliminato",
         type: "success"
       });
     },
   });
 
   const toggleActiveMutation = useMutation({
-    mutationFn: ({ id, attivo }) => base44.entities.SubscriptionDiscountCode.update(id, { attivo }),
+    mutationFn: ({ id, attivo }) => SubscriptionDiscountCode.update(id, { attivo }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['discount-codes'] });
       toast({
-        title: "✅ Stato aggiornato",
+        title: "Stato aggiornato",
         type: "success"
       });
     },
@@ -66,22 +75,29 @@ export default function DiscountCodes() {
     return usages.filter(u => u.discount_code_id === codeId).length;
   };
 
+  const getCurrentUsages = (code) => {
+    if (Number.isFinite(code?.utilizzi_attuali)) return code.utilizzi_attuali;
+    return getCodeUsages(code.id);
+  };
+
   const isCodeExpired = (code) => {
     if (!code.data_scadenza) return false;
-    return new Date(code.data_scadenza) < new Date();
+    const d = new Date(code.data_scadenza);
+    if (Number.isNaN(d.getTime())) return false;
+    return d < new Date();
   };
 
   const isCodeLimitReached = (code) => {
     if (!code.max_utilizzi_totali || code.max_utilizzi_totali === 0) return false;
-    return code.utilizzi_attuali >= code.max_utilizzi_totali;
+    return getCurrentUsages(code) >= code.max_utilizzi_totali;
   };
 
   return (
-    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Codici Sconto Abbonamenti</h1>
-          <p className="text-gray-500 mt-1">Gestisci i codici sconto per gli abbonamenti dei ristoratori</p>
+          <h1 className="text-3xl font-bold">Codici Sconto Abbonamenti</h1>
+          <p className="text-muted-foreground mt-1">Gestisci i codici sconto per gli abbonamenti dei ristoratori</p>
         </div>
 
         <div className="mb-6 flex justify-end">
@@ -99,6 +115,7 @@ export default function DiscountCodes() {
             const expired = isCodeExpired(code);
             const limitReached = isCodeLimitReached(code);
             const isInactive = !code.attivo || expired || limitReached;
+            const currentUsages = getCurrentUsages(code);
             
             return (
               <Card key={code.id} className={`${isInactive ? 'opacity-60' : ''}`}>
@@ -110,14 +127,14 @@ export default function DiscountCodes() {
                         <div>
                           <h3 className="text-xl font-bold">{code.codice}</h3>
                           {code.descrizione && (
-                            <p className="text-sm text-gray-600">{code.descrizione}</p>
+                            <p className="text-sm text-muted-foreground">{code.descrizione}</p>
                           )}
                         </div>
                       </div>
 
                       <div className="grid md:grid-cols-2 gap-4 mb-4">
                         <div>
-                          <div className="text-sm text-gray-500 mb-1">Tipo Sconto</div>
+                          <div className="text-sm text-muted-foreground mb-1">Tipo Sconto</div>
                           <div className="font-semibold">
                             {tipoScontoLabels[code.tipo_sconto]}
                             {code.valore_sconto && (
@@ -132,13 +149,13 @@ export default function DiscountCodes() {
                         </div>
 
                         <div>
-                          <div className="text-sm text-gray-500 mb-1">Durata</div>
+                          <div className="text-sm text-muted-foreground mb-1">Durata</div>
                           <div className="font-semibold">{durataScontoLabels[code.durata_sconto]}</div>
                         </div>
 
                         {code.data_scadenza && (
                           <div>
-                            <div className="text-sm text-gray-500 mb-1">Scadenza</div>
+                            <div className="text-sm text-muted-foreground mb-1">Scadenza</div>
                             <div className="font-semibold">
                               {new Date(code.data_scadenza).toLocaleDateString('it-IT')}
                               {expired && <Badge className="ml-2 bg-red-600">Scaduto</Badge>}
@@ -147,9 +164,9 @@ export default function DiscountCodes() {
                         )}
 
                         <div>
-                          <div className="text-sm text-gray-500 mb-1">Utilizzi</div>
+                          <div className="text-sm text-muted-foreground mb-1">Utilizzi</div>
                           <div className="font-semibold">
-                            {code.utilizzi_attuali || 0}
+                            {currentUsages || 0}
                             {code.max_utilizzi_totali > 0 && ` / ${code.max_utilizzi_totali}`}
                             {limitReached && <Badge className="ml-2 bg-orange-600">Limite raggiunto</Badge>}
                           </div>
@@ -158,13 +175,13 @@ export default function DiscountCodes() {
 
                       {code.piani_applicabili && code.piani_applicabili.length > 0 && (
                         <div className="text-sm">
-                          <span className="text-gray-500">Piani:</span> {code.piani_applicabili.join(", ")}
+                          <span className="text-muted-foreground">Piani:</span> {code.piani_applicabili.join(", ")}
                         </div>
                       )}
                     </div>
 
                     <div className="flex flex-col gap-2 md:min-w-[200px]">
-                      <Badge className={code.attivo && !expired && !limitReached ? "bg-green-500" : "bg-gray-500"}>
+                      <Badge className={code.attivo && !expired && !limitReached ? "bg-green-500 text-white dark:bg-green-950/30 dark:text-green-100" : "bg-muted text-muted-foreground"}>
                         {code.attivo && !expired && !limitReached ? "Attivo" : "Disattivato"}
                       </Badge>
                       
@@ -207,9 +224,9 @@ export default function DiscountCodes() {
           {codes.length === 0 && !isLoading && (
             <Card>
               <CardContent className="p-12 text-center">
-                <Ticket className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <Ticket className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
                 <h2 className="text-xl font-bold mb-2">Nessun codice sconto</h2>
-                <p className="text-gray-500 mb-6">Crea il primo codice sconto per gli abbonamenti</p>
+                <p className="text-muted-foreground mb-6">Crea il primo codice sconto per gli abbonamenti</p>
                 <Button
                   onClick={() => setShowAddDialog(true)}
                   className="bg-red-600 hover:bg-red-700"

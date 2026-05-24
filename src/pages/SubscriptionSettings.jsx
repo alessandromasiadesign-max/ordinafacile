@@ -1,5 +1,5 @@
+﻿import { SubscriptionPlan, PlatformSettings, Restaurant, SubscriptionTransaction } from '@/api/entities';
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Save, CreditCard } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 import {
   Dialog,
   DialogContent,
@@ -19,13 +20,16 @@ import {
 export default function SubscriptionSettings() {
   const [showAddPlan, setShowAddPlan] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
+
   const [platformSettings, setPlatformSettings] = useState({
     payment_info: {
       iban: "",
       intestatario: "",
       banca: "",
       paypal_email: "",
-      stripe_account_id: ""
+      paypal_client_id: "",
+      stripe_account_id: "",
+      stripe_prices: {}
     },
     notification_settings: {
       admin_email: "",
@@ -33,18 +37,31 @@ export default function SubscriptionSettings() {
       email_template_scadenza: ""
     }
   });
-  
+
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: plans = [] } = useQuery({
     queryKey: ['subscription-plans'],
-    queryFn: () => base44.entities.SubscriptionPlan.list("ordine"),
+    queryFn: () => SubscriptionPlan.list("ordine"),
     initialData: [],
   });
 
   const { data: settings = [] } = useQuery({
     queryKey: ['platform-settings'],
-    queryFn: () => base44.entities.PlatformSettings.list(),
+    queryFn: () => PlatformSettings.list(),
+    initialData: [],
+  });
+
+  const { data: restaurants = [] } = useQuery({
+    queryKey: ['admin-restaurants'],
+    queryFn: () => Restaurant.list('-created_at', 500),
+    initialData: [],
+  });
+
+  const { data: pendingTransactions = [] } = useQuery({
+    queryKey: ['subscription-transactions-pending'],
+    queryFn: () => SubscriptionTransaction.filter({ stato: 'pending' }, '-created_at', 200),
     initialData: [],
   });
 
@@ -57,31 +74,164 @@ export default function SubscriptionSettings() {
   const saveSettingsMutation = useMutation({
     mutationFn: async (data) => {
       if (settings.length > 0) {
-        return base44.entities.PlatformSettings.update(settings[0].id, data);
+        return PlatformSettings.update(settings[0].id, data);
       } else {
-        return base44.entities.PlatformSettings.create(data);
+        return PlatformSettings.create(data);
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['platform-settings'] });
-      alert("✅ Impostazioni salvate!");
+      toast({
+        title: 'Impostazioni salvate',
+        type: 'success',
+      });
+    },
+    onError: (error) => {
+      console.error('Errore salvataggio impostazioni:', error);
+      toast({
+        title: 'Errore salvataggio impostazioni',
+        description: error?.message || 'Impossibile salvare le impostazioni',
+        type: 'error',
+      });
     },
   });
 
   const deletePlanMutation = useMutation({
-    mutationFn: (id) => base44.entities.SubscriptionPlan.delete(id),
+    mutationFn: (id) => SubscriptionPlan.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription-plans'] });
     },
   });
 
+  const approveTransactionMutation = useMutation({
+    mutationFn: async (tx) => {
+      if (!tx?.id) throw new Error('Transazione non valida');
+      if (!tx?.restaurant_id) throw new Error('Ristorante non valido');
+
+      await SubscriptionTransaction.update(tx.id, {
+        stato: 'paid',
+      });
+
+      await Restaurant.update(tx.restaurant_id, {
+        abbonamento_tipo: tx.piano,
+        abbonamento_scadenza: tx.data_scadenza,
+        abbonamento_attivo: true,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subscription-transactions-pending'] });
+      queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+      toast({
+        title: 'Transazione approvata',
+        description: 'Abbonamento attivato.',
+        type: 'success',
+      });
+    },
+    onError: (error) => {
+      console.error('Errore approvazione transazione:', error);
+      toast({
+        title: 'Errore approvazione',
+        description: error?.message || 'Errore durante l’approvazione',
+        type: 'error',
+      });
+    },
+  });
+
+  const rejectTransactionMutation = useMutation({
+    mutationFn: async (tx) => {
+      if (!tx?.id) throw new Error('Transazione non valida');
+      await SubscriptionTransaction.update(tx.id, {
+        stato: 'rejected',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subscription-transactions-pending'] });
+      toast({
+        title: 'Transazione rifiutata',
+        type: 'success',
+      });
+    },
+    onError: (error) => {
+      console.error('Errore rifiuto transazione:', error);
+      toast({
+        title: 'Errore rifiuto',
+        description: error?.message || 'Errore durante il rifiuto',
+        type: 'error',
+      });
+    },
+  });
+
+  const restaurantsById = new Map((restaurants || []).map((r) => [r.id, r]));
+  const stripePrices = (
+    platformSettings?.payment_info?.stripe_prices && typeof platformSettings.payment_info.stripe_prices === 'object'
+      ? platformSettings.payment_info.stripe_prices
+      : {}
+  );
+
+  const paymentInfo = platformSettings.payment_info;
+
   return (
-    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-8 bg-background min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Gestione Abbonamenti</h1>
-          <p className="text-gray-500 mt-1">Configura piani e impostazioni di pagamento</p>
+          <h1 className="text-3xl font-bold text-foreground">Gestione Abbonamenti</h1>
+          <p className="text-muted-foreground mt-1">Configura piani e impostazioni di pagamento</p>
         </div>
+
+        {/* Richieste in Attesa */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Richieste di rinnovo in attesa</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {pendingTransactions.length === 0 ? (
+              <div className="text-sm text-muted-foreground">Nessuna richiesta in attesa.</div>
+            ) : (
+              <div className="space-y-3">
+                {pendingTransactions.map((tx) => {
+                  const rest = restaurantsById.get(tx.restaurant_id);
+                  const restLabel = rest?.nome ?? rest?.name ?? tx.restaurant_id;
+                  const approveBusy = approveTransactionMutation.isPending;
+                  const rejectBusy = rejectTransactionMutation.isPending;
+
+                  return (
+                    <div key={tx.id} className="rounded-lg border border-border p-4">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-semibold truncate">{restLabel}</div>
+                          <div className="text-sm text-muted-foreground">
+                            Piano: <strong>{tx.piano}</strong> • Periodo: <strong>{tx.tipo}</strong> • Metodo: <strong>{tx.metodo_pagamento}</strong> • Importo: <strong>€{Number(tx.importo || 0).toFixed(2)}</strong>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Validità: {tx.data_inizio} → {tx.data_scadenza}
+                          </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <Button
+                            type="button"
+                            className="bg-green-600 hover:bg-green-700"
+                            disabled={approveBusy || rejectBusy}
+                            onClick={() => approveTransactionMutation.mutate(tx)}
+                          >
+                            Approva
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            disabled={approveBusy || rejectBusy}
+                            onClick={() => rejectTransactionMutation.mutate(tx)}
+                          >
+                            Rifiuta
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Impostazioni Pagamento */}
         <Card className="mb-6">
@@ -144,6 +294,18 @@ export default function SubscriptionSettings() {
             </div>
 
             <div className="space-y-2">
+              <Label>PayPal Client ID (checkout automatico)</Label>
+              <Input
+                value={platformSettings.payment_info?.paypal_client_id || ""}
+                onChange={(e) => setPlatformSettings(prev => ({
+                  ...prev,
+                  payment_info: { ...prev.payment_info, paypal_client_id: e.target.value }
+                }))}
+                placeholder="AQ..."
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label>Stripe Account ID (opzionale)</Label>
               <Input
                 value={platformSettings.payment_info?.stripe_account_id || ""}
@@ -153,6 +315,77 @@ export default function SubscriptionSettings() {
                 }))}
                 placeholder="acct_xxxxxxxxxxxx"
               />
+            </div>
+
+            <div className="pt-4">
+              <h4 className="font-semibold mb-3">Stripe Price IDs (per piano)</h4>
+              {!paymentInfo.stripe_account_id ? (
+                <div className="text-sm text-muted-foreground">
+                  Configura prima lo <strong>Stripe Account ID</strong> per abilitare il pagamento con carta. I Price ID servono solo a Stripe.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {plans.map((plan) => {
+                    const planPrices = stripePrices?.[plan.id] && typeof stripePrices[plan.id] === 'object' ? stripePrices[plan.id] : {};
+                    const monthly = planPrices?.mensile ?? '';
+                    const yearly = planPrices?.annuale ?? '';
+
+                    return (
+                      <div key={plan.id} className="rounded-lg border border-border p-4">
+                        <div className="font-semibold">{plan.nome}</div>
+                        <div className="grid md:grid-cols-2 gap-3 mt-3">
+                          <div className="space-y-2">
+                            <Label>Price ID Mensile</Label>
+                            <Input
+                              value={monthly}
+                              onChange={(e) => {
+                                const next = e.target.value;
+                                setPlatformSettings((prev) => ({
+                                  ...prev,
+                                  payment_info: {
+                                    ...prev.payment_info,
+                                    stripe_prices: {
+                                      ...(stripePrices || {}),
+                                      [plan.id]: {
+                                        ...(planPrices || {}),
+                                        mensile: next,
+                                      },
+                                    },
+                                  },
+                                }));
+                              }}
+                              placeholder="price_..."
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Price ID Annuale</Label>
+                            <Input
+                              value={yearly}
+                              onChange={(e) => {
+                                const next = e.target.value;
+                                setPlatformSettings((prev) => ({
+                                  ...prev,
+                                  payment_info: {
+                                    ...prev.payment_info,
+                                    stripe_prices: {
+                                      ...(stripePrices || {}),
+                                      [plan.id]: {
+                                        ...(planPrices || {}),
+                                        annuale: next,
+                                      },
+                                    },
+                                  },
+                                }));
+                              }}
+                              placeholder="price_..."
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="pt-4">
@@ -216,7 +449,7 @@ export default function SubscriptionSettings() {
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <h3 className="text-xl font-bold">{plan.nome}</h3>
-                        <Badge className={plan.attivo ? "bg-green-500" : "bg-gray-500"}>
+                        <Badge className={plan.attivo ? "bg-green-500" : "bg-muted text-muted-foreground"}>
                           {plan.attivo ? "Attivo" : "Disattivato"}
                         </Badge>
                       </div>
@@ -242,15 +475,15 @@ export default function SubscriptionSettings() {
                       </div>
                     </div>
 
-                    <p className="text-gray-600 text-sm mb-4">{plan.descrizione}</p>
+                    <p className="text-muted-foreground text-sm mb-4">{plan.descrizione}</p>
 
                     <div className="space-y-2 mb-4">
                       <div className="text-3xl font-bold text-red-600">
                         €{plan.prezzo_mensile}
-                        <span className="text-sm text-gray-500">/mese</span>
+                        <span className="text-sm text-muted-foreground">/mese</span>
                       </div>
                       {plan.prezzo_annuale > 0 && (
-                        <div className="text-lg text-gray-600">
+                        <div className="text-lg text-muted-foreground">
                           €{plan.prezzo_annuale}/anno
                           <Badge variant="outline" className="ml-2">
                             Risparmia {Math.round((1 - plan.prezzo_annuale / (plan.prezzo_mensile * 12)) * 100)}%
@@ -296,44 +529,96 @@ export default function SubscriptionSettings() {
   );
 }
 
+const DEFAULT_PLAN_FORM_DATA = {
+  nome: "",
+  descrizione: "",
+  prezzo_mensile: 0,
+  prezzo_annuale: 0,
+  features: [],
+  max_ordini_mese: 0,
+  max_prodotti: 0,
+  commissione_percentuale: 0,
+  attivo: true,
+  sort_order: 0,
+};
+
 function PlanDialog({ open, onClose, plan }) {
-  const [formData, setFormData] = useState({
-    nome: "",
-    descrizione: "",
-    prezzo_mensile: 0,
-    prezzo_annuale: 0,
-    features: [],
-    max_ordini_mese: 0,
-    max_prodotti: 0,
-    commissione_percentuale: 0,
-    attivo: true,
-    ordine: 0
-  });
+  const [formData, setFormData] = useState(DEFAULT_PLAN_FORM_DATA);
   const [newFeature, setNewFeature] = useState("");
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   useEffect(() => {
+    if (!open) return;
+
     if (plan) {
-      setFormData(plan);
+      setFormData({
+        ...DEFAULT_PLAN_FORM_DATA,
+        ...plan,
+        features: Array.isArray(plan.features) ? plan.features : [],
+      });
+      setNewFeature("");
+      return;
     }
-  }, [plan]);
+
+    setFormData(DEFAULT_PLAN_FORM_DATA);
+    setNewFeature("");
+  }, [open, plan]);
 
   const saveMutation = useMutation({
     mutationFn: (data) => {
       if (plan) {
-        return base44.entities.SubscriptionPlan.update(plan.id, data);
+        return SubscriptionPlan.update(plan.id, data);
       }
-      return base44.entities.SubscriptionPlan.create(data);
+      return SubscriptionPlan.create(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription-plans'] });
+      toast({
+        title: plan ? 'Piano aggiornato' : 'Piano creato',
+        type: 'success',
+      });
       onClose();
+    },
+    onError: (error) => {
+      console.error('Errore salvataggio piano:', error);
+      toast({
+        title: 'Errore salvataggio piano',
+        description: error?.message || 'Errore durante il salvataggio del piano',
+        type: 'error',
+      });
     },
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    saveMutation.mutate(formData);
+
+    const safeNumber = (value, fallback = 0) => {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    };
+
+    const safeInt = (value, fallback = 0) => {
+      const n = parseInt(String(value), 10);
+      return Number.isFinite(n) ? n : fallback;
+    };
+
+    const normalized = {
+      ...formData,
+      prezzo_mensile: safeNumber(formData.prezzo_mensile, 0),
+      prezzo_annuale: safeNumber(formData.prezzo_annuale, 0),
+      max_ordini_mese: safeInt(formData.max_ordini_mese, 0),
+      max_prodotti: safeInt(formData.max_prodotti, 0),
+      commissione_percentuale: safeNumber(formData.commissione_percentuale, 0),
+      sort_order: safeInt(formData.sort_order, 0),
+      attivo: !!formData.attivo,
+      features: (Array.isArray(formData.features) ? formData.features : [])
+        .map((f) => String(f).trim())
+        .filter(Boolean),
+    };
+
+    const { id, created_at, updated_at, ...payload } = normalized;
+    saveMutation.mutate(payload);
   };
 
   const addFeature = () => {
@@ -367,8 +652,8 @@ function PlanDialog({ open, onClose, plan }) {
                 <Label>Ordine Visualizzazione</Label>
                 <Input
                   type="number"
-                  value={formData.ordine}
-                  onChange={(e) => setFormData(prev => ({ ...prev, ordine: parseInt(e.target.value) }))}
+                  value={formData.sort_order}
+                  onChange={(e) => setFormData(prev => ({ ...prev, sort_order: parseInt(e.target.value) }))}
                 />
               </div>
             </div>
@@ -448,7 +733,7 @@ function PlanDialog({ open, onClose, plan }) {
               </div>
               <div className="space-y-1 mt-2">
                 {formData.features?.map((feature, i) => (
-                  <div key={i} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                  <div key={i} className="flex items-center justify-between bg-muted p-2 rounded">
                     <span>{feature}</span>
                     <Button
                       type="button"
@@ -470,8 +755,8 @@ function PlanDialog({ open, onClose, plan }) {
             <Button type="button" variant="outline" onClick={onClose}>
               Annulla
             </Button>
-            <Button type="submit" className="bg-red-600 hover:bg-red-700">
-              Salva Piano
+            <Button type="submit" className="bg-red-600 hover:bg-red-700" disabled={saveMutation.isPending}>
+              {saveMutation.isPending ? 'Salvataggio...' : 'Salva Piano'}
             </Button>
           </DialogFooter>
         </form>

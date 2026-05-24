@@ -1,4 +1,4 @@
-/**
+﻿/**
  * pages.config.js - Page routing configuration
  * 
  * This file is AUTO-GENERATED. Do not add imports or modify PAGES manually.
@@ -16,7 +16,7 @@
  *   export const PAGES = {
  *       "HomePage": HomePage,
  *       "Dashboard": Dashboard,
- *       "Settings": Settings,
+ *       "Settings": 
  *   }
  *   
  *   export const pagesConfig = {
@@ -32,7 +32,7 @@
  *
  *   export const PAGES = {
  *       "Home": Home,
- *       "Settings": Settings,
+ *       "Settings": 
  *   }
  *
  *   export const pagesConfig = {
@@ -47,53 +47,18 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Cookies from './pages/Cookies';
-import Dashboard from './pages/Dashboard';
-import DiscountCodes from './pages/DiscountCodes';
-import EventMenu from './pages/EventMenu';
-import Events from './pages/Events';
-import Landing from './pages/Landing';
-import Locations from './pages/Locations';
-import MasterDashboard from './pages/MasterDashboard';
-import MenuManagement from './pages/MenuManagement';
-import OrderHistory from './pages/OrderHistory';
-import Orders from './pages/Orders';
-import PrintOrders from './pages/PrintOrders';
-import Privacy from './pages/Privacy';
-import Promotions from './pages/Promotions';
-import RenewSubscription from './pages/RenewSubscription';
-import RestaurantPublic from './pages/RestaurantPublic';
-import Settings from './pages/Settings';
-import SubscriptionSettings from './pages/SubscriptionSettings';
-import SupportRequests from './pages/SupportRequests';
-import Terms from './pages/Terms';
-import app from './pages/_app';
+import { lazy } from 'react';
 import __Layout from './Layout.jsx';
 
+const pageModules = import.meta.glob('./pages/*.jsx');
 
-export const PAGES = {
-    "Cookies": Cookies,
-    "Dashboard": Dashboard,
-    "DiscountCodes": DiscountCodes,
-    "EventMenu": EventMenu,
-    "Events": Events,
-    "Landing": Landing,
-    "Locations": Locations,
-    "MasterDashboard": MasterDashboard,
-    "MenuManagement": MenuManagement,
-    "OrderHistory": OrderHistory,
-    "Orders": Orders,
-    "PrintOrders": PrintOrders,
-    "Privacy": Privacy,
-    "Promotions": Promotions,
-    "RenewSubscription": RenewSubscription,
-    "RestaurantPublic": RestaurantPublic,
-    "Settings": Settings,
-    "SubscriptionSettings": SubscriptionSettings,
-    "SupportRequests": SupportRequests,
-    "Terms": Terms,
-    "_app": app,
-}
+export const PAGES = Object.fromEntries(
+    Object.entries(pageModules).map(([file, loader]) => {
+        const fileName = file.split('/').pop();
+        const name = fileName.replace('.jsx', '');
+        return [name, lazy(loader)];
+    })
+);
 
 export const pagesConfig = {
     mainPage: "Dashboard",

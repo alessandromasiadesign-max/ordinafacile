@@ -1,5 +1,5 @@
+﻿import { SubscriptionDiscountCode } from '@/api/entities';
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
@@ -39,7 +39,7 @@ export default function AddDiscountCodeDialog({ open, onClose }) {
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.SubscriptionDiscountCode.create(data),
+    mutationFn: (data) => SubscriptionDiscountCode.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['discount-codes'] });
       toast({

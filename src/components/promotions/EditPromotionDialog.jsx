@@ -1,3 +1,4 @@
+﻿import { Promotion } from '@/api/entities';
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -18,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Check } from 'lucide-react';
 import StatusToggle from "../ui/status-toggle";
 import { useToast } from "../ui/use-toast";
@@ -49,11 +49,11 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
   }, [promotion]);
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Promotion.update(promotion.id, data),
+    mutationFn: (data) => Promotion.update(promotion.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
       toast({
-        title: "✅ Promozione aggiornata!",
+        title: "Promozione aggiornata",
         type: "success"
       });
       onClose();
@@ -61,11 +61,11 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.Promotion.delete(promotion.id),
+    mutationFn: () => Promotion.delete(promotion.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
       toast({
-        title: "✅ Promozione eliminata",
+        title: "Promozione eliminata",
         type: "success"
       });
       onClose();
@@ -74,7 +74,27 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    updateMutation.mutate(formData);
+
+    const discountTypeDb = (() => {
+      const v = String(formData?.tipo_sconto ?? '').trim();
+      if (v === 'percentuale') return 'percentage';
+      if (v === 'fisso') return 'fixed';
+      return v || null;
+    })();
+
+    const payload = {
+      name: formData?.nome,
+      description: formData?.descrizione || null,
+      discount_type: discountTypeDb,
+      discount_value: Number(formData?.valore_sconto ?? 0),
+      code: formData?.codice || null,
+      min_order: Number(formData?.regole?.ordine_minimo ?? 0) || 0,
+      is_active: Boolean(formData?.attiva ?? formData?.is_active ?? true),
+      valid_from: formData?.regole?.data_inizio ? new Date(formData.regole.data_inizio).toISOString() : null,
+      valid_until: formData?.regole?.data_fine ? new Date(formData.regole.data_fine).toISOString() : null,
+    };
+
+    updateMutation.mutate(payload);
   };
 
   const toggleGiorno = (giorno) => {
@@ -188,7 +208,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
                   onChange={(e) => setFormData(prev => ({ ...prev, codice: e.target.value.toUpperCase() }))}
                   placeholder={formData.attivazione === "automatica" ? "Opzionale" : "PROMO20"}
                   disabled={formData.attivazione === "automatica"}
-                  className={formData.attivazione === "automatica" ? "bg-gray-100" : ""}
+                  className={formData.attivazione === "automatica" ? "bg-muted" : ""}
                 />
               </div>
             </div>
@@ -289,7 +309,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
                       className={`px-4 py-2 rounded-lg border-2 cursor-pointer transition-all ${
                         formData.regole.giorni_settimana?.includes(giorno.value)
                           ? 'border-red-500 bg-red-50 text-red-700'
-                          : 'border-gray-200 hover:border-gray-300'
+                          : 'border-border hover:border-muted-foreground'
                       }`}
                       onClick={() => toggleGiorno(giorno.value)}
                     >
@@ -297,7 +317,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
                         <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
                           formData.regole.giorni_settimana?.includes(giorno.value)
                             ? 'border-red-500 bg-red-500'
-                            : 'border-gray-300'
+                            : 'border-border'
                         }`}>
                           {formData.regole.giorni_settimana?.includes(giorno.value) && (
                             <Check className="w-3 h-3 text-white" />
@@ -308,7 +328,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {!formData.regole.giorni_settimana || formData.regole.giorni_settimana.length === 0 
                     ? "Valida tutti i giorni" 
                     : "Valida solo nei giorni selezionati"}
@@ -340,7 +360,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
                 </div>
               </div>
               {(formData.regole.orario_inizio || formData.regole.orario_fine) && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   Promo valida dalle {formData.regole.orario_inizio || "00:00"} alle {formData.regole.orario_fine || "23:59"}
                 </p>
               )}
@@ -350,7 +370,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
                   className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
                     formData.regole.solo_primo_ordine 
                       ? 'border-red-500 bg-red-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-border hover:border-muted-foreground'
                   }`}
                   onClick={() => setFormData(prev => ({
                     ...prev,
@@ -360,7 +380,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                     formData.regole.solo_primo_ordine 
                       ? 'border-red-500 bg-red-500' 
-                      : 'border-gray-300'
+                      : 'border-border'
                   }`}>
                     {formData.regole.solo_primo_ordine && <Check className="w-3 h-3 text-white" />}
                   </div>
@@ -373,7 +393,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
                   className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
                     formData.regole.cumulabile 
                       ? 'border-red-500 bg-red-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-border hover:border-muted-foreground'
                   }`}
                   onClick={() => setFormData(prev => ({
                     ...prev,
@@ -383,7 +403,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                     formData.regole.cumulabile 
                       ? 'border-red-500 bg-red-500' 
-                      : 'border-gray-300'
+                      : 'border-border'
                   }`}>
                     {formData.regole.cumulabile && <Check className="w-3 h-3 text-white" />}
                   </div>

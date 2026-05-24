@@ -1,3 +1,5 @@
+﻿import { Core } from '@/api/integrations';
+import { Event } from '@/api/entities';
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -12,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Check, Upload, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import LazyImage from "../ui/lazy-image";
 import { useToast } from "../ui/use-toast";
 
@@ -33,11 +34,26 @@ export default function AddEventDialog({ open, onClose, restaurantId }) {
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Event.create(data),
+    mutationFn: async (data) => {
+      if (!restaurantId) {
+        throw new Error("Ristorante non configurato");
+      }
+
+      const payload = {
+        ...(data || {}),
+        data_inizio: data?.data_inizio ? data.data_inizio : null,
+        data_fine: data?.data_fine ? data.data_fine : null,
+        orario_inizio: data?.orario_inizio ? data.orario_inizio : null,
+        orario_fine: data?.orario_fine ? data.orario_fine : null,
+        restaurant_id: restaurantId
+      };
+
+      return await Event.create(payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       toast({
-        title: "✅ Evento creato!",
+        title: "Evento creato",
         type: "success"
       });
       onClose();
@@ -53,14 +69,31 @@ export default function AddEventDialog({ open, onClose, restaurantId }) {
         attivo: true
       });
     },
+    onError: (error) => {
+      const msg =
+        error?.message ??
+        error?.details ??
+        error?.error_description ??
+        "Impossibile creare l'evento";
+      toast({
+        title: "Errore creazione evento",
+        description: msg,
+        type: "error"
+      });
+    }
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createMutation.mutate({
-      ...formData,
-      restaurant_id: restaurantId
-    });
+    if (!restaurantId) {
+      toast({
+        title: "Ristorante non configurato",
+        description: "Configura prima il ristorante in Impostazioni.",
+        type: "error"
+      });
+      return;
+    }
+    createMutation.mutate(formData);
   };
 
   const handleImageUpload = async (e) => {
@@ -69,7 +102,7 @@ export default function AddEventDialog({ open, onClose, restaurantId }) {
 
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await Core.UploadFile({ file });
       setFormData(prev => ({ ...prev, immagine_url: file_url }));
     } catch (error) {
       alert("Errore caricamento immagine");
@@ -87,13 +120,13 @@ export default function AddEventDialog({ open, onClose, restaurantId }) {
   };
 
   const giorniSettimana = [
-    { value: 'lunedi', label: 'Lun' },
-    { value: 'martedi', label: 'Mar' },
-    { value: 'mercoledi', label: 'Mer' },
-    { value: 'giovedi', label: 'Gio' },
-    { value: 'venerdi', label: 'Ven' },
-    { value: 'sabato', label: 'Sab' },
-    { value: 'domenica', label: 'Dom' }
+    { value: 'monday', label: 'Lun' },
+    { value: 'tuesday', label: 'Mar' },
+    { value: 'wednesday', label: 'Mer' },
+    { value: 'thursday', label: 'Gio' },
+    { value: 'friday', label: 'Ven' },
+    { value: 'saturday', label: 'Sab' },
+    { value: 'sunday', label: 'Dom' }
   ];
 
   return (
@@ -144,9 +177,9 @@ export default function AddEventDialog({ open, onClose, restaurantId }) {
                   </Button>
                 </div>
               ) : (
-                <label className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center cursor-pointer hover:border-gray-400">
-                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-500">
+                <label className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center cursor-pointer hover:border-muted-foreground">
+                  <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                  <span className="text-sm text-muted-foreground">
                     {uploading ? "Caricamento..." : "Carica Immagine"}
                   </span>
                   <input
@@ -188,7 +221,7 @@ export default function AddEventDialog({ open, onClose, restaurantId }) {
                     className={`px-4 py-2 rounded-lg border-2 cursor-pointer transition-all ${
                       formData.giorni_settimana.includes(giorno.value)
                         ? 'border-red-500 bg-red-50 text-red-700'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-border hover:border-muted-foreground'
                     }`}
                     onClick={() => toggleGiorno(giorno.value)}
                   >
@@ -196,7 +229,7 @@ export default function AddEventDialog({ open, onClose, restaurantId }) {
                       <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
                         formData.giorni_settimana.includes(giorno.value)
                           ? 'border-red-500 bg-red-500'
-                          : 'border-gray-300'
+                          : 'border-border'
                       }`}>
                         {formData.giorni_settimana.includes(giorno.value) && (
                           <Check className="w-3 h-3 text-white" />
@@ -232,14 +265,14 @@ export default function AddEventDialog({ open, onClose, restaurantId }) {
               className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
                 formData.attivo 
                   ? 'border-red-500 bg-red-50' 
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-border hover:border-muted-foreground'
               }`}
               onClick={() => setFormData(prev => ({ ...prev, attivo: !prev.attivo }))}
             >
               <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                 formData.attivo 
                   ? 'border-red-500 bg-red-500' 
-                  : 'border-gray-300'
+                  : 'border-border'
               }`}>
                 {formData.attivo && <Check className="w-3 h-3 text-white" />}
               </div>
@@ -252,8 +285,12 @@ export default function AddEventDialog({ open, onClose, restaurantId }) {
             <Button type="button" variant="outline" onClick={onClose}>
               Annulla
             </Button>
-            <Button type="submit" className="bg-red-600 hover:bg-red-700">
-              Crea Evento
+            <Button
+              type="submit"
+              className="bg-red-600 hover:bg-red-700"
+              disabled={createMutation.isPending || !restaurantId}
+            >
+              {createMutation.isPending ? "Creazione..." : "Crea Evento"}
             </Button>
           </DialogFooter>
         </form>

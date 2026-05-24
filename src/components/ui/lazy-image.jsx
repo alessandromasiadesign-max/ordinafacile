@@ -7,8 +7,8 @@ export default function LazyImage({ src, alt, className, ...props }) {
 
   if (error) {
     return (
-      <div className={`${className} bg-gray-200 flex items-center justify-center`}>
-        <span className="text-gray-400 text-sm">🖼️</span>
+      <div className={`${className} bg-muted flex items-center justify-center`}>
+        <span className="text-muted-foreground text-sm">🖼️</span>
       </div>
     );
   }
@@ -16,7 +16,7 @@ export default function LazyImage({ src, alt, className, ...props }) {
   return (
     <>
       {!loaded && (
-        <div className={`${className} bg-gray-200 animate-pulse`}></div>
+        <div className={`${className} bg-muted animate-pulse`}></div>
       )}
       <motion.img
         src={src}

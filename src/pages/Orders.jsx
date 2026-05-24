@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { Restaurant, Order } from '@/api/entities';
+import { supabase } from '@/api/supabaseClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,8 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-
 
 import OrderDetailsModal from "../components/orders/OrderDetailsModal";
 
@@ -51,24 +50,84 @@ export default function Orders() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("tutti");
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [lastOrderCount, setLastOrderCount] = useState(0);
   const queryClient = useQueryClient();
+
+  const safeFormatDate = (value) => {
+    if (!value) return "";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+    return format(d, "d MMM yyyy, HH:mm", { locale: it });
+  };
+
+  const normalizeOrder = (o) => {
+    const statoIt = (() => {
+      const raw = o?.stato ?? o?.status;
+      if (raw === 'pending') return 'nuovo';
+      if (raw === 'confirmed') return 'confermato';
+      if (raw === 'preparing') return 'in_preparazione';
+      if (raw === 'ready') return 'pronto';
+      if (raw === 'delivered') return 'completato';
+      if (raw === 'cancelled') return 'annullato';
+      return raw;
+    })();
+
+    const tipoConsegnaIt = (() => {
+      const raw = o?.tipo_consegna ?? o?.delivery_type;
+      if (raw === 'delivery') return 'consegna';
+      if (raw === 'pickup') return 'asporto';
+      if (raw === 'table') return 'tavolo';
+      return raw;
+    })();
+
+    return {
+      ...o,
+      numero_ordine: o?.numero_ordine ?? o?.order_number,
+      cliente_nome: o?.cliente_nome ?? o?.customer_name,
+      cliente_telefono: o?.cliente_telefono ?? o?.customer_phone,
+      cliente_indirizzo: o?.cliente_indirizzo ?? o?.customer_address ?? "",
+      note: o?.note ?? o?.customer_notes,
+      tipo_consegna: tipoConsegnaIt,
+      stato: statoIt,
+      totale: Number(o?.totale ?? o?.total ?? 0),
+      created_date: o?.created_date ?? o?.created_at,
+    };
+  };
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['orders', restaurant?.id],
     queryFn: async () => {
       if (!restaurant) return [];
-      return base44.entities.Order.filter(
+      const rows = await Order.filter(
         { restaurant_id: restaurant.id },
         "-created_date"
       );
+
+      const normalized = (rows || []).map(normalizeOrder);
+      const orderIds = normalized.map((o) => o.id).filter(Boolean);
+      if (orderIds.length === 0) return normalized;
+
+      const { data: orderItems, error } = await supabase
+        .from('order_items')
+        .select('order_id')
+        .in('order_id', orderIds);
+      if (error) throw error;
+
+      const countByOrderId = (orderItems || []).reduce((acc, row) => {
+        acc[row.order_id] = (acc[row.order_id] || 0) + 1;
+        return acc;
+      }, {});
+
+      return normalized.map((o) => ({
+        ...o,
+        items_count: countByOrderId[o.id] || 0,
+      }));
     },
     enabled: !!restaurant,
     initialData: [],
   });
 
   const updateOrderMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Order.update(id, data),
+    mutationFn: ({ id, data }) => Order.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
@@ -82,28 +141,40 @@ export default function Orders() {
   useEffect(() => {
     if (!restaurant) return;
 
-    const unsubscribe = base44.entities.Order.subscribe((event) => {
-      if (event.type === 'create' && event.data.restaurant_id === restaurant.id) {
-        // Riproduce suono di notifica
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwPUKnk77ZkHQU7k9n0y3csBSF1yPDckUELFF+27OukVRULRp/h8r9vIQYshM/z2Io3CBxqvvHlnU8NEFCp5O+2ZB0FO5PZ9Mt3LAUgdcjw3JBBC');
-        audio.volume = 0.7;
-        audio.play().catch(e => console.log('Audio play failed:', e));
+    const channel = supabase
+      .channel(`orders-insert-${restaurant.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'orders',
+          filter: `restaurant_id=eq.${restaurant.id}`,
+        },
+        (payload) => {
+          const row = payload?.new;
+          if (!row) return;
 
-        // Mostra notifica browser se supportata
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('Nuovo Ordine! 🍕', {
-            body: `Ordine #${event.data.numero_ordine} da ${event.data.cliente_nome}`,
-            icon: '/favicon.ico',
-            tag: event.data.id
-          });
+          const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwPUKnk77ZkHQU7k9n0y3csBSF1yPDckUELFF+27OukVRULRp/h8r9vIQYshM/z2Io3CBxqvvHlnU8NEFCp5O+2ZB0FO5PZ9Mt3LAUgdcjw3JBBC');
+          audio.volume = 0.7;
+          audio.play().catch(e => console.log('Audio play failed:', e));
+
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Nuovo Ordine!', {
+              body: `Ordine #${row.numero_ordine ?? row.order_number ?? ''}`,
+              icon: '/favicon.ico',
+              tag: row.id,
+            });
+          }
+
+          queryClient.invalidateQueries({ queryKey: ['orders'] });
         }
+      )
+      .subscribe();
 
-        // Aggiorna la lista ordini
-        queryClient.invalidateQueries({ queryKey: ['orders'] });
-      }
-    });
-
-    return unsubscribe;
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [restaurant, queryClient]);
 
   // Richiede permesso notifiche al primo caricamento
@@ -115,31 +186,70 @@ export default function Orders() {
 
   const loadRestaurant = async () => {
     try {
-      const user = await base44.auth.me();
-      const restaurants = await base44.entities.Restaurant.filter({
-        user_id: user.id
-      });
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user?.id) return;
+      const isAdmin = user?.app_metadata?.role === 'admin' || user?.user_metadata?.role === 'admin';
+
+      const storedId = localStorage.getItem('selected_restaurant_id');
+
+      const restaurants = isAdmin
+        ? await Restaurant.list('-created_at')
+        : await Restaurant.filter({ user_id: user.id });
+
       if (restaurants.length > 0) {
-        setRestaurant(restaurants[0]);
+        const selected = restaurants.find((r) => r.id === storedId) || restaurants[0];
+        if (selected?.id) {
+          localStorage.setItem('selected_restaurant_id', selected.id);
+        }
+        setRestaurant(selected);
       }
     } catch (error) {
       console.error("Errore:", error);
     }
   };
 
+  const loadOrderItemsForOrder = async (orderId) => {
+    const { data, error } = await supabase
+      .from('order_items')
+      .select('*')
+      .eq('order_id', orderId)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+
+    return (data || []).map((row) => ({
+      menu_item_id: row.menu_item_id,
+      nome: row.name,
+      quantita: row.quantity,
+      prezzo_unitario: Number(row.price ?? 0),
+      modificatori: Array.isArray(row.modifiers) ? row.modifiers : [],
+      note: row.notes || "",
+    }));
+  };
+
   const handleStatusChange = (order, newStatus) => {
+    const dbStatus = (() => {
+      if (newStatus === 'nuovo') return 'pending';
+      if (newStatus === 'confermato') return 'confirmed';
+      if (newStatus === 'in_preparazione') return 'preparing';
+      if (newStatus === 'pronto') return 'ready';
+      if (newStatus === 'in_consegna') return 'delivered';
+      if (newStatus === 'completato') return 'delivered';
+      if (newStatus === 'annullato') return 'cancelled';
+      return newStatus;
+    })();
+
     updateOrderMutation.mutate({
       id: order.id,
-      data: { stato: newStatus }
+      data: { status: dbStatus, stato: newStatus }
     });
   };
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = 
-      order.numero_ordine?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.cliente_nome?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.cliente_telefono?.includes(searchQuery);
-    
+      String(order.numero_ordine ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(order.cliente_nome ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(order.cliente_telefono ?? '').includes(searchQuery);
+
     const matchesStatus = statusFilter === "tutti" || order.stato === statusFilter;
     
     return matchesSearch && matchesStatus;
@@ -147,6 +257,7 @@ export default function Orders() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+
       <div className="p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6 md:mb-8">
@@ -205,7 +316,15 @@ export default function Orders() {
             ) : (
               filteredOrders.map((order) => (
                 <Card key={order.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-                  onClick={() => setSelectedOrder(order)}>
+                  onClick={async () => {
+                    try {
+                      const items = await loadOrderItemsForOrder(order.id);
+                      setSelectedOrder({ ...order, items });
+                    } catch (e) {
+                      console.error('Errore caricamento items ordine:', e);
+                      setSelectedOrder(order);
+                    }
+                  }}>
                   <CardContent className="p-4 md:p-6">
                     <div className="flex flex-col gap-3 md:gap-4">
                       <div className="flex-1">
@@ -245,7 +364,7 @@ export default function Orders() {
                           <div className="flex items-center gap-2">
                             <Clock className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
                             <span>
-                              {format(new Date(order.created_date), "d MMM yyyy, HH:mm", { locale: it })}
+                              {safeFormatDate(order.created_date)}
                             </span>
                           </div>
                         </div>
@@ -254,10 +373,10 @@ export default function Orders() {
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t">
                         <div className="text-left sm:text-right">
                           <p className="text-xl md:text-2xl font-bold text-red-600">
-                            €{order.totale.toFixed(2)}
+                            €{Number(order.totale ?? 0).toFixed(2)}
                           </p>
                           <p className="text-xs md:text-sm text-gray-500">
-                            {order.items?.length || 0} prodotti
+                            {order.items_count ?? (order.items?.length || 0)} prodotti
                           </p>
                         </div>
 

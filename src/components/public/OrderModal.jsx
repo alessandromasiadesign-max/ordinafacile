@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+
 import {
   Dialog,
   DialogContent,
@@ -8,10 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea"; // Added Textarea import
+import { Textarea } from "@/components/ui/textarea";
 import { Check } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { supabase } from '@/api/supabaseClient';
 import LazyImage from "../ui/lazy-image";
 
 export default function OrderModal({ item, onClose, onAdd }) {
@@ -21,28 +22,43 @@ export default function OrderModal({ item, onClose, onAdd }) {
 
   const { data: modifiers = [] } = useQuery({
     queryKey: ['modifiers', item?.id],
-    queryFn: () => base44.entities.Modifier.filter({ menu_item_id: item.id }),
+    queryFn: async () => {
+      if (!item?.id) return [];
+
+      const { data, error } = await supabase
+        .from('menu_item_category_modifiers')
+        .select('category_modifier_id, category_modifiers(*)')
+        .eq('menu_item_id', item.id);
+
+      if (error) throw error;
+
+      return (data ?? [])
+        .map((r) => r?.category_modifiers)
+        .filter(Boolean);
+    },
     enabled: !!item,
     initialData: [],
   });
 
   useEffect(() => {
     if (item && modifiers) {
-      let price = item.prezzo;
+      let price = Number(item?.prezzo ?? 0);
       Object.values(selectedModifiers).forEach(modValue => {
         if (Array.isArray(modValue)) {
           modValue.forEach(optName => {
             const modifier = modifiers.find(m => m.opzioni?.some(o => o.nome === optName));
             const option = modifier?.opzioni?.find(o => o.nome === optName);
-            if (option?.prezzo_extra) price += option.prezzo_extra;
+            const extra = Number(option?.prezzo_extra ?? 0);
+            if (Number.isFinite(extra) && extra > 0) price += extra;
           });
         } else if (modValue) {
           const modifier = modifiers.find(m => m.opzioni?.some(o => o.nome === modValue));
           const option = modifier?.opzioni?.find(o => o.nome === modValue);
-          if (option?.prezzo_extra) price += option.prezzo_extra;
+          const extra = Number(option?.prezzo_extra ?? 0);
+          if (Number.isFinite(extra) && extra > 0) price += extra;
         }
       });
-      setTotalPrice(price);
+      setTotalPrice(Number.isFinite(price) ? price : 0);
     }
   }, [selectedModifiers, item?.id, item?.prezzo, modifiers.length]);
 
@@ -67,19 +83,22 @@ export default function OrderModal({ item, onClose, onAdd }) {
   const handleAdd = () => {
     if (!canAdd) return;
     
-    const modifiersList = [];
+    const modifiersPayload = [];
     Object.entries(selectedModifiers).forEach(([modId, value]) => {
       const modifier = modifiers.find(m => m.id === modId);
-      if (modifier) {
-        if (Array.isArray(value)) {
-          value.forEach(opt => modifiersList.push(`${modifier.nome}: ${opt}`));
-        } else {
-          modifiersList.push(`${modifier.nome}: ${value}`);
-        }
-      }
+      if (!modifier) return;
+
+      const values = Array.isArray(value) ? value : [value];
+      values.filter(Boolean).forEach((optName) => {
+        const option = modifier?.opzioni?.find(o => o.nome === optName);
+        modifiersPayload.push({
+          label: `${modifier.nome}: ${optName}`,
+          priceExtra: Number(option?.prezzo_extra ?? 0),
+        });
+      });
     });
-    
-    onAdd({ ...item, prezzo: totalPrice }, modifiersList, notes);
+
+    onAdd({ ...item, prezzo: totalPrice }, modifiersPayload, notes);
     setSelectedModifiers({});
     setNotes("");
   };
@@ -107,13 +126,13 @@ export default function OrderModal({ item, onClose, onAdd }) {
           )}
           
           {item.descrizione && (
-            <p className="text-gray-600 text-base">{item.descrizione}</p>
+            <p className="text-muted-foreground text-base">{item.descrizione}</p>
           )}
 
           <div className="border-t pt-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-lg font-semibold text-gray-900">Prezzo base</span>
-              <span className="text-xl font-bold text-red-600">€{item.prezzo.toFixed(2)}</span>
+              <span className="text-lg font-semibold">Prezzo base</span>
+              <span className="text-xl font-bold text-red-600">€{Number(item?.prezzo ?? 0).toFixed(2)}</span>
             </div>
           </div>
 
@@ -122,11 +141,11 @@ export default function OrderModal({ item, onClose, onAdd }) {
               {modifiers.map(modifier => (
                 <div key={modifier.id} className="border-t pt-4">
                   <div className="mb-4">
-                    <h3 className="text-lg font-bold text-gray-900">
+                    <h3 className="text-lg font-bold">
                       {modifier.nome}
                       {modifier.obbligatorio && <span className="text-red-600 ml-1">*</span>}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {modifier.tipo === "singolo" ? "Seleziona una opzione" : "Seleziona più opzioni"}
                     </p>
                   </div>
@@ -142,8 +161,8 @@ export default function OrderModal({ item, onClose, onAdd }) {
                           key={i} 
                           className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             isSelected 
-                              ? 'border-red-500 bg-red-50' 
-                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                              ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
+                              : 'border-border hover:bg-accent'
                           }`}
                           onClick={() => {
                             if (modifier.tipo === "singolo") {
@@ -159,11 +178,11 @@ export default function OrderModal({ item, onClose, onAdd }) {
                             } ${
                               isSelected 
                                 ? 'border-red-500 bg-red-500' 
-                                : 'border-gray-300'
+                                : 'border-border'
                             }`}>
                               {isSelected && <Check className="w-4 h-4 text-white" />}
                             </div>
-                            <span className="font-medium text-gray-900">{option.nome}</span>
+                            <span className="font-medium">{option.nome}</span>
                           </div>
                           {option.prezzo_extra > 0 && (
                             <span className="text-red-600 font-bold">
@@ -192,7 +211,7 @@ export default function OrderModal({ item, onClose, onAdd }) {
               rows={3}
               className="w-full"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Specifica eventuali richieste particolari per questo prodotto
             </p>
           </div>
@@ -200,7 +219,7 @@ export default function OrderModal({ item, onClose, onAdd }) {
 
         <DialogFooter className="border-t pt-4 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-sm text-gray-500">Totale</span>
+            <span className="text-sm text-muted-foreground">Totale</span>
             <span className="text-3xl font-bold text-red-600">
               €{totalPrice.toFixed(2)}
             </span>

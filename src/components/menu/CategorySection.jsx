@@ -1,17 +1,17 @@
+﻿import { MenuItem } from '@/api/entities';
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil } from "lucide-react";
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { base44 } from "@/api/base44Client";
-import { useToast } from "../ui/toast";
+import { useToast } from "../ui/use-toast";
 
 import EditCategoryDialog from "./EditCategoryDialog";
 import EditMenuItemDialog from "./EditMenuItemDialog";
 
 
-export default function CategorySection({ category, menuItems, onAddItem, isExpanded }) {
+export default function CategorySection({ category, menuItems, onAddItem, isExpanded, headerActions = null }) {
   const [showEditCategory, setShowEditCategory] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
@@ -19,18 +19,18 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
   const { toast } = useToast();
 
   const toggleEsauritoMutation = useMutation({
-    mutationFn: ({ id, esaurito }) => base44.entities.MenuItem.update(id, { esaurito }),
+    mutationFn: ({ id, esaurito }) => MenuItem.update(id, { esaurito }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menuItems'] });
       toast({
-        title: "✅ Stato aggiornato!",
+        title: "Stato aggiornato",
         type: "success"
       });
     },
     onError: (error) => {
       console.error("Errore aggiornamento:", error);
       toast({
-        title: "❌ Errore",
+        title: "Errore",
         description: "Impossibile aggiornare lo stato del prodotto",
         type: "error"
       });
@@ -44,6 +44,12 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
       id: item.id, 
       esaurito: !item.esaurito 
     });
+  };
+
+  const formatPrice = (value) => {
+    const n = Number(value);
+    const safe = Number.isFinite(n) ? n : 0;
+    return safe.toFixed(2);
   };
 
   return (
@@ -61,11 +67,12 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
             <div>
               <CardTitle className="text-2xl">{category.nome}</CardTitle>
               {category.descrizione && (
-                <p className="text-sm text-gray-600 mt-1">{category.descrizione}</p>
+                <p className="text-sm text-muted-foreground mt-1">{category.descrizione}</p>
               )}
             </div>
           </div>
           <div className="flex gap-2">
+            {headerActions}
             <Button 
               variant="outline" 
               size="icon"
@@ -81,7 +88,7 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
         </CardHeader>
         <CardContent>
           {menuItems.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted-foreground">
               Nessun prodotto in questa categoria
             </div>
           ) : (
@@ -112,7 +119,7 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                       </div>
                     )}
                     {!item.immagine_url && item.esaurito && (
-                        <div className="w-full h-32 bg-gray-200 rounded-lg mb-3 flex items-center justify-center relative">
+                        <div className="w-full h-32 bg-muted rounded-lg mb-3 flex items-center justify-center relative">
                             <Badge className="bg-red-600 text-white text-lg">
                                 ESAURITO
                             </Badge>
@@ -134,13 +141,13 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                       </div>
                     </div>
                     {item.descrizione && (
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                         {item.descrizione}
                       </p>
                     )}
                     <div className="flex justify-between items-center">
                       <span className="text-xl font-bold text-red-600">
-                        €{item.prezzo.toFixed(2)}
+                        €{formatPrice(item?.prezzo)}
                       </span>
                       <div className="flex gap-2">
                         <Button 

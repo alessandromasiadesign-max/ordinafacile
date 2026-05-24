@@ -1,4 +1,7 @@
+﻿import { Core } from '@/api/integrations';
+import { Category } from '@/api/entities';
 import React, { useState } from 'react';
+
 import {
   Dialog,
   DialogContent,
@@ -12,10 +15,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Upload, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { useToast } from "../ui/use-toast";
 
-export default function AddCategoryDialog({ open, onClose, restaurantId }) {
+export default function AddCategoryDialog({ open, onClose, restaurantId, eventId }) {
+
   const [formData, setFormData] = useState({
     nome: "",
     descrizione: "",
@@ -27,15 +30,46 @@ export default function AddCategoryDialog({ open, onClose, restaurantId }) {
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Category.create(data),
+    mutationFn: (data) => Category.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
+      if (restaurantId) {
+        queryClient.invalidateQueries({ queryKey: ['categories', restaurantId] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      if (restaurantId) {
+        queryClient.invalidateQueries({ queryKey: ['menuItems', restaurantId] });
+      }
+      if (eventId) {
+        queryClient.invalidateQueries({ queryKey: ['event-categories', eventId] });
+      }
       toast({
-        title: "✅ Categoria aggiunta!",
+        title: "Categoria aggiunta",
         type: "success"
       });
       onClose();
+
       setFormData({ nome: "", descrizione: "", immagine_url: "", ordine: 0 });
+    },
+    onError: (error) => {
+      console.error('Errore creazione categoria:', {
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code,
+        raw: error,
+      });
+      const details = [
+        error?.message,
+        error?.details,
+        error?.hint,
+        error?.code ? `code: ${error.code}` : null,
+      ].filter(Boolean).join(' | ');
+      toast({
+        title: "Errore",
+        description: details || "Impossibile creare la categoria",
+        type: "error",
+      });
     },
   });
 
@@ -45,21 +79,43 @@ export default function AddCategoryDialog({ open, onClose, restaurantId }) {
 
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await Core.UploadFile({ file });
       setFormData(prev => ({ ...prev, immagine_url: file_url }));
     } catch (error) {
-      alert("Errore caricamento immagine");
+      console.error('Errore caricamento immagine:', error);
+      toast({
+        title: "Errore",
+        description: error?.message || "Impossibile caricare l'immagine",
+        type: "error",
+      });
     }
+
     setUploading(false);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createMutation.mutate({
-      ...formData,
+    if (!restaurantId) {
+      toast({
+        title: "Errore",
+        description: "Ristorante non caricato. Riprova tra qualche secondo.",
+        type: "error",
+      });
+      return;
+    }
+
+    const payload = {
       restaurant_id: restaurantId,
-      attiva: true
-    });
+      event_id: eventId || null,
+      name: formData.nome,
+      description: formData.descrizione,
+      image_url: formData.immagine_url,
+      sort_order: Number.isFinite(Number(formData.ordine)) ? Number(formData.ordine) : 0,
+      is_active: true,
+    };
+
+    console.log('Creazione categoria payload:', payload);
+    createMutation.mutate(payload);
   };
 
   return (
@@ -110,9 +166,9 @@ export default function AddCategoryDialog({ open, onClose, restaurantId }) {
                   </Button>
                 </div>
               ) : (
-                <label className="border-2 border-dashed border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors">
-                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-500">
+                <label className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-muted-foreground transition-colors">
+                  <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                  <span className="text-sm text-muted-foreground">
                     {uploading ? "Caricamento..." : "Clicca per caricare"}
                   </span>
                   <input

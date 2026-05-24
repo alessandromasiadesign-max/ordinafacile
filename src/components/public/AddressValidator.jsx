@@ -1,14 +1,67 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MapPin, Navigation, AlertCircle, CheckCircle2 } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { supabase } from '@/api/supabaseClient';
 
 export default function AddressValidator({ restaurant, onAddressValidated }) {
   const [address, setAddress] = useState("");
   const [validating, setValidating] = useState(false);
   const [result, setResult] = useState(null);
+
+  const geocode = async (addr) => {
+    const { data, error } = await supabase.functions.invoke('geocode-address', {
+      body: {
+        address: addr,
+        city: restaurant?.citta,
+        country: 'Italia',
+      },
+    });
+
+    if (error) {
+      throw new Error(error?.message || 'Errore geocoding');
+    }
+
+    if (data?.error) {
+      throw new Error(String(data.error));
+    }
+
+    const lat = data?.result?.lat;
+    const lng = data?.result?.lng;
+
+    if (typeof lat !== 'number' || typeof lng !== 'number') {
+      throw new Error('Coordinate non disponibili');
+    }
+
+    return { lat, lng };
+  };
+
+  const isPointInPolygon = (point, polygonPoints) => {
+    const pts = Array.isArray(polygonPoints) ? polygonPoints : [];
+    if (pts.length < 3) return false;
+    const x = Number(point?.lng);
+    const y = Number(point?.lat);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+
+    let inside = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const xi = Number(pts[i]?.lng);
+      const yi = Number(pts[i]?.lat);
+      const xj = Number(pts[j]?.lng);
+      const yj = Number(pts[j]?.lat);
+      if (!Number.isFinite(xi) || !Number.isFinite(yi) || !Number.isFinite(xj) || !Number.isFinite(yj)) {
+        continue;
+      }
+
+      const intersect =
+        (yi > y) !== (yj > y) &&
+        x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  };
 
   const validateAddress = async () => {
     if (!address.trim()) {
@@ -21,33 +74,12 @@ export default function AddressValidator({ restaurant, onAddressValidated }) {
 
     try {
       // Geocode customer address
-      const customerGeocode = await base44.integrations.Core.InvokeLLM({
-        prompt: `Get GPS coordinates (latitude and longitude) for this address: "${address}, ${restaurant.citta}, Italia". Return ONLY a JSON object with lat and lng as numbers, no other text.`,
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            lat: { type: "number" },
-            lng: { type: "number" }
-          }
-        }
-      });
+      const customerGeocode = await geocode(address);
 
       // Get restaurant coordinates if not set
       let restaurantCoords = restaurant.coordinate_ristorante;
       if (!restaurantCoords?.lat || !restaurantCoords?.lng) {
-        const restaurantGeocode = await base44.integrations.Core.InvokeLLM({
-          prompt: `Get GPS coordinates (latitude and longitude) for this address: "${restaurant.indirizzo}, ${restaurant.citta}, Italia". Return ONLY a JSON object with lat and lng as numbers, no other text.`,
-          add_context_from_internet: true,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              lat: { type: "number" },
-              lng: { type: "number" }
-            }
-          }
-        });
-        restaurantCoords = restaurantGeocode;
+        restaurantCoords = await geocode(restaurant.indirizzo);
       }
 
       // Calculate distance using Haversine formula
@@ -60,9 +92,23 @@ export default function AddressValidator({ restaurant, onAddressValidated }) {
 
       // Find applicable zone
       const zones = restaurant.zone_consegna || [];
-      const applicableZone = zones
-        .sort((a, b) => a.distanza_max_km - b.distanza_max_km)
-        .find(zone => distance <= zone.distanza_max_km);
+
+      const polygonZones = zones.filter((z) => z?.tipo === 'polygon' && Array.isArray(z?.points));
+      const concentricZones = zones
+        .filter((z) => z?.tipo === 'concentric' || !z?.tipo)
+        .slice();
+
+      const customerPoint = { lat: customerGeocode.lat, lng: customerGeocode.lng };
+
+      const polygonMatch = polygonZones.find((z) => isPointInPolygon(customerPoint, z.points));
+      const concentricMatch = concentricZones
+        .filter((z) => {
+          const maxKm = Number(z?.distanza_max_km ?? 0) || 0;
+          return maxKm > 0 && distance <= maxKm;
+        })
+        .sort((a, b) => (Number(a?.distanza_max_km ?? 0) || 0) - (Number(b?.distanza_max_km ?? 0) || 0))[0];
+
+      const applicableZone = polygonMatch || concentricMatch;
 
       if (!applicableZone) {
         setResult({
@@ -108,9 +154,9 @@ export default function AddressValidator({ restaurant, onAddressValidated }) {
   };
 
   return (
-    <Card className="border-2 border-blue-200 bg-blue-50">
+    <Card className="border-2 border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30">
       <CardContent className="p-4 space-y-4">
-        <div className="flex items-center gap-2 text-blue-900 font-semibold">
+        <div className="flex items-center gap-2 text-blue-900 dark:text-blue-100 font-semibold">
           <Navigation className="w-5 h-5" />
           <span>Verifica Zona di Consegna</span>
         </div>
@@ -120,9 +166,10 @@ export default function AddressValidator({ restaurant, onAddressValidated }) {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Inserisci il tuo indirizzo completo (via, numero civico)"
-            className="bg-white"
+            className="bg-background"
             onKeyPress={(e) => e.key === 'Enter' && validateAddress()}
           />
+
           <Button
             onClick={validateAddress}
             disabled={validating || !address.trim()}
@@ -143,14 +190,14 @@ export default function AddressValidator({ restaurant, onAddressValidated }) {
         </div>
 
         {result && (
-          <div className={`p-4 rounded-lg ${result.success ? 'bg-green-100 border border-green-300' : 'bg-red-100 border border-red-300'}`}>
+          <div className={`p-4 rounded-lg ${result.success ? 'bg-green-100 border border-green-300 dark:bg-green-950/30 dark:border-green-900' : 'bg-red-100 border border-red-300 dark:bg-red-950/30 dark:border-red-900'}`}>
             {result.success ? (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-green-800 font-semibold">
+                <div className="flex items-center gap-2 text-green-800 dark:text-green-200 font-semibold">
                   <CheckCircle2 className="w-5 h-5" />
                   <span>Consegniamo al tuo indirizzo!</span>
                 </div>
-                <div className="text-sm text-green-700 space-y-1">
+                <div className="text-sm text-green-700 dark:text-green-200 space-y-1">
                   <div>📍 Distanza: {result.distance} km</div>
                   <div>🚚 Zona: {result.zone.nome}</div>
                   <div>💰 Costo consegna: €{result.deliveryCost.toFixed(2)}</div>
@@ -161,11 +208,11 @@ export default function AddressValidator({ restaurant, onAddressValidated }) {
               </div>
             ) : (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-red-800 font-semibold">
+                <div className="flex items-center gap-2 text-red-800 dark:text-red-200 font-semibold">
                   <AlertCircle className="w-5 h-5" />
                   <span>Zona non coperta</span>
                 </div>
-                <div className="text-sm text-red-700">
+                <div className="text-sm text-red-700 dark:text-red-200">
                   {result.message}
                   {result.distance && ` (Distanza: ${result.distance} km)`}
                 </div>

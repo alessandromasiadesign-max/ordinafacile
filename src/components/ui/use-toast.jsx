@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 
 const TOAST_LIMIT = 20;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_REMOVE_DELAY = 200;
+const DEFAULT_TOAST_DURATION = 5000;
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -19,6 +20,7 @@ function genId() {
 }
 
 const toastTimeouts = new Map();
+const toastAutoDismissTimeouts = new Map();
 
 const addToRemoveQueue = (toastId) => {
   if (toastTimeouts.has(toastId)) {
@@ -44,6 +46,14 @@ const _clearFromRemoveQueue = (toastId) => {
   }
 };
 
+const _clearAutoDismiss = (toastId) => {
+  const timeout = toastAutoDismissTimeouts.get(toastId);
+  if (timeout) {
+    clearTimeout(timeout);
+    toastAutoDismissTimeouts.delete(toastId);
+  }
+};
+
 export const reducer = (state, action) => {
   switch (action.type) {
     case actionTypes.ADD_TOAST:
@@ -62,6 +72,14 @@ export const reducer = (state, action) => {
 
     case actionTypes.DISMISS_TOAST: {
       const { toastId } = action;
+
+      if (toastId) {
+        _clearAutoDismiss(toastId);
+      } else {
+        state.toasts.forEach((toast) => {
+          _clearAutoDismiss(toast.id);
+        });
+      }
 
       // ! Side effects ! - This could be extracted into a dismissToast() action,
       // but I'll keep it here for simplicity
@@ -122,6 +140,9 @@ function toast({ ...props }) {
   const dismiss = () =>
     dispatch({ type: actionTypes.DISMISS_TOAST, toastId: id });
 
+  const duration =
+    props?.duration === undefined ? DEFAULT_TOAST_DURATION : props.duration;
+
   dispatch({
     type: actionTypes.ADD_TOAST,
     toast: {
@@ -133,6 +154,14 @@ function toast({ ...props }) {
       },
     },
   });
+
+  if (duration && duration > 0) {
+    const timeout = setTimeout(() => {
+      toastAutoDismissTimeouts.delete(id);
+      dismiss();
+    }, duration);
+    toastAutoDismissTimeouts.set(id, timeout);
+  }
 
   return {
     id,
@@ -152,7 +181,7 @@ function useToast() {
         listeners.splice(index, 1);
       }
     };
-  }, [state]);
+  }, []);
 
   return {
     ...state,
@@ -161,4 +190,4 @@ function useToast() {
   };
 }
 
-export { useToast, toast }; 
+export { useToast, toast };

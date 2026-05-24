@@ -39,7 +39,7 @@ export default function QRCodeGenerator({ restaurant }) {
       {/* Updated CardContent spacing */}
       <CardContent className="space-y-3 md:space-y-4">
         {/* New structure for QR Code display */}
-        <div className="bg-white p-3 md:p-4 rounded-lg border-2 border-dashed border-gray-300">
+        <div className="bg-background p-3 md:p-4 rounded-lg border-2 border-dashed border-border">
           <div ref={qrRef} className="flex justify-center">
             <div className="w-full max-w-[200px] md:max-w-xs">
               {/* QR Code renders here, using the existing qrCodeUrl */}
@@ -77,7 +77,7 @@ export default function QRCodeGenerator({ restaurant }) {
         </div>
 
         {/* New informational text */}
-        <div className="text-xs md:text-sm text-gray-500 text-center">
+        <div className="text-xs md:text-sm text-muted-foreground text-center">
           Stampa e mostra questo QR ai clienti
         </div>
       </CardContent>

@@ -1,3 +1,4 @@
+﻿import { Modifier } from '@/api/entities';
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 
 export default function ModifierManager({ menuItem, onClose }) {
   const [newModifier, setNewModifier] = useState({
@@ -27,13 +27,13 @@ export default function ModifierManager({ menuItem, onClose }) {
 
   const { data: modifiers = [] } = useQuery({
     queryKey: ['modifiers', menuItem?.id],
-    queryFn: () => base44.entities.Modifier.filter({ menu_item_id: menuItem.id }),
+    queryFn: () => Modifier.filter({ menu_item_id: menuItem.id }),
     enabled: !!menuItem,
     initialData: [],
   });
 
   const createModifierMutation = useMutation({
-    mutationFn: (data) => base44.entities.Modifier.create(data),
+    mutationFn: (data) => Modifier.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['modifiers'] });
       setNewModifier({
@@ -46,7 +46,7 @@ export default function ModifierManager({ menuItem, onClose }) {
   });
 
   const deleteModifierMutation = useMutation({
-    mutationFn: (id) => base44.entities.Modifier.delete(id),
+    mutationFn: (id) => Modifier.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['modifiers'] });
     },
@@ -175,14 +175,14 @@ export default function ModifierManager({ menuItem, onClose }) {
                 className={`flex items-center space-x-2 p-3 border-2 rounded-lg cursor-pointer transition-all w-full ${
                   newModifier.obbligatorio 
                     ? 'border-red-500 bg-red-50' 
-                    : 'border-gray-200 hover:border-gray-300'
+                    : 'border-border hover:border-muted-foreground'
                 }`}
                 onClick={() => setNewModifier(prev => ({ ...prev, obbligatorio: !prev.obbligatorio }))}
               >
                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                   newModifier.obbligatorio 
                     ? 'border-red-500 bg-red-500' 
-                    : 'border-gray-300'
+                    : 'border-border'
                 }`}>
                   {newModifier.obbligatorio && <Check className="w-3 h-3 text-white" />}
                 </div>
@@ -199,7 +199,7 @@ export default function ModifierManager({ menuItem, onClose }) {
             {newModifier.opzioni.length > 0 && (
               <div className="space-y-2 mb-4">
                 {newModifier.opzioni.map((opt, i) => (
-                  <div key={i} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <div key={i} className="flex items-center justify-between p-2 bg-muted rounded">
                     <span>{opt.nome}</span>
                     <div className="flex items-center gap-3">
                       {opt.prezzo_extra > 0 && (

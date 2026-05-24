@@ -6,7 +6,7 @@ import { createPageUrl } from "@/utils";
 
 export default function Cookies() {
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-background text-foreground p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <Link 
           to={createPageUrl("Dashboard")}
@@ -22,14 +22,14 @@ export default function Cookies() {
               <Cookie className="w-8 h-8 text-red-600" />
               <CardTitle className="text-3xl">Cookie Policy</CardTitle>
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Ultimo aggiornamento: {new Date().toLocaleDateString('it-IT')}
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
             <section>
               <h2 className="text-2xl font-bold mb-3">1. Cosa sono i Cookies</h2>
-              <p className="text-gray-700">
+              <p className="text-muted-foreground">
                 I cookies sono piccoli file di testo che vengono memorizzati sul tuo dispositivo
                 (computer, tablet, smartphone) quando visiti un sito web. Permettono al sito di
                 riconoscere il tuo dispositivo e memorizzare alcune informazioni sulle tue preferenze
@@ -108,39 +108,39 @@ export default function Cookies() {
             <section>
               <h2 className="text-2xl font-bold mb-3">3. Cookies Specifici Utilizzati</h2>
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300">
-                  <thead className="bg-gray-100">
+                <table className="w-full border-collapse border border-border">
+                  <thead className="bg-muted">
                     <tr>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Nome</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Tipo</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Durata</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Scopo</th>
+                      <th className="border border-border px-4 py-2 text-left">Nome</th>
+                      <th className="border border-border px-4 py-2 text-left">Tipo</th>
+                      <th className="border border-border px-4 py-2 text-left">Durata</th>
+                      <th className="border border-border px-4 py-2 text-left">Scopo</th>
                     </tr>
                   </thead>
                   <tbody className="text-sm">
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">session_id</td>
-                      <td className="border border-gray-300 px-4 py-2">Tecnico</td>
-                      <td className="border border-gray-300 px-4 py-2">Sessione</td>
-                      <td className="border border-gray-300 px-4 py-2">Gestione login</td>
+                      <td className="border border-border px-4 py-2">session_id</td>
+                      <td className="border border-border px-4 py-2">Tecnico</td>
+                      <td className="border border-border px-4 py-2">Sessione</td>
+                      <td className="border border-border px-4 py-2">Gestione login</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">_ga</td>
-                      <td className="border border-gray-300 px-4 py-2">Analitico</td>
-                      <td className="border border-gray-300 px-4 py-2">2 anni</td>
-                      <td className="border border-gray-300 px-4 py-2">Google Analytics</td>
+                      <td className="border border-border px-4 py-2">_ga</td>
+                      <td className="border border-border px-4 py-2">Analitico</td>
+                      <td className="border border-border px-4 py-2">2 anni</td>
+                      <td className="border border-border px-4 py-2">Google Analytics</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">_gid</td>
-                      <td className="border border-gray-300 px-4 py-2">Analitico</td>
-                      <td className="border border-gray-300 px-4 py-2">24 ore</td>
-                      <td className="border border-gray-300 px-4 py-2">Google Analytics</td>
+                      <td className="border border-border px-4 py-2">_gid</td>
+                      <td className="border border-border px-4 py-2">Analitico</td>
+                      <td className="border border-border px-4 py-2">24 ore</td>
+                      <td className="border border-border px-4 py-2">Google Analytics</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">cookie_consent</td>
-                      <td className="border border-gray-300 px-4 py-2">Tecnico</td>
-                      <td className="border border-gray-300 px-4 py-2">12 mesi</td>
-                      <td className="border border-gray-300 px-4 py-2">Memorizza preferenze cookies</td>
+                      <td className="border border-border px-4 py-2">cookie_consent</td>
+                      <td className="border border-border px-4 py-2">Tecnico</td>
+                      <td className="border border-border px-4 py-2">12 mesi</td>
+                      <td className="border border-border px-4 py-2">Memorizza preferenze cookies</td>
                     </tr>
                   </tbody>
                 </table>
@@ -149,15 +149,15 @@ export default function Cookies() {
 
             <section>
               <h2 className="text-2xl font-bold mb-3">4. Consenso e Gestione Cookies</h2>
-              <p className="text-gray-700 mb-3">
+              <p className="text-muted-foreground mb-3">
                 Al primo accesso al sito, ti viene mostrato un banner informativo. Puoi:
               </p>
-              <ul className="list-disc list-inside space-y-1 text-gray-700 ml-4">
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
                 <li><strong>Accettare tutti:</strong> consenti l'uso di tutti i cookies</li>
                 <li><strong>Rifiutare non necessari:</strong> solo cookies tecnici essenziali</li>
                 <li><strong>Personalizzare:</strong> scegli quali categorie accettare</li>
               </ul>
-              <p className="text-gray-700 mt-3">
+              <p className="text-muted-foreground mt-3">
                 Puoi modificare le tue preferenze in qualsiasi momento tramite le impostazioni
                 del browser o contattandoci.
               </p>
@@ -165,10 +165,10 @@ export default function Cookies() {
 
             <section>
               <h2 className="text-2xl font-bold mb-3">5. Come Gestire i Cookies nel Browser</h2>
-              <p className="text-gray-700 mb-3">
+              <p className="text-muted-foreground mb-3">
                 Puoi bloccare o eliminare i cookies attraverso le impostazioni del tuo browser:
               </p>
-              <div className="space-y-2 text-gray-700 ml-4">
+              <div className="space-y-2 text-muted-foreground ml-4">
                 <p><strong>Chrome:</strong> Impostazioni → Privacy e sicurezza → Cookie</p>
                 <p><strong>Firefox:</strong> Opzioni → Privacy e sicurezza → Cookie e dati dei siti</p>
                 <p><strong>Safari:</strong> Preferenze → Privacy → Gestisci dati siti web</p>
@@ -181,10 +181,10 @@ export default function Cookies() {
 
             <section>
               <h2 className="text-2xl font-bold mb-3">6. Cookies di Terze Parti</h2>
-              <p className="text-gray-700 mb-3">
+              <p className="text-muted-foreground mb-3">
                 Per maggiori informazioni sui cookies di terze parti utilizzati:
               </p>
-              <ul className="space-y-2 text-gray-700 ml-4">
+              <ul className="space-y-2 text-muted-foreground ml-4">
                 <li>
                   <strong>Google Analytics:</strong>{" "}
                   <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" 
@@ -211,7 +211,7 @@ export default function Cookies() {
 
             <section>
               <h2 className="text-2xl font-bold mb-3">7. Aggiornamenti</h2>
-              <p className="text-gray-700">
+              <p className="text-muted-foreground">
                 Questa Cookie Policy può essere aggiornata periodicamente. Ti invitiamo a
                 consultare regolarmente questa pagina per essere informato sulle nostre
                 pratiche relative ai cookies.

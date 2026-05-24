@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Minus, Trash2, Check } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { Order, OrderItem, Promotion } from "@/api/entities";
+import { Core } from "@/api/integrations";
+import { createPageUrl } from "@/utils";
 import AddressValidator from "./AddressValidator";
 import {
   Select,
@@ -23,8 +25,10 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge"; // Assuming this exists in shadcn/ui
 
-export default function CartDrawer({ open, onClose, cart, restaurant, deliveryType, onUpdateQuantity, onRemove, onClearCart }) {
+export default function CartDrawer({ open, onClose, cart, restaurant, deliveryType, onUpdateQuantity, onRemove, onClearCart, startInCheckout = false }) {
+  const safeCart = Array.isArray(cart) ? cart : [];
   const [showCheckout, setShowCheckout] = useState(false);
+  const startInCheckoutAppliedRef = useRef(false);
   const [customerData, setCustomerData] = useState({
     nome: "",
     telefono: "",
@@ -41,8 +45,41 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
   const [paymentMethod, setPaymentMethod] = useState("contanti"); // New state for payment method
   const [orderCompleted, setOrderCompleted] = useState(false);    // New state for showing completion screen
   const [completedOrder, setCompletedOrder] = useState(null);     // New state to store completed order details
+  const [whatsappDraft, setWhatsappDraft] = useState(null);
 
   const queryClient = useQueryClient(); // Initialized useQueryClient
+
+  useEffect(() => {
+    if (!open) {
+      startInCheckoutAppliedRef.current = false;
+      return;
+    }
+
+    if (startInCheckout && !startInCheckoutAppliedRef.current) {
+      setShowCheckout(true);
+      startInCheckoutAppliedRef.current = true;
+    }
+  }, [open, startInCheckout]);
+
+  const formatModifier = (mod) => {
+    if (mod == null) return "";
+    if (typeof mod === "string") return mod;
+    if (typeof mod === "number" || typeof mod === "boolean") return String(mod);
+    if (typeof mod === "object") {
+      const label = typeof mod.label === "string" ? mod.label : "";
+      const extra = typeof mod.priceExtra === "number" ? mod.priceExtra : null;
+      if (label && extra != null && extra !== 0) {
+        return `${label} (+€${extra.toFixed(2)})`;
+      }
+      if (label) return label;
+      try {
+        return JSON.stringify(mod);
+      } catch {
+        return "";
+      }
+    }
+    return "";
+  };
 
   const resetAllStates = () => {
     setShowCheckout(false);
@@ -56,29 +93,61 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
     setPaymentMethod("contanti"); // Reset payment method
     setOrderCompleted(false);
     setCompletedOrder(null);
+    setWhatsappDraft(null);
   }
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData) => {
-      const order = await base44.entities.Order.create(orderData);
+      const itemsForOrder = Array.isArray(orderData?.items) ? orderData.items : [];
+      // orders table most likely doesn't accept nested items; create order first, then order_items
+      // eslint-disable-next-line no-unused-vars
+      const { items: _ignoredItems, ...orderPayload } = orderData;
+
+      const order = await Order.create(orderPayload);
+
+      if (order?.id && itemsForOrder.length > 0) {
+        try {
+          await Promise.all(
+            itemsForOrder.map((item) =>
+              OrderItem.create({
+                order_id: order.id,
+                menu_item_id: item.menu_item_id,
+                name: item.nome,
+                quantity: item.quantita,
+                price: item.prezzo_unitario,
+                modifiers: Array.isArray(item.modificatori) ? item.modificatori : [],
+                notes: item.note || "",
+              })
+            )
+          );
+        } catch (e) {
+          if (e?.code === "42501") {
+            console.warn("RLS blocked insert into order_items. Continuing without persisted items.", e);
+          } else {
+            throw e;
+          }
+        }
+      }
+
+      const orderWithItems = { ...order, items: itemsForOrder };
       
       // Invia conferma via email/SMS/WhatsApp
       if (customerData.email) {
-        await base44.integrations.Core.SendEmail({
+        await Core.SendEmail({
           to: customerData.email,
-          subject: `Conferma Ordine #${order.numero_ordine} - ${restaurant.nome}`,
+          subject: `Conferma Ordine #${orderWithItems.numero_ordine} - ${restaurant.nome}`,
           body: `
             <h2>Grazie per il tuo ordine!</h2>
-            <p><strong>Numero Ordine:</strong> #${order.numero_ordine}</p>
+            <p><strong>Numero Ordine:</strong> #${orderWithItems.numero_ordine}</p>
             <p><strong>Ristorante:</strong> ${restaurant.nome}</p>
-            <p><strong>Totale:</strong> €${order.totale.toFixed(2)}</p>
-            <p><strong>Tipo:</strong> ${order.tipo_consegna === 'consegna' ? 'Consegna' : 'Asporto'}</p>
-            ${order.tipo_consegna === 'consegna' ? `<p><strong>Indirizzo:</strong> ${order.cliente_indirizzo}</p>` : ''}
-            <p><strong>Metodo Pagamento:</strong> ${order.metodo_pagamento === 'contanti' ? 'Contanti alla consegna' : order.metodo_pagamento === 'paypal' ? 'PayPal' : 'Carta di Credito'}</p>
+            <p><strong>Totale:</strong> €${orderWithItems.totale.toFixed(2)}</p>
+            <p><strong>Tipo:</strong> ${orderWithItems.tipo_consegna === 'consegna' ? 'Consegna' : 'Asporto'}</p>
+            ${orderWithItems.tipo_consegna === 'consegna' ? `<p><strong>Indirizzo:</strong> ${orderWithItems.cliente_indirizzo}</p>` : ''}
+            <p><strong>Metodo Pagamento:</strong> ${orderWithItems.metodo_pagamento === 'contanti' ? 'Contanti alla consegna' : orderWithItems.metodo_pagamento === 'paypal' ? 'PayPal' : 'Carta di Credito'}</p>
             <br>
             <h3>Prodotti:</h3>
             <ul>
-              ${order.items.map(item => `
+              ${orderWithItems.items.map(item => `
                 <li>${item.quantita}x ${item.nome} - €${(item.prezzo_unitario * item.quantita).toFixed(2)}</li>
               `).join('')}
             </ul>
@@ -90,34 +159,64 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
 
       // Invia conferma WhatsApp via SMS (simulato)
       if (customerData.telefono) {
-        const whatsappMessage = `
-✅ *Ordine Confermato!*
+        const trackOrderUrl = `${window.location.origin}${createPageUrl("TrackOrder")}?order=${encodeURIComponent(orderWithItems.numero_ordine ?? "")}`;
+        const whatsappMessage = [
+          `✅ *Ordine confermato!*`,
+          ``,
+          `*${restaurant.nome}*`,
+          `Ordine: #${orderWithItems.numero_ordine}`,
+          `Totale: €${orderWithItems.totale.toFixed(2)}`,
+          `Tipo: ${orderWithItems.tipo_consegna === 'consegna' ? 'Consegna' : 'Asporto'}`,
+          orderWithItems.tipo_consegna === 'consegna' ? `Indirizzo: ${orderWithItems.cliente_indirizzo}` : null,
+          `Pagamento: ${orderWithItems.metodo_pagamento === 'contanti' ? 'Contanti alla consegna' : orderWithItems.metodo_pagamento === 'paypal' ? 'PayPal' : 'Carta di Credito'}`,
+          ``,
+          `Segui lo stato dell'ordine: ${trackOrderUrl}`,
+          ``,
+          `Ti contatteremo a breve.`,
+        ].filter(Boolean).join("\n");
 
-*${restaurant.nome}*
-Ordine: #${order.numero_ordine}
-Totale: €${order.totale.toFixed(2)}
-Tipo: ${order.tipo_consegna === 'consegna' ? 'Consegna' : 'Asporto'}
-${order.tipo_consegna === 'consegna' ? `Indirizzo: ${order.cliente_indirizzo}` : ''}
-Pagamento: ${order.metodo_pagamento === 'contanti' ? 'Contanti alla consegna' : order.metodo_pagamento === 'paypal' ? 'PayPal' : 'Carta di Credito'}
-
-Ti contatteremo a breve!
-        `.trim();
-        
-        // Apri WhatsApp Web con il messaggio
-        const whatsappUrl = `https://wa.me/${customerData.telefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMessage)}`;
-        window.open(whatsappUrl, '_blank');
+        setWhatsappDraft({
+          phoneE164Like: customerData.telefono.replace(/[^0-9]/g, ''),
+          message: whatsappMessage,
+        });
       }
 
-      return order;
+      return orderWithItems;
     },
     onSuccess: (order) => {
       setCompletedOrder(order);
       setOrderCompleted(true);
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       console.error("Error creating order:", error);
-      alert("❌ Errore durante l'invio dell'ordine. Riprova più tardi.");
+      console.error("Order payload (variables):", variables);
+
+      if (error?.code === '42501') {
+        alert(
+          "❌ Questo ristorante non può ricevere ordini perché l’abbonamento non risulta attivo o è scaduto."
+        );
+        return;
+      }
+
+      const message = typeof error?.message === "string" ? error.message : "";
+      const details = typeof error?.details === "string" ? error.details : "";
+      const hint = typeof error?.hint === "string" ? error.hint : "";
+      const code = typeof error?.code === "string" ? error.code : "";
+
+      const diagnostic = [
+        (variables?.metodo_pagamento || variables?.payment_method) && `payment_method: ${variables?.metodo_pagamento || variables?.payment_method}`,
+        (variables?.pagamento_stato || variables?.payment_status) && `payment_status: ${variables?.pagamento_stato || variables?.payment_status}`,
+        message && `message: ${message}`,
+        details && `details: ${details}`,
+        hint && `hint: ${hint}`,
+        code && `code: ${code}`,
+      ].filter(Boolean).join("\n");
+
+      alert(
+        `❌ Errore durante l'invio dell'ordine. Riprova più tardi.` +
+        (diagnostic ? `\n\n${diagnostic}` : "")
+      );
     }
   });
 
@@ -126,7 +225,7 @@ Ti contatteremo a breve!
     queryFn: async () => {
       if (!restaurant) return [];
       try {
-        const response = await base44.entities.Promotion.filter({
+        const response = await Promotion.filter({
           restaurant_id: restaurant.id,
           attiva: true
         });
@@ -141,50 +240,50 @@ Ti contatteremo a breve!
   });
 
   const calculateTotals = () => {
-    const subtotal = cart.reduce((sum, item) => sum + (item.prezzo_totale * item.quantita), 0);
-    const cartItemCount = cart.reduce((sum, item) => sum + item.quantita, 0);
+    const subtotal = safeCart.reduce((sum, item) => sum + (item.prezzo_totale * item.quantita), 0);
+    const cartItemCount = safeCart.reduce((sum, item) => sum + item.quantita, 0);
 
     let deliveryCost = 0;
-  if (deliveryType === "consegna") {
-    if (deliveryZone) { // If a specific delivery zone is active
-      deliveryCost = deliveryZone.costo;
-    } else if (restaurant.costo_consegna) { // Fallback to general restaurant delivery cost
-      deliveryCost = restaurant.costo_consegna;
+    if (deliveryType === "consegna") {
+      if (deliveryZone) { // If a specific delivery zone is active
+        deliveryCost = deliveryZone.costo;
+      } else if (restaurant?.costo_consegna) { // Fallback to general restaurant delivery cost
+        deliveryCost = restaurant.costo_consegna;
+      }
     }
-  }
   
-  let discount = 0;
-  let subtotalForDiscount = subtotal; // Default to full subtotal, can be adjusted by promo rules
+    let discount = 0;
+    let subtotalForDiscount = subtotal; // Default to full subtotal, can be adjusted by promo rules
 
-  if (appliedPromo) {
-    // If promo applies to specific products, calculate subtotal only for those items
-    if (appliedPromo.regole?.applicabile_a_prodotti_specifici?.length > 0) {
-      const specificProductIds = appliedPromo.regole.applicabile_a_prodotti_specifici;
-      subtotalForDiscount = cart.reduce((sum, item) => {
-        if (specificProductIds.includes(item.id)) {
-          return sum + (item.prezzo_totale * item.quantita);
-        }
-        return sum;
-      }, 0);
-    } 
-    // If promo does NOT apply to specific products, calculate subtotal excluding those items
-    else if (appliedPromo.regole?.non_applicabile_a_prodotti_specifici?.length > 0) {
-      const excludedProductIds = appliedPromo.regole.non_applicabile_a_prodotti_specifici;
-      subtotalForDiscount = cart.reduce((sum, item) => {
-        if (!excludedProductIds.includes(item.id)) {
-          return sum + (item.prezzo_totale * item.quantita);
-        }
-        return sum;
-      }, 0);
-    }
+    if (appliedPromo) {
+      // If promo applies to specific products, calculate subtotal only for those items
+      if (appliedPromo.regole?.applicabile_a_prodotti_specifici?.length > 0) {
+        const specificProductIds = appliedPromo.regole.applicabile_a_prodotti_specifici;
+        subtotalForDiscount = safeCart.reduce((sum, item) => {
+          if (specificProductIds.includes(item.id)) {
+            return sum + (item.prezzo_totale * item.quantita);
+          }
+          return sum;
+        }, 0);
+      } 
+      // If promo does NOT apply to specific products, calculate subtotal excluding those items
+      else if (appliedPromo.regole?.non_applicabile_a_prodotti_specifici?.length > 0) {
+        const excludedProductIds = appliedPromo.regole.non_applicabile_a_prodotti_specifici;
+        subtotalForDiscount = safeCart.reduce((sum, item) => {
+          if (!excludedProductIds.includes(item.id)) {
+            return sum + (item.prezzo_totale * item.quantita);
+          }
+          return sum;
+        }, 0);
+      }
 
-    if (appliedPromo.tipo_sconto === "percentuale") {
-      discount = (subtotalForDiscount * appliedPromo.valore_sconto) / 100;
-    } else {
-      discount = appliedPromo.valore_sconto;
+      if (appliedPromo.tipo_sconto === "percentuale") {
+        discount = (subtotalForDiscount * appliedPromo.valore_sconto) / 100;
+      } else {
+        discount = appliedPromo.valore_sconto;
+      }
+      discount = Math.min(discount, subtotalForDiscount); // Discount cannot exceed the subtotal it applies to
     }
-    discount = Math.min(discount, subtotalForDiscount); // Discount cannot exceed the subtotal it applies to
-  }
   
     const total = Math.max(0, subtotal + deliveryCost - discount);
 
@@ -243,7 +342,7 @@ Ti contatteremo a breve!
     }
 
     if (rules.applicabile_a_prodotti_specifici?.length > 0) {
-      const hasApplicableItem = cart.some(item => rules.applicabile_a_prodotti_specifici.includes(item.id));
+      const hasApplicableItem = safeCart.some(item => rules.applicabile_a_prodotti_specifici.includes(item.id));
       if (!hasApplicableItem) {
         alert("❌ Questo codice è valido solo per specifici prodotti che non sono nel carrello.");
         return;
@@ -251,7 +350,7 @@ Ti contatteremo a breve!
     }
 
     if (rules.non_applicabile_a_prodotti_specifici?.length > 0) {
-      const hasNonExcludedItem = cart.some(item => !rules.non_applicabile_a_prodotti_specifici.includes(item.id));
+      const hasNonExcludedItem = safeCart.some(item => !rules.non_applicabile_a_prodotti_specifici.includes(item.id));
       if (!hasNonExcludedItem) {
         alert("❌ Tutti i prodotti nel carrello sono esclusi da questa promozione.");
         return;
@@ -294,13 +393,22 @@ Ti contatteremo a breve!
     }
     // --- End new rules validation ---
 
-    // If all rules pass
     setAppliedPromo(promo);
     alert("✅ Codice promozionale applicato!");
   };
 
   const handleCheckout = (e) => {
     e.preventDefault();
+
+    if (!restaurant?.id) {
+      alert("Ristorante non disponibile. Riprova tra qualche secondo.");
+      return;
+    }
+
+    if (safeCart.length === 0) {
+      alert("Il carrello è vuoto.");
+      return;
+    }
     
     if (!acceptTerms) {
       alert("Per favore, accetta i termini e condizioni e la privacy policy.");
@@ -314,6 +422,7 @@ Ti contatteremo a breve!
     }
 
     const orderNumber = `ORD-${Date.now()}`;
+    const computedPaymentStatus = paymentMethod === "contanti" ? "pending" : "paid";
     const orderData = {
       restaurant_id: restaurant.id,
       numero_ordine: orderNumber,
@@ -324,13 +433,14 @@ Ti contatteremo a breve!
       tipo_consegna: deliveryType,
       stato: "nuovo",
       metodo_pagamento: paymentMethod, // Add payment method
-      pagamento_stato: paymentMethod === "contanti" ? "pending" : "completed", // Set payment status
-      items: cart.map(item => ({
+      pagamento_stato: computedPaymentStatus, // Set payment status (legacy/IT)
+      payment_status: computedPaymentStatus, // Set payment status (EN)
+      items: safeCart.map(item => ({
         menu_item_id: item.id,
         nome: item.nome,
         quantita: item.quantita,
         prezzo_unitario: item.prezzo_totale,
-        modificatori: item.modificatori || [],
+        modificatori: (item.modificatori || []).map(formatModifier).filter(Boolean),
         note: ""
       })),
       totale: total,
@@ -405,19 +515,79 @@ Ti contatteremo a breve!
               </div>
             </div>
 
+            <Button
+              type="button"
+              className="w-full bg-red-600 hover:bg-red-700"
+              onClick={() => {
+                const orderNum = completedOrder?.numero_ordine;
+                if (!orderNum) return;
+                const url = `${window.location.origin}${createPageUrl("TrackOrder")}?order=${encodeURIComponent(orderNum)}`;
+                window.open(url, '_blank');
+              }}
+            >
+              Segui stato ordine in tempo reale
+            </Button>
+
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
               <strong>📱 Conferma inviata!</strong>
               <p className="mt-1">
                 {customerData.email && "Ti abbiamo inviato un'email con i dettagli dell'ordine. "}
-                {customerData.telefono && "Controlla WhatsApp per la conferma!"}
+                {customerData.telefono && "Puoi inviare a te stesso il messaggio WhatsApp di conferma."}
               </p>
             </div>
+
+            {whatsappDraft?.message && (
+              <div className="bg-gray-50 border rounded-lg p-4 text-sm">
+                <div className="font-semibold mb-2">Messaggio WhatsApp (facoltativo)</div>
+                <pre className="whitespace-pre-wrap text-xs text-gray-700">{whatsappDraft.message}</pre>
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(whatsappDraft.message);
+                        alert("Messaggio copiato!");
+                      } catch {
+                        alert("Impossibile copiare automaticamente. Seleziona e copia manualmente.");
+                      }
+                    }}
+                  >
+                    Copia
+                  </Button>
+                  <Button
+                    type="button"
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={() => {
+                      const phone = whatsappDraft.phoneE164Like;
+                      const url = `https://wa.me/${phone}?text=${encodeURIComponent(whatsappDraft.message)}`;
+                      window.open(url, '_blank');
+                    }}
+                  >
+                    Apri WhatsApp
+                  </Button>
+                </div>
+              </div>
+            )}
 
             <p className="text-center text-gray-600 text-sm">
               Ti contatteremo a breve per confermare l'ordine!
             </p>
           </div>
           <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                const orderNum = completedOrder?.numero_ordine;
+                if (!orderNum) return;
+                const url = `${window.location.origin}${createPageUrl("TrackOrder")}?order=${encodeURIComponent(orderNum)}`;
+                window.open(url, '_blank');
+              }}
+            >
+              Segui stato ordine
+            </Button>
             <Button
               className="w-full bg-red-600 hover:bg-red-700"
               onClick={() => {
@@ -609,10 +779,12 @@ Ti contatteremo a breve!
         </DialogHeader>
         
         <div className="space-y-4 py-4">
-          {cart.length === 0 ? (
+          {!restaurant ? (
+            <p className="text-center text-gray-500">Caricamento...</p>
+          ) : safeCart.length === 0 ? (
             <p className="text-center text-gray-500">Il carrello è vuoto.</p>
           ) : (
-            cart.map(item => (
+            safeCart.map(item => (
               <div key={item.cart_id} className="p-4 border-2 rounded-lg border-gray-200 hover:border-gray-300 transition-colors">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
@@ -622,7 +794,7 @@ Ti contatteremo a breve!
                         {item.modificatori.map((mod, i) => (
                           <div key={i} className="text-sm text-gray-600 flex items-center gap-1">
                             <span className="text-red-600">•</span>
-                            <span>{mod}</span>
+                            <span>{formatModifier(mod)}</span>
                           </div>
                         ))}
                       </div>
@@ -670,7 +842,7 @@ Ti contatteremo a breve!
             ))
           )}
 
-          {cart.length > 0 && (
+          {!!restaurant && safeCart.length > 0 && (
             <div className="border-t pt-4">
               <div className="space-y-2 mb-4">
                 <Label htmlFor="promo-code">Codice Promozionale</Label>
@@ -712,7 +884,7 @@ Ti contatteremo a breve!
           )}
         </div>
 
-        {cart.length > 0 && (
+        {!!restaurant && safeCart.length > 0 && (
           <>
             <div className="border-t pt-4 space-y-3">
               <div className="flex justify-between text-base">

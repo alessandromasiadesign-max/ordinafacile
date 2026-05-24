@@ -26,26 +26,26 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
           <div 
             className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
               paymentSettings.paypal_enabled 
-                ? 'border-blue-500 bg-blue-50' 
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' 
+                : 'border-border hover:bg-accent'
             }`}
             onClick={() => togglePaymentMethod('paypal')}
           >
             <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
               paymentSettings.paypal_enabled 
                 ? 'border-blue-500 bg-blue-500' 
-                : 'border-gray-300'
+                : 'border-border'
             }`}>
               {paymentSettings.paypal_enabled && <Check className="w-4 h-4 text-white" />}
             </div>
             <div className="flex-1">
               <div className="font-semibold">PayPal</div>
-              <div className="text-sm text-gray-500">Accetta pagamenti tramite PayPal</div>
+              <div className="text-sm text-muted-foreground">Accetta pagamenti tramite PayPal</div>
             </div>
           </div>
           
           {paymentSettings.paypal_enabled && (
-            <div className="ml-4 pl-4 border-l-2 border-blue-200 space-y-2">
+            <div className="ml-4 pl-4 border-l-2 border-blue-200 dark:border-blue-900 space-y-2">
               <Label>Email PayPal</Label>
               <Input
                 type="email"
@@ -53,7 +53,7 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
                 onChange={(e) => onChange({...paymentSettings, paypal_email: e.target.value})}
                 placeholder="tuo@email.com"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 I pagamenti saranno inviati a questa email PayPal
               </p>
             </div>
@@ -65,26 +65,26 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
           <div 
             className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
               paymentSettings.stripe_enabled 
-                ? 'border-purple-500 bg-purple-50' 
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/30' 
+                : 'border-border hover:bg-accent'
             }`}
             onClick={() => togglePaymentMethod('stripe')}
           >
             <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
               paymentSettings.stripe_enabled 
                 ? 'border-purple-500 bg-purple-500' 
-                : 'border-gray-300'
+                : 'border-border'
             }`}>
               {paymentSettings.stripe_enabled && <Check className="w-4 h-4 text-white" />}
             </div>
             <div className="flex-1">
               <div className="font-semibold">Carta di Credito (Stripe)</div>
-              <div className="text-sm text-gray-500">Accetta carte di credito/debito</div>
+              <div className="text-sm text-muted-foreground">Accetta carte di credito/debito</div>
             </div>
           </div>
           
           {paymentSettings.stripe_enabled && (
-            <div className="ml-4 pl-4 border-l-2 border-purple-200 space-y-3">
+            <div className="ml-4 pl-4 border-l-2 border-purple-200 dark:border-purple-900 space-y-3">
               <div className="space-y-2">
                 <Label>Stripe Public Key</Label>
                 <Input
@@ -93,7 +93,7 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
                   placeholder="pk_live_..."
                 />
               </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
+              <div className="bg-blue-50 border border-blue-200 dark:bg-blue-950/30 dark:border-blue-900 rounded-lg p-3 text-xs text-blue-800 dark:text-blue-100">
                 <strong>📘 Come configurare Stripe:</strong>
                 <ol className="mt-2 ml-4 space-y-1">
                   <li>1. Crea un account su stripe.com</li>
@@ -110,15 +110,15 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
         <div 
           className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
             paymentSettings.cash_enabled 
-              ? 'border-green-500 bg-green-50' 
-              : 'border-gray-200 hover:border-gray-300'
+              ? 'border-green-500 bg-green-50 dark:bg-green-950/30' 
+              : 'border-border hover:bg-accent'
           }`}
           onClick={() => togglePaymentMethod('cash')}
         >
           <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
             paymentSettings.cash_enabled 
               ? 'border-green-500 bg-green-500' 
-              : 'border-gray-300'
+              : 'border-border'
           }`}>
             {paymentSettings.cash_enabled && <Check className="w-4 h-4 text-white" />}
           </div>
@@ -127,11 +127,11 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
               <DollarSign className="w-5 h-5" />
               Contanti alla Consegna
             </div>
-            <div className="text-sm text-gray-500">Pagamento in contanti al momento della consegna</div>
+            <div className="text-sm text-muted-foreground">Pagamento in contanti al momento della consegna</div>
           </div>
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+        <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-900 rounded-lg p-4 text-sm text-amber-800 dark:text-amber-100">
           <strong>⚠️ Importante:</strong> I pagamenti online richiedono la configurazione di un account su PayPal o Stripe. I fondi saranno trasferiti direttamente sul tuo conto.
         </div>
       </CardContent>

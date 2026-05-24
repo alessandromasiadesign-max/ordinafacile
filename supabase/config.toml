@@ -1,0 +1,11 @@
+[functions.sync-subscription-status]
+verify_jwt = false
+
+[functions.subscription-expiry-reminders]
+verify_jwt = false
+
+[functions.invoke-llm]
+verify_jwt = false
+
+[functions.geocode-address]
+verify_jwt = false
