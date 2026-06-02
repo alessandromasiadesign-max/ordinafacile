@@ -1,4 +1,4 @@
-﻿import { Restaurant, MenuItem, Category, Promotion, Event } from '@/api/entities';
+import { Restaurant, MenuItem, Category, Promotion, Event } from '@/api/entities';
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -104,7 +104,7 @@ export default function RestaurantPublic() {
     queryKey: ['categories', restaurantId, eventId], // Added eventId to queryKey
     queryFn: async () => {
       const rows = await Category.filter(
-        { restaurant_id: restaurantId, is_active: true },
+        { restaurant_id: restaurantId, is_active: true, event_id: eventId || null },
         "sort_order"
       );
 
