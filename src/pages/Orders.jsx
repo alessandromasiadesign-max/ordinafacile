@@ -352,7 +352,7 @@ export default function Orders() {
                           <div className="flex items-center gap-2">
                             <Phone className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
                             <span className="font-medium truncate">{order.cliente_nome}</span>
-                            <span className="text-gray-400">â€¢</span>
+                            <span className="text-muted-foreground/60">•</span>
                             <span className="truncate">{order.cliente_telefono}</span>
                           </div>
                           {order.tipo_consegna === "consegna" && order.cliente_indirizzo && (
@@ -370,12 +370,12 @@ export default function Orders() {
                         </div>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-border">
                         <div className="text-left sm:text-right">
                           <p className="text-xl md:text-2xl font-bold text-red-600">
-                            â‚¬{Number(order.totale ?? 0).toFixed(2)}
+                            €{Number(order.totale ?? 0).toFixed(2)}
                           </p>
-                          <p className="text-xs md:text-sm text-gray-500">
+                          <p className="text-xs md:text-sm text-muted-foreground">
                             {order.items_count ?? (order.items?.length || 0)} prodotti
                           </p>
                         </div>
