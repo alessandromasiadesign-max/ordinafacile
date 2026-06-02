@@ -1,5 +1,5 @@
 import { Toaster } from "@/components/ui/toaster"
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
@@ -154,6 +154,57 @@ const AuthenticatedApp = () => {
   );
 };
 
+class AppErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error) {
+    try {
+      const message = String(error?.message ?? error ?? '');
+      const looksLikeChunkError = /ChunkLoadError|Loading chunk|Failed to fetch dynamically imported module/i.test(message);
+      if (!looksLikeChunkError) return;
+
+      const key = 'of_chunk_reload_once';
+      const alreadyReloaded = typeof sessionStorage !== 'undefined' && sessionStorage.getItem(key) === '1';
+      if (alreadyReloaded) return;
+
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(key, '1');
+      }
+      window.location.reload();
+    } catch {
+    }
+  }
+
+  render() {
+    if (!this.state.hasError) return this.props.children;
+
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-background text-foreground">
+        <div className="max-w-md w-full text-center space-y-4">
+          <div className="text-2xl font-semibold">Si è verificato un errore</div>
+          <div className="text-sm text-muted-foreground break-words">
+            {String(this.state.error?.message ?? this.state.error ?? '')}
+          </div>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-foreground bg-background border border-border rounded-lg hover:bg-accent transition-colors duration-200"
+          >
+            Ricarica
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
+
 
 function App() {
 
@@ -163,15 +214,17 @@ function App() {
         <QueryClientProvider client={queryClientInstance}>
           <Router>
             <NavigationTracker />
-            <Suspense
-              fallback={(
-                <div className="fixed inset-0 flex items-center justify-center">
-                  <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-                </div>
-              )}
-            >
-              <AuthenticatedApp />
-            </Suspense>
+            <AppErrorBoundary>
+              <Suspense
+                fallback={(
+                  <div className="fixed inset-0 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+                  </div>
+                )}
+              >
+                <AuthenticatedApp />
+              </Suspense>
+            </AppErrorBoundary>
           </Router>
           <Toaster />
         </QueryClientProvider>
