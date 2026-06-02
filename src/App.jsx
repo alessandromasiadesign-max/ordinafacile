@@ -80,6 +80,7 @@ const AuthenticatedApp = () => {
           <MainPage />
         </LayoutWrapper>
       } />
+      {Pages.RestaurantPublic && <Route path="/RestaurantPublic" element={<Pages.RestaurantPublic />} />}
       {Pages.RestaurantPublic && <Route path="/r/:restaurantId" element={<Pages.RestaurantPublic />} />}
       {Pages.MasterDashboard && (
         <Route

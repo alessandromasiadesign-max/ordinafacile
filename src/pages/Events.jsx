@@ -104,7 +104,7 @@ export default function Events() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map(event => {
-              const eventMenuUrl = restaurant?.id ? `${window.location.origin}${createPageUrl(`RestaurantPublic?id=${restaurant.id}&event=${event.id}`)}` : "#";
+              const eventMenuUrl = restaurant?.id ? `${window.location.origin}/r/${restaurant.id}?event=${event.id}` : "#";
               const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(eventMenuUrl)}`;
               const isActive = !!event?.attivo;
               const eventName = event?.nome;

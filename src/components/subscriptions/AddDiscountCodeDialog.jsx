@@ -49,6 +49,14 @@ export default function AddDiscountCodeDialog({ open, onClose }) {
       onClose();
       resetForm();
     },
+    onError: (error) => {
+      console.error("Errore creazione codice sconto:", error);
+      toast({
+        title: "Errore creazione codice sconto",
+        description: error?.message ?? "Errore sconosciuto",
+        type: "error"
+      });
+    },
   });
 
   const resetForm = () => {
@@ -68,14 +76,23 @@ export default function AddDiscountCodeDialog({ open, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.codice) {
+    const codice = String(formData.codice ?? "").trim().toUpperCase();
+    if (!codice) {
       toast({
         title: "⚠️ Inserisci il codice",
         type: "error"
       });
       return;
     }
-    createMutation.mutate(formData);
+
+    const payload = {
+      ...formData,
+      codice,
+      data_inizio: formData.data_inizio ? formData.data_inizio : null,
+      data_scadenza: formData.data_scadenza ? formData.data_scadenza : null,
+    };
+
+    createMutation.mutate(payload);
   };
 
   return (
@@ -193,8 +210,12 @@ export default function AddDiscountCodeDialog({ open, onClose }) {
             <Button type="button" variant="outline" onClick={onClose}>
               Annulla
             </Button>
-            <Button type="submit" className="bg-red-600 hover:bg-red-700">
-              Crea Codice Sconto
+            <Button
+              type="submit"
+              className="bg-red-600 hover:bg-red-700"
+              disabled={createMutation.isPending}
+            >
+              {createMutation.isPending ? "Creazione..." : "Crea Codice Sconto"}
             </Button>
           </DialogFooter>
         </form>

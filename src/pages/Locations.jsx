@@ -290,7 +290,7 @@ export default function Locations() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => window.open(createPageUrl(`RestaurantPublic?id=${location.id}`), '_blank')}
+                            onClick={() => window.open(`/r/${location.id}`, '_blank')}
                             className="text-xs md:text-sm"
                           >
                             <ExternalLink className="w-3 h-3 md:w-4 md:h-4 md:mr-1" />
@@ -306,7 +306,7 @@ export default function Locations() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                 onClick={() => {
-                                  const url = `${window.location.origin}${createPageUrl(`RestaurantPublic?id=${location.id}`)}`;
+                                  const url = `${window.location.origin}/r/${location.id}`;
                                   navigator.clipboard.writeText(url);
                                   alert("Link copiato!");
                                 }}

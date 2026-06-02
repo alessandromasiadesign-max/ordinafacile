@@ -3,7 +3,6 @@ import React, { useState, useRef } from 'react'; // Added useRef
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Copy } from "lucide-react"; // Added Copy icon
-import { createPageUrl } from "@/utils";
 
 export default function QRCodeGenerator({ restaurant }) {
   const [qrSize, setQrSize] = useState(300);
@@ -11,7 +10,7 @@ export default function QRCodeGenerator({ restaurant }) {
 
   if (!restaurant) return null;
 
-  const menuUrl = `${window.location.origin}${createPageUrl(`RestaurantPublic?id=${restaurant.id}`)}`;
+  const menuUrl = `${window.location.origin}/r/${restaurant.id}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(menuUrl)}`;
 
   const downloadQR = () => {

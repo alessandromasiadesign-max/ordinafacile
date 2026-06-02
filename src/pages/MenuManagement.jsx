@@ -236,7 +236,7 @@ export default function MenuManagement() {
 
   const getPublicMenuUrl = () => {
     if (!restaurant?.id) return '';
-    return `${window.location.origin}${createPageUrl(`RestaurantPublic?id=${restaurant.id}`)}`;
+    return `${window.location.origin}/r/${restaurant.id}`;
   };
 
   useEffect(() => {
