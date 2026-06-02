@@ -86,38 +86,68 @@ export default function TrackOrder() {
 
   const pollRef = useRef(null);
 
+  const fetchOrderViaEdge = async () => {
+    const { data, error } = await supabase.functions.invoke('track-order', {
+      body: {
+        orderId: orderId || null,
+        orderNumber: orderNumber || null,
+      },
+    });
+
+    if (error) throw error;
+
+    if (data?.order) return data.order;
+
+    const apiError = typeof data?.error === 'string' ? data.error : '';
+    if (apiError && apiError.toLowerCase().includes('not found')) return null;
+    if (apiError) throw new Error(apiError);
+
+    return null;
+  };
+
+  const fetchOrderViaDirect = async () => {
+    let query = supabase
+      .from("orders")
+      .select("*")
+      .limit(1);
+
+    if (orderId) {
+      query = query.eq('id', orderId);
+    } else {
+      query = query.or(`numero_ordine.eq.${orderNumber},order_number.eq.${orderNumber}`);
+    }
+
+    const { data, error: fetchError } = await query.maybeSingle();
+
+    if (fetchError) {
+      throw fetchError;
+    }
+
+    return data ?? null;
+  };
+
   const fetchOrder = async () => {
     if (!orderNumber && !orderId) return null;
 
+    let edgeError = null;
     try {
-      const { data, error } = await supabase.functions.invoke('track-order', {
-        body: {
-          orderId: orderId || null,
-          orderNumber: orderNumber || null,
-        },
-      });
-      if (error) throw error;
-      return data?.order ?? null;
+      return await fetchOrderViaEdge();
     } catch (e) {
-      let query = supabase
-        .from("orders")
-        .select("*")
-        .limit(1);
-
-      if (orderId) {
-        query = query.eq('id', orderId);
-      } else {
-        query = query.or(`numero_ordine.eq.${orderNumber},order_number.eq.${orderNumber}`);
-      }
-
-      const { data, error: fetchError } = await query.maybeSingle();
-
-      if (fetchError) {
-        throw fetchError;
-      }
-
-      return data ?? null;
+      edgeError = e;
     }
+
+    const directRow = await fetchOrderViaDirect();
+    if (directRow) return directRow;
+
+    if (edgeError) {
+      const msg = typeof edgeError?.message === 'string' ? edgeError.message : '';
+      throw new Error(
+        "Tracking momentaneamente non disponibile. Riprova tra qualche secondo." +
+          (msg ? ` (${msg})` : "")
+      );
+    }
+
+    return null;
   };
 
   const verifyAndLoad = async () => {
