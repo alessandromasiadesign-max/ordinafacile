@@ -77,6 +77,7 @@ const typeLabel = (raw) => {
 export default function TrackOrder() {
   const [searchParams] = useSearchParams();
   const orderNumber = (searchParams.get("order") || "").trim();
+  const orderId = (searchParams.get("oid") || "").trim();
 
   const [loading, setLoading] = useState(false);
   const [verified, setVerified] = useState(false);
@@ -86,33 +87,54 @@ export default function TrackOrder() {
   const pollRef = useRef(null);
 
   const fetchOrder = async () => {
-    if (!orderNumber) return null;
+    if (!orderNumber && !orderId) return null;
 
-    const { data, error: fetchError } = await supabase
-      .from("orders")
-      .select("*")
-      .or(`numero_ordine.eq.${orderNumber},order_number.eq.${orderNumber}`)
-      .limit(1)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase.functions.invoke('track-order', {
+        body: {
+          orderId: orderId || null,
+          orderNumber: orderNumber || null,
+        },
+      });
+      if (error) throw error;
+      return data?.order ?? null;
+    } catch (e) {
+      let query = supabase
+        .from("orders")
+        .select("*")
+        .limit(1);
 
-    if (fetchError) {
-      throw fetchError;
+      if (orderId) {
+        query = query.eq('id', orderId);
+      } else {
+        query = query.or(`numero_ordine.eq.${orderNumber},order_number.eq.${orderNumber}`);
+      }
+
+      const { data, error: fetchError } = await query.maybeSingle();
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      return data ?? null;
     }
-
-    return data ?? null;
   };
 
   const verifyAndLoad = async () => {
-    if (!orderNumber) return;
+    if (!orderNumber && !orderId) return;
     setLoading(true);
     setError(null);
 
     try {
       const row = await fetchOrder();
       if (!row) {
-        setVerified(false);
-        setOrder(null);
-        setError("Ordine non trovato. Controlla il numero ordine.");
+        if (verified) {
+          setError("Aggiornamento non disponibile in questo momento. Riprova tra qualche secondo.");
+        } else {
+          setVerified(false);
+          setOrder(null);
+          setError("Ordine non trovato. Controlla il numero ordine.");
+        }
         return;
       }
 
@@ -135,9 +157,9 @@ export default function TrackOrder() {
   };
 
   useEffect(() => {
-    if (!orderNumber) return;
+    if (!orderNumber && !orderId) return;
     verifyAndLoad();
-  }, [orderNumber]);
+  }, [orderNumber, orderId]);
 
   useEffect(() => {
     if (!verified || !order?.id) return;
@@ -192,7 +214,7 @@ export default function TrackOrder() {
         pollRef.current = null;
       }
     };
-  }, [verified, orderNumber]);
+  }, [verified, orderNumber, orderId]);
 
   const ui = statusUi(getStatusFromRecord(order));
 
@@ -204,7 +226,7 @@ export default function TrackOrder() {
             <CardTitle>Segui il tuo ordine</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {!orderNumber ? (
+            {!orderNumber && !orderId ? (
               <div className="text-sm text-muted-foreground">
                 Link non valido: manca il numero d'ordine.
               </div>
@@ -212,7 +234,7 @@ export default function TrackOrder() {
               <>
                 <div className="space-y-2">
                   <div className="text-sm text-muted-foreground">Numero ordine</div>
-                  <div className="font-semibold">#{orderNumber}</div>
+                  <div className="font-semibold">{orderNumber ? `#${orderNumber}` : `ID: ${orderId}`}</div>
                 </div>
 
                 {!verified ? (

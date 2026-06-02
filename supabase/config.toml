@@ -9,3 +9,6 @@ verify_jwt = false
 
 [functions.geocode-address]
 verify_jwt = false
+
+[functions.track-order]
+verify_jwt = false

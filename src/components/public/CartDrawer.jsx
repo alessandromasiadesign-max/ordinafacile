@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -159,7 +159,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
 
       // Invia conferma WhatsApp via SMS (simulato)
       if (customerData.telefono) {
-        const trackOrderUrl = `${window.location.origin}${createPageUrl("TrackOrder")}?order=${encodeURIComponent(orderWithItems.numero_ordine ?? "")}`;
+        const trackOrderUrl = `${window.location.origin}${createPageUrl("TrackOrder")}?order=${encodeURIComponent(orderWithItems.numero_ordine ?? "")}&oid=${encodeURIComponent(orderWithItems.id ?? "")}`;
         const whatsappMessage = [
           `✅ *Ordine confermato!*`,
           ``,
@@ -521,7 +521,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
               onClick={() => {
                 const orderNum = completedOrder?.numero_ordine;
                 if (!orderNum) return;
-                const url = `${window.location.origin}${createPageUrl("TrackOrder")}?order=${encodeURIComponent(orderNum)}`;
+                const url = `${window.location.origin}${createPageUrl("TrackOrder")}?order=${encodeURIComponent(orderNum)}&oid=${encodeURIComponent(completedOrder?.id ?? "")}`;
                 window.open(url, '_blank');
               }}
             >
@@ -582,7 +582,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
               onClick={() => {
                 const orderNum = completedOrder?.numero_ordine;
                 if (!orderNum) return;
-                const url = `${window.location.origin}${createPageUrl("TrackOrder")}?order=${encodeURIComponent(orderNum)}`;
+                const url = `${window.location.origin}${createPageUrl("TrackOrder")}?order=${encodeURIComponent(orderNum)}&oid=${encodeURIComponent(completedOrder?.id ?? "")}`;
                 window.open(url, '_blank');
               }}
             >
