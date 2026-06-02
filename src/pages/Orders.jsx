@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Restaurant, Order } from '@/api/entities';
 import { supabase } from '@/api/supabaseClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,13 +26,13 @@ import {
 import OrderDetailsModal from "../components/orders/OrderDetailsModal";
 
 const statusColors = {
-  nuovo: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  confermato: "bg-blue-100 text-blue-800 border-blue-200",
-  in_preparazione: "bg-purple-100 text-purple-800 border-purple-200",
-  pronto: "bg-green-100 text-green-800 border-green-200",
-  in_consegna: "bg-indigo-100 text-indigo-800 border-indigo-200",
-  completato: "bg-gray-100 text-gray-800 border-gray-200",
-  annullato: "bg-red-100 text-red-800 border-red-200"
+  nuovo: "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-100 dark:border-yellow-900/40",
+  confermato: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-100 dark:border-blue-900/40",
+  in_preparazione: "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/30 dark:text-purple-100 dark:border-purple-900/40",
+  pronto: "bg-green-100 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-100 dark:border-green-900/40",
+  in_consegna: "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-100 dark:border-indigo-900/40",
+  completato: "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-900/40 dark:text-slate-100 dark:border-slate-700/50",
+  annullato: "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-100 dark:border-red-900/40"
 };
 
 const statusLabels = {
@@ -256,13 +256,13 @@ export default function Orders() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground">
 
       <div className="p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6 md:mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Gestione Ordini</h1>
-            <p className="text-sm md:text-base text-gray-500 mt-1">Visualizza e gestisci tutti gli ordini</p>
+            <h1 className="text-2xl md:text-3xl font-bold">Gestione Ordini</h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-1">Visualizza e gestisci tutti gli ordini</p>
           </div>
 
           <Card className="mb-4 md:mb-6">
@@ -270,7 +270,7 @@ export default function Orders() {
               <div className="flex flex-col gap-3 md:gap-4">
                 <div className="flex-1">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 md:w-5 md:h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 md:w-5 md:h-5" />
                     <Input
                       placeholder="Cerca ordine..."
                       value={searchQuery}
@@ -303,14 +303,14 @@ export default function Orders() {
             {isLoading ? (
               <Card>
                 <CardContent className="p-6 md:p-8 text-center">
-                  <p className="text-sm md:text-base text-gray-500">Caricamento ordini...</p>
+                  <p className="text-sm md:text-base text-muted-foreground">Caricamento ordini...</p>
                 </CardContent>
               </Card>
             ) : filteredOrders.length === 0 ? (
               <Card>
                 <CardContent className="p-6 md:p-8 text-center">
-                  <Package className="w-10 h-10 md:w-12 md:h-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-sm md:text-base text-gray-500">Nessun ordine trovato</p>
+                  <Package className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground/50 mx-auto mb-4" />
+                  <p className="text-sm md:text-base text-muted-foreground">Nessun ordine trovato</p>
                 </CardContent>
               </Card>
             ) : (
@@ -329,7 +329,7 @@ export default function Orders() {
                     <div className="flex flex-col gap-3 md:gap-4">
                       <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-2 mb-3">
-                          <h3 className="text-base md:text-lg font-bold text-gray-900">
+                          <h3 className="text-base md:text-lg font-bold">
                             #{order.numero_ordine}
                           </h3>
                           <Badge className={`${statusColors[order.stato]} border text-xs md:text-sm`}>
@@ -348,11 +348,11 @@ export default function Orders() {
                           )}
                         </div>
                         
-                        <div className="grid gap-2 text-xs md:text-sm text-gray-600">
+                        <div className="grid gap-2 text-xs md:text-sm text-muted-foreground">
                           <div className="flex items-center gap-2">
                             <Phone className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
                             <span className="font-medium truncate">{order.cliente_nome}</span>
-                            <span className="text-gray-400">•</span>
+                            <span className="text-gray-400">â€¢</span>
                             <span className="truncate">{order.cliente_telefono}</span>
                           </div>
                           {order.tipo_consegna === "consegna" && order.cliente_indirizzo && (
@@ -373,7 +373,7 @@ export default function Orders() {
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t">
                         <div className="text-left sm:text-right">
                           <p className="text-xl md:text-2xl font-bold text-red-600">
-                            €{Number(order.totale ?? 0).toFixed(2)}
+                            â‚¬{Number(order.totale ?? 0).toFixed(2)}
                           </p>
                           <p className="text-xs md:text-sm text-gray-500">
                             {order.items_count ?? (order.items?.length || 0)} prodotti
