@@ -4,6 +4,7 @@ import { supabase } from "@/api/supabaseClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/use-toast";
 
 const POLL_MS = 5_000;
 
@@ -85,6 +86,8 @@ export default function TrackOrder() {
   const [order, setOrder] = useState(null);
 
   const pollRef = useRef(null);
+  const lastStatusRef = useRef(null);
+  const lastOrderIdRef = useRef(null);
 
   const fetchOrderViaEdge = async () => {
     const { data, error } = await supabase.functions.invoke('track-order', {
@@ -214,6 +217,34 @@ export default function TrackOrder() {
       supabase.removeChannel(channel);
     };
   }, [verified, order?.id]);
+
+  useEffect(() => {
+    if (!verified || !order?.id) return;
+
+    const currentStatus = getStatusFromRecord(order);
+
+    if (lastOrderIdRef.current !== order.id) {
+      lastOrderIdRef.current = order.id;
+      lastStatusRef.current = currentStatus;
+      return;
+    }
+
+    const prevStatus = lastStatusRef.current;
+    if (prevStatus && currentStatus && prevStatus !== currentStatus) {
+      const prevUi = statusUi(prevStatus);
+      const nextUi = statusUi(currentStatus);
+      const type = currentStatus === "annullato" ? "error" : "success";
+
+      toast({
+        title: "Stato ordine aggiornato",
+        description: `${prevUi.label} → ${nextUi.label}`,
+        type,
+        duration: 4000,
+      });
+    }
+
+    lastStatusRef.current = currentStatus;
+  }, [verified, order?.id, order?.stato, order?.status]);
 
   useEffect(() => {
     if (!verified) {
