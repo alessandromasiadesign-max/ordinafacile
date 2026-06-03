@@ -223,9 +223,40 @@ export default function TrackOrder() {
 
     const currentStatus = getStatusFromRecord(order);
 
+    const confirmedToastKey = `track-order-confirmed-toast:${order.id}`;
+    const isConfirmed = currentStatus === "confermato";
+    const canUseSessionStorage = typeof window !== "undefined" && typeof window.sessionStorage !== "undefined";
+    const confirmedToastAlreadyShown = (() => {
+      if (!canUseSessionStorage) return false;
+      try {
+        return window.sessionStorage.getItem(confirmedToastKey) === "1";
+      } catch {
+        return false;
+      }
+    })();
+
+    const markConfirmedToastShown = () => {
+      if (!canUseSessionStorage) return;
+      try {
+        window.sessionStorage.setItem(confirmedToastKey, "1");
+      } catch {
+        // ignore
+      }
+    };
+
     if (lastOrderIdRef.current !== order.id) {
       lastOrderIdRef.current = order.id;
       lastStatusRef.current = currentStatus;
+
+      if (isConfirmed && !confirmedToastAlreadyShown) {
+        toast({
+          title: "Ordine confermato",
+          description: "Il ristorante ha confermato il tuo ordine.",
+          type: "success",
+          duration: 4000,
+        });
+        markConfirmedToastShown();
+      }
       return;
     }
 
@@ -235,12 +266,22 @@ export default function TrackOrder() {
       const nextUi = statusUi(currentStatus);
       const type = currentStatus === "annullato" ? "error" : "success";
 
-      toast({
-        title: "Stato ordine aggiornato",
-        description: `${prevUi.label} → ${nextUi.label}`,
-        type,
-        duration: 4000,
-      });
+      if (isConfirmed && !confirmedToastAlreadyShown) {
+        toast({
+          title: "Ordine confermato",
+          description: "Il ristorante ha confermato il tuo ordine.",
+          type: "success",
+          duration: 4000,
+        });
+        markConfirmedToastShown();
+      } else {
+        toast({
+          title: "Stato ordine aggiornato",
+          description: `${prevUi.label} → ${nextUi.label}`,
+          type,
+          duration: 4000,
+        });
+      }
     }
 
     lastStatusRef.current = currentStatus;
