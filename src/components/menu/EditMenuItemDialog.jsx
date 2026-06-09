@@ -1,6 +1,6 @@
 ﻿import { Core } from '@/api/integrations';
 import { MenuItem } from '@/api/entities';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,9 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("dettagli");
   const [selectedCategoryModifierIds, setSelectedCategoryModifierIds] = useState([]);
+  const [autosaveState, setAutosaveState] = useState('saved');
+  const autosaveInitRef = useRef(true);
+  const autosaveTimerRef = useRef(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -53,6 +56,8 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
         esaurito: menuItem.esaurito || false // Initialize esaurito if not present
       });
       setActiveTab("dettagli");
+      setAutosaveState('saved');
+      autosaveInitRef.current = true;
     }
   }, [menuItem]);
 
@@ -98,23 +103,53 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
 
   const updateMutation = useMutation({
     mutationFn: (data) => MenuItem.update(menuItem.id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
-      toast({
-        title: "Prodotto aggiornato",
-        type: "success"
-      });
-      onClose();
-    },
-    onError: (error) => {
-      console.error('Errore aggiornamento prodotto:', error);
-      toast({
-        title: "Errore",
-        description: error?.message || "Impossibile aggiornare il prodotto",
-        type: "error",
-      });
-    },
   });
+
+  const buildUpdatePayload = (fd) => {
+    const price = Number(fd?.prezzo);
+    return {
+      name: fd?.nome,
+      description: fd?.descrizione,
+      price: Number.isFinite(price) ? price : 0,
+      image_url: fd?.immagine_url,
+      allergens: Array.isArray(fd?.allergeni) ? fd.allergeni : [],
+      is_available: !!fd?.disponibile,
+      esaurito: !!fd?.esaurito,
+    };
+  };
+
+  React.useEffect(() => {
+    if (!menuItem?.id) return;
+    if (!open) return;
+    if (activeTab !== 'dettagli') return;
+
+    if (autosaveInitRef.current) {
+      autosaveInitRef.current = false;
+      return;
+    }
+
+    setAutosaveState('dirty');
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+
+    autosaveTimerRef.current = setTimeout(() => {
+      setAutosaveState('saving');
+      const payload = buildUpdatePayload(formData);
+      updateMutation.mutate(payload, {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+          setAutosaveState('saved');
+        },
+        onError: (error) => {
+          console.error('Errore aggiornamento prodotto:', error);
+          setAutosaveState('error');
+        },
+      });
+    }, 700);
+
+    return () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    };
+  }, [menuItem?.id, open, activeTab, formData, queryClient, updateMutation]);
 
   const saveMenuItemModifiersMutation = useMutation({
     mutationFn: async (modifierIds) => {
@@ -201,14 +236,24 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const price = Number(formData.prezzo);
-    updateMutation.mutate({
-      name: formData.nome,
-      description: formData.descrizione,
-      price: Number.isFinite(price) ? price : 0,
-      image_url: formData.immagine_url,
-      allergens: Array.isArray(formData.allergeni) ? formData.allergeni : [],
-      is_available: !!formData.disponibile,
+    const payload = buildUpdatePayload(formData);
+    updateMutation.mutate(payload, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+        toast({
+          title: "Prodotto aggiornato",
+          type: "success"
+        });
+        onClose();
+      },
+      onError: (error) => {
+        console.error('Errore aggiornamento prodotto:', error);
+        toast({
+          title: "Errore",
+          description: error?.message || "Impossibile aggiornare il prodotto",
+          type: "error",
+        });
+      },
     });
   };
 
@@ -224,7 +269,18 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
     <Dialog open={open && !!menuItem} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Modifica Prodotto</DialogTitle>
+          <div className="flex items-start justify-between gap-3">
+            <DialogTitle>Modifica Prodotto</DialogTitle>
+            <div className="text-xs text-muted-foreground pt-1">
+              {autosaveState === 'saving'
+                ? 'Salvataggio...'
+                : autosaveState === 'dirty'
+                  ? 'Modifiche non salvate'
+                  : autosaveState === 'error'
+                    ? 'Errore salvataggio'
+                    : 'Salvato'}
+            </div>
+          </div>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -385,8 +441,8 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
                 <Button type="button" variant="outline" onClick={onClose}>
                   Annulla
                 </Button>
-                <Button type="submit" className="bg-red-600 hover:bg-red-700">
-                  Salva Modifiche
+                <Button type="submit" className="bg-red-600 hover:bg-red-700" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? 'Salvataggio...' : 'Salva Modifiche'}
                 </Button>
               </DialogFooter>
             </form>

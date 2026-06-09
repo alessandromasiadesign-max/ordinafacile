@@ -1,6 +1,6 @@
 ﻿import { Core } from '@/api/integrations';
 import { Category } from '@/api/entities';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +27,9 @@ export default function EditCategoryDialog({ open, onClose, category }) {
   });
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("dettagli");
+  const [autosaveState, setAutosaveState] = useState('saved');
+  const autosaveInitRef = useRef(true);
+  const autosaveTimerRef = useRef(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -38,20 +41,53 @@ export default function EditCategoryDialog({ open, onClose, category }) {
         immagine_url: category.immagine_url || ""
       });
       setActiveTab("dettagli");
+      setAutosaveState('saved');
+      autosaveInitRef.current = true;
     }
   }, [category]);
 
   const updateMutation = useMutation({
     mutationFn: (data) => Category.update(category.id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast({
-        title: "Categoria aggiornata",
-        type: "success"
-      });
-      onClose();
-    },
   });
+
+  const buildUpdatePayload = (fd) => ({
+    name: fd?.nome,
+    description: fd?.descrizione,
+    image_url: fd?.immagine_url,
+  });
+
+  useEffect(() => {
+    if (!category?.id) return;
+    if (!open) return;
+    if (activeTab !== 'dettagli') return;
+
+    if (autosaveInitRef.current) {
+      autosaveInitRef.current = false;
+      return;
+    }
+
+    setAutosaveState('dirty');
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+
+    autosaveTimerRef.current = setTimeout(() => {
+      setAutosaveState('saving');
+      const payload = buildUpdatePayload(formData);
+      updateMutation.mutate(payload, {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['categories'] });
+          setAutosaveState('saved');
+        },
+        onError: (error) => {
+          console.error('Errore aggiornamento categoria:', error);
+          setAutosaveState('error');
+        },
+      });
+    }, 700);
+
+    return () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    };
+  }, [category?.id, open, activeTab, formData, queryClient, updateMutation]);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -69,10 +105,16 @@ export default function EditCategoryDialog({ open, onClose, category }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    updateMutation.mutate({
-      name: formData.nome,
-      description: formData.descrizione,
-      image_url: formData.immagine_url,
+    const payload = buildUpdatePayload(formData);
+    updateMutation.mutate(payload, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['categories'] });
+        toast({
+          title: "Categoria aggiornata",
+          type: "success"
+        });
+        onClose();
+      },
     });
   };
 
@@ -82,7 +124,18 @@ export default function EditCategoryDialog({ open, onClose, category }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Modifica Categoria</DialogTitle>
+          <div className="flex items-start justify-between gap-3">
+            <DialogTitle>Modifica Categoria</DialogTitle>
+            <div className="text-xs text-muted-foreground pt-1">
+              {autosaveState === 'saving'
+                ? 'Salvataggio...'
+                : autosaveState === 'dirty'
+                  ? 'Modifiche non salvate'
+                  : autosaveState === 'error'
+                    ? 'Errore salvataggio'
+                    : 'Salvato'}
+            </div>
+          </div>
         </DialogHeader>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
@@ -151,8 +204,8 @@ export default function EditCategoryDialog({ open, onClose, category }) {
                 <Button type="button" variant="outline" onClick={onClose}>
                   Annulla
                 </Button>
-                <Button type="submit" className="bg-red-600 hover:bg-red-700">
-                  Salva Modifiche
+                <Button type="submit" className="bg-red-600 hover:bg-red-700" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? 'Salvataggio...' : 'Salva Modifiche'}
                 </Button>
               </DialogFooter>
             </form>

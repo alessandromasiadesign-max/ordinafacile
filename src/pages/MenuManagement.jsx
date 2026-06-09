@@ -1,11 +1,12 @@
 ﻿import { Restaurant, MenuItem, Category, Event } from '@/api/entities';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { supabase } from '@/api/supabaseClient';
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { createPageUrl } from "@/utils";
-import { Plus, UtensilsCrossed, ChevronDown, ChevronUp, Copy, CopyPlus, Trash2, Calendar } from "lucide-react";
+import { Plus, UtensilsCrossed, ChevronDown, ChevronUp, Copy, CopyPlus, Trash2, Calendar, Search, X } from "lucide-react";
 
 import {
   AlertDialog,
@@ -42,6 +43,7 @@ export default function MenuManagement() {
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [showAddItem, setShowAddItem] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [guideDismissed, setGuideDismissed] = useState(false);
   const [hasPreviewedPublicMenu, setHasPreviewedPublicMenu] = useState(false);
@@ -224,6 +226,33 @@ export default function MenuManagement() {
     enabled: !!restaurant,
     initialData: [],
   });
+
+  const trimmedSearch = String(searchQuery || "").trim();
+
+  const filteredMenuItems = useMemo(() => {
+    if (!trimmedSearch) return menuItems || [];
+    const q = trimmedSearch.toLowerCase();
+    return (menuItems || []).filter((item) => {
+      const name = String(item?.nome ?? item?.name ?? "").toLowerCase();
+      const desc = String(item?.descrizione ?? item?.description ?? "").toLowerCase();
+      return name.includes(q) || desc.includes(q);
+    });
+  }, [menuItems, trimmedSearch]);
+
+  const filteredCategories = useMemo(() => {
+    if (!trimmedSearch) return categories || [];
+    const q = trimmedSearch.toLowerCase();
+    const categoryIdsWithMatchingItems = new Set(
+      (filteredMenuItems || []).map((i) => i?.category_id).filter(Boolean)
+    );
+
+    return (categories || []).filter((cat) => {
+      const name = String(cat?.nome ?? cat?.name ?? "").toLowerCase();
+      const desc = String(cat?.descrizione ?? cat?.description ?? "").toLowerCase();
+      const categoryMatches = name.includes(q) || desc.includes(q);
+      return categoryMatches || categoryIdsWithMatchingItems.has(cat?.id);
+    });
+  }, [categories, filteredMenuItems, trimmedSearch]);
 
   useEffect(() => {
     loadRestaurant();
@@ -589,6 +618,42 @@ export default function MenuManagement() {
             </Button>
           </div>
 
+          {categories.length > 0 && (
+            <Card className="mb-4 md:mb-6">
+              <CardContent className="p-4 md:p-6">
+                <div className="flex flex-col gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Cerca categoria o prodotto..."
+                      className="pl-9 pr-9"
+                    />
+                    {trimmedSearch && (
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7"
+                        onClick={() => setSearchQuery("")}
+                        title="Svuota ricerca"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+
+                  {trimmedSearch && (
+                    <div className="text-sm text-muted-foreground">
+                      {filteredCategories.length} categorie
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {shouldShowGuide && (
             <Card className="mb-4 md:mb-6">
               <CardContent className="p-4 md:p-6">
@@ -774,15 +839,31 @@ export default function MenuManagement() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {categories.map((category) => {
-                const categoryItems = menuItems.filter(item => item.category_id === category.id);
-                const isExpanded = expandedCategories.has(category.id);
+              {filteredCategories.map((category) => {
+                const q = trimmedSearch.toLowerCase();
+                const categoryMatches = trimmedSearch
+                  ? (
+                      String(category?.nome ?? category?.name ?? "").toLowerCase().includes(q) ||
+                      String(category?.descrizione ?? category?.description ?? "").toLowerCase().includes(q)
+                    )
+                  : false;
+
+                const categoryItems = trimmedSearch
+                  ? (categoryMatches
+                      ? menuItems.filter((item) => item.category_id === category.id)
+                      : filteredMenuItems.filter((item) => item.category_id === category.id))
+                  : menuItems.filter((item) => item.category_id === category.id);
+
+                const isExpanded = trimmedSearch ? true : expandedCategories.has(category.id);
 
                 return (
                   <Card key={category.id} className="hover:shadow-md transition-shadow">
                     <div 
                       className="p-4 md:p-6 cursor-pointer"
-                      onClick={() => toggleCategory(category.id)}
+                      onClick={() => {
+                        if (trimmedSearch) return;
+                        toggleCategory(category.id);
+                      }}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
@@ -915,6 +996,7 @@ export default function MenuManagement() {
                         menuItems={categoryItems}
                         onAddItem={() => handleAddItem(category)}
                         isExpanded={isExpanded}
+                        enableBulkActions
                       />
                     )}
                   </Card>
