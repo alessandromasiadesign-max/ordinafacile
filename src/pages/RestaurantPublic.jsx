@@ -74,13 +74,30 @@ export default function RestaurantPublic() {
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeMobileCategoryId, setActiveMobileCategoryId] = useState(null);
   const mobileCategorySectionsRef = useRef(new Map());
+  const deliveryBarRef = useRef(null);
+  const searchCardRef = useRef(null);
+  const mobileTabsRef = useRef(null);
+
+  const getMobileStickyOffsetPx = () => {
+    if (typeof window === "undefined") return 190;
+    if (!window.matchMedia || !window.matchMedia("(max-width: 767px)").matches) return 0;
+
+    const bottoms = [
+      deliveryBarRef.current?.getBoundingClientRect?.().bottom,
+      searchCardRef.current?.getBoundingClientRect?.().bottom,
+      mobileTabsRef.current?.getBoundingClientRect?.().bottom,
+    ].filter((v) => typeof v === "number" && Number.isFinite(v));
+
+    const maxBottom = bottoms.length > 0 ? Math.max(...bottoms) : 0;
+    return Math.round(maxBottom + 12);
+  };
 
   const scrollToMobileCategory = (categoryId) => {
     if (typeof window === "undefined") return;
     const el = mobileCategorySectionsRef.current.get(String(categoryId));
     if (!el) return;
 
-    const offset = 190;
+    const offset = getMobileStickyOffsetPx();
     const top = el.getBoundingClientRect().top + window.scrollY - offset;
     window.scrollTo({ top, behavior: "smooth" });
   };
@@ -101,6 +118,7 @@ export default function RestaurantPublic() {
   const [showAllergeniFilter, setShowAllergeniFilter] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchBlurTimeoutRef = useRef(null);
+  const searchContainerRef = useRef(null);
 
   const isRestaurantBlocked = useMemo(() => {
     if (!restaurant) return false;
@@ -121,6 +139,38 @@ export default function RestaurantPublic() {
       setCart([]);
     }
   }, [isRestaurantBlocked, cart.length]);
+
+  useEffect(() => {
+    if (!isSearchFocused) return;
+
+    const onKeyDown = (e) => {
+      if (e.key !== "Escape") return;
+      if (searchBlurTimeoutRef.current) {
+        clearTimeout(searchBlurTimeoutRef.current);
+        searchBlurTimeoutRef.current = null;
+      }
+      setIsSearchFocused(false);
+      setSearchQuery("");
+    };
+
+    const onPointerDown = (e) => {
+      const el = searchContainerRef.current;
+      if (!el) return;
+      if (el.contains(e.target)) return;
+      if (searchBlurTimeoutRef.current) {
+        clearTimeout(searchBlurTimeoutRef.current);
+        searchBlurTimeoutRef.current = null;
+      }
+      setIsSearchFocused(false);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [isSearchFocused]);
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories', restaurantId, eventId], // Added eventId to queryKey
@@ -318,7 +368,7 @@ export default function RestaurantPublic() {
       },
       {
         threshold: [0.1, 0.25, 0.5],
-        rootMargin: "-190px 0px -65% 0px",
+        rootMargin: `-${getMobileStickyOffsetPx()}px 0px -65% 0px`,
       }
     );
 
@@ -526,7 +576,7 @@ export default function RestaurantPublic() {
       )}
 
       {restaurant.modalita_consegna?.length > 0 && (
-        <div className="bg-background border-b border-border py-4 px-4 sticky top-0 z-10">
+        <div ref={deliveryBarRef} className="bg-background border-b border-border py-4 px-4 sticky top-0 z-10">
           <div className="max-w-6xl mx-auto flex justify-center gap-4">
             {restaurant.modalita_consegna.includes("consegna") && (
               <Button
@@ -584,9 +634,9 @@ export default function RestaurantPublic() {
 
       <div className="max-w-6xl mx-auto p-4">
         {/* Barra di Ricerca e Filtri */}
-        <Card className="mb-4 md:mb-6 bg-background/95 backdrop-blur-sm sticky top-16 z-20 md:static">
+        <Card ref={searchCardRef} className="mb-4 md:mb-6 bg-background/95 backdrop-blur-sm sticky top-16 z-20 md:static">
           <CardContent className="p-3 md:p-4 space-y-3 md:space-y-4">
-            <div className="relative">
+            <div ref={searchContainerRef} className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 md:w-5 md:h-5" />
               <Input
                 placeholder="Cerca prodotti nel menu..."
@@ -718,7 +768,7 @@ export default function RestaurantPublic() {
               ) : (
                 <div className="space-y-6">
                   <div className="h-[52px]" />
-                  <div className="fixed top-32 left-0 right-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
+                  <div ref={mobileTabsRef} className="fixed top-32 left-0 right-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
                     <div className="max-w-6xl mx-auto px-4 py-2">
                       <div className="flex gap-2 overflow-x-auto whitespace-nowrap">
                         {categoriesWithItems.map(({ category }) => {
