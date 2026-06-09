@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ThemeToggle from "@/components/layout/ThemeToggle";
 import { useTheme } from "@/lib/ThemeContext";
+import { supabase } from '@/api/supabaseClient';
 
 import { Input } from "@/components/ui/input"; // Added Input component
 
@@ -20,6 +21,8 @@ import {
   Search, // Added Search icon
   Filter, // Added Filter icon
   Tag, // Added Tag icon
+  Heart,
+  X,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -53,12 +56,44 @@ const normalizeSearchText = (value) =>
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
 
+const escapeRegExp = (value) => String(value ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const renderHighlightedText = (text, query) => {
+  const q = String(query ?? "").trim();
+  const source = String(text ?? "");
+  if (!q) return source;
+
+  try {
+    const re = new RegExp(`(${escapeRegExp(q)})`, "ig");
+    const parts = source.split(re);
+    const qLower = q.toLowerCase();
+
+    return parts.map((part, i) => {
+      const isMatch = part.toLowerCase() === qLower;
+      return isMatch ? (
+        <span key={i} className="font-extrabold underline">
+          {part}
+        </span>
+      ) : (
+        <span key={i}>{part}</span>
+      );
+    });
+  } catch {
+    return source;
+  }
+};
+
 export default function RestaurantPublic() {
   const { resolvedTheme } = useTheme();
   const params = useParams();
   const urlParams = new URLSearchParams(window.location.search);
   const restaurantId = params?.restaurantId ?? urlParams.get('id');
   const eventId = urlParams.get('event'); // Added eventId
+
+  const favoritesStorageKey = useMemo(() => {
+    if (!restaurantId) return null;
+    return `favorites_${restaurantId}_${eventId || "std"}`;
+  }, [restaurantId, eventId]);
   
   const [restaurant, setRestaurant] = useState(null);
   const [event, setEvent] = useState(null); // Added event state
@@ -71,12 +106,14 @@ export default function RestaurantPublic() {
   const [cartOpenMode, setCartOpenMode] = useState("cart");
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [favoriteItemIds, setFavoriteItemIds] = useState([]);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeMobileCategoryId, setActiveMobileCategoryId] = useState(null);
   const mobileCategorySectionsRef = useRef(new Map());
   const deliveryBarRef = useRef(null);
   const searchCardRef = useRef(null);
   const mobileTabsRef = useRef(null);
+  const modifiersMetaCacheRef = useRef(new Map());
 
   const getMobileStickyOffsetPx = () => {
     if (typeof window === "undefined") return 190;
@@ -113,12 +150,40 @@ export default function RestaurantPublic() {
     setActiveMobileCategoryId(null);
   }, [restaurantId, eventId]);
 
+  useEffect(() => {
+    if (!favoritesStorageKey) {
+      setFavoriteItemIds([]);
+      return;
+    }
+
+    try {
+      const raw = localStorage.getItem(favoritesStorageKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(parsed)) {
+        setFavoriteItemIds([]);
+        return;
+      }
+      setFavoriteItemIds(parsed.map((x) => String(x)));
+    } catch {
+      setFavoriteItemIds([]);
+    }
+  }, [favoritesStorageKey]);
+
+  useEffect(() => {
+    if (!favoritesStorageKey) return;
+    try {
+      localStorage.setItem(favoritesStorageKey, JSON.stringify(favoriteItemIds));
+    } catch {
+    }
+  }, [favoritesStorageKey, favoriteItemIds]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAllergeni, setSelectedAllergeni] = useState([]);
   const [showAllergeniFilter, setShowAllergeniFilter] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchBlurTimeoutRef = useRef(null);
   const searchContainerRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   const isRestaurantBlocked = useMemo(() => {
     if (!restaurant) return false;
@@ -282,6 +347,52 @@ export default function RestaurantPublic() {
     setCart(prev => [...prev, cartItem]);
   };
 
+  const getItemModifiersMeta = async (menuItemId) => {
+    const key = String(menuItemId ?? "");
+    if (!key) return { hasAny: false, hasRequired: false, unknown: true };
+
+    if (modifiersMetaCacheRef.current.has(key)) {
+      return modifiersMetaCacheRef.current.get(key);
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('menu_item_category_modifiers')
+        .select('category_modifier_id, category_modifiers(obbligatorio)')
+        .eq('menu_item_id', menuItemId);
+
+      if (error) throw error;
+
+      const rows = Array.isArray(data) ? data : [];
+      const hasAny = rows.length > 0;
+      const hasRequired = rows.some((r) => r?.category_modifiers?.obbligatorio === true);
+      const meta = { hasAny, hasRequired, unknown: false };
+      modifiersMetaCacheRef.current.set(key, meta);
+      return meta;
+    } catch {
+      const meta = { hasAny: true, hasRequired: true, unknown: true };
+      modifiersMetaCacheRef.current.set(key, meta);
+      return meta;
+    }
+  };
+
+  const quickAddFromFavorites = async (item) => {
+    if (!item) return;
+
+    const hasProhibitedAllergeni = selectedAllergeni.length > 0 &&
+      selectedAllergeni.some((a) => (item.allergeni || []).includes(a));
+    const isUnavailable = item.esaurito || hasProhibitedAllergeni || isRestaurantBlocked;
+    if (isUnavailable) return;
+
+    const meta = await getItemModifiersMeta(item.id);
+    if (meta?.hasRequired) {
+      setSelectedItem(item);
+      return;
+    }
+
+    addToCart(item, [], "");
+  };
+
   const removeFromCart = (cartId) => {
     setCart(prev => prev.filter(item => item.cart_id !== cartId));
   };
@@ -312,6 +423,20 @@ export default function RestaurantPublic() {
     );
   };
 
+  const favoriteIdSet = useMemo(() => {
+    return new Set((favoriteItemIds || []).map((x) => String(x)));
+  }, [favoriteItemIds]);
+
+  const toggleFavorite = (itemId) => {
+    const id = String(itemId ?? "");
+    if (!id) return;
+    setFavoriteItemIds((prev) => {
+      const safePrev = Array.isArray(prev) ? prev : [];
+      if (safePrev.includes(id)) return safePrev.filter((x) => x !== id);
+      return [id, ...safePrev];
+    });
+  };
+
   const filteredMenuItems = menuItems.filter(item => {
     const matchesSearch = item.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.descrizione?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -322,6 +447,12 @@ export default function RestaurantPublic() {
     
     return matchesSearch && !hasProhibitedAllergeni;
   });
+
+  const favoriteMenuItems = useMemo(() => {
+    return filteredMenuItems.filter((item) => favoriteIdSet.has(String(item.id)));
+  }, [filteredMenuItems, favoriteIdSet]);
+
+  const showFavoritesSection = favoriteMenuItems.length > 0 && normalizeSearchText(searchQuery) === "";
 
   const featuredPromotions = promotions.filter(p => 
     restaurant?.promozioni_evidenza?.includes(p.id)
@@ -343,9 +474,13 @@ export default function RestaurantPublic() {
 
   useEffect(() => {
     if (activeMobileCategoryId != null) return;
+    if (showFavoritesSection) {
+      setActiveMobileCategoryId("__favorites__");
+      return;
+    }
     if (categoriesWithItems.length === 0) return;
     setActiveMobileCategoryId(String(categoriesWithItems[0]?.category?.id ?? ""));
-  }, [activeMobileCategoryId, categoriesWithItems]);
+  }, [activeMobileCategoryId, categoriesWithItems, showFavoritesSection]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -374,7 +509,7 @@ export default function RestaurantPublic() {
 
     targets.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [categoriesWithItems]);
+  }, [categoriesWithItems, showFavoritesSection, favoriteItemIds.length]);
 
   const categoryById = useMemo(() => {
     return new Map((categories || []).map((c) => [c.id, c]));
@@ -639,6 +774,7 @@ export default function RestaurantPublic() {
             <div ref={searchContainerRef} className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 md:w-5 md:h-5" />
               <Input
+                ref={searchInputRef}
                 placeholder="Cerca prodotti nel menu..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -654,8 +790,23 @@ export default function RestaurantPublic() {
                     setIsSearchFocused(false);
                   }, 150);
                 }}
-                className="pl-9 md:pl-10 text-sm md:text-lg"
+                className="pl-9 pr-9 md:pl-10 text-sm md:text-lg"
               />
+
+              {normalizeSearchText(searchQuery) !== "" && (
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setIsSearchFocused(true);
+                    searchInputRef.current?.focus?.();
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
 
               {isSearchFocused && normalizeSearchText(searchQuery) !== "" && (
                 <div className="absolute left-0 right-0 top-full mt-2 z-40 rounded-lg border border-border bg-background/95 backdrop-blur-sm shadow-lg overflow-hidden">
@@ -685,7 +836,7 @@ export default function RestaurantPublic() {
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
-                                <div className="font-semibold truncate">{item.nome}</div>
+                                <div className="font-semibold truncate">{renderHighlightedText(item.nome, searchQuery)}</div>
                                 {catName && (
                                   <div className="text-xs text-muted-foreground truncate">{catName}</div>
                                 )}
@@ -771,6 +922,22 @@ export default function RestaurantPublic() {
                   <div ref={mobileTabsRef} className="fixed top-32 left-0 right-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
                     <div className="max-w-6xl mx-auto px-4 py-2">
                       <div className="flex gap-2 overflow-x-auto whitespace-nowrap">
+                        {showFavoritesSection && (
+                          <Button
+                            key="__favorites__"
+                            type="button"
+                            size="sm"
+                            variant={String(activeMobileCategoryId) === "__favorites__" ? "default" : "outline"}
+                            className="shrink-0"
+                            style={String(activeMobileCategoryId) === "__favorites__" ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
+                            onClick={() => {
+                              setActiveMobileCategoryId("__favorites__");
+                              scrollToMobileCategory("__favorites__");
+                            }}
+                          >
+                            Preferiti
+                          </Button>
+                        )}
                         {categoriesWithItems.map(({ category }) => {
                           const key = String(category.id);
                           const isActive = String(activeMobileCategoryId) === key;
@@ -797,6 +964,120 @@ export default function RestaurantPublic() {
                   </div>
 
                   <div className="space-y-10">
+                    {showFavoritesSection && (
+                      <div
+                        data-category-id="__favorites__"
+                        ref={(el) => {
+                          if (el) mobileCategorySectionsRef.current.set("__favorites__", el);
+                          else mobileCategorySectionsRef.current.delete("__favorites__");
+                        }}
+                      >
+                        <div className="space-y-1">
+                          <div className="font-bold text-lg truncate">Preferiti</div>
+                        </div>
+
+                        <div className="mt-4 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {favoriteMenuItems.map((item) => {
+                            const hasProhibitedAllergeni = selectedAllergeni.length > 0 &&
+                              selectedAllergeni.some((a) => (item.allergeni || []).includes(a));
+
+                            const isUnavailable = item.esaurito || hasProhibitedAllergeni || isRestaurantBlocked;
+                            const isFav = favoriteIdSet.has(String(item.id));
+
+                            return (
+                              <Card
+                                key={item.id}
+                                className={`hover:shadow-xl transition-all duration-300 ${
+                                  isUnavailable ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+                                } bg-background/95 backdrop-blur-sm`}
+                                onClick={() => !isUnavailable && setSelectedItem(item)}
+                              >
+                                <CardContent className="p-4 md:p-6 relative">
+                                  <button
+                                    type="button"
+                                    className="absolute top-3 right-3"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleFavorite(item.id);
+                                    }}
+                                  >
+                                    <Heart
+                                      className="w-5 h-5"
+                                      style={isFav ? { color: primaryColor, fill: primaryColor } : { color: "hsl(var(--muted-foreground))", fill: "transparent" }}
+                                    />
+                                  </button>
+                                  <div className="relative">
+                                    {item.immagine_url && (
+                                      <LazyImage
+                                        src={item.immagine_url}
+                                        alt={item.nome}
+                                        className="w-full h-48 object-cover rounded-lg mb-4"
+                                      />
+                                    )}
+                                    {item.esaurito && (
+                                      <div className={`absolute ${item.immagine_url ? 'inset-0' : 'top-0 right-0'} ${item.immagine_url ? 'bg-black bg-opacity-60 rounded-lg flex items-center justify-center' : ''}`}>
+                                        <Badge className="bg-red-600 text-white font-bold text-lg px-4 py-2 shadow-lg border-2 border-white">
+                                          🚫 ESAURITO
+                                        </Badge>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex items-start justify-between mb-2">
+                                    <h3 className="text-base md:text-xl font-bold">
+                                      {item.nome}
+                                    </h3>
+                                    {item.esaurito && !item.immagine_url && (
+                                      <Badge className="ml-2 bg-red-600 text-white font-bold">
+                                        🚫 ESAURITO
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  {item.descrizione && (
+                                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                                      {item.descrizione}
+                                    </p>
+                                  )}
+
+                                  {item.allergeni && item.allergeni.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mb-3">
+                                      {item.allergeni.map((a) => {
+                                        const allergene = ALLERGENI.find((al) => al.value === a);
+                                        return allergene ? (
+                                          <span key={a} className="text-lg" title={allergene.label}>
+                                            {allergene.icon}
+                                          </span>
+                                        ) : null;
+                                      })}
+                                    </div>
+                                  )}
+
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span
+                                      className="text-xl md:text-2xl font-bold"
+                                      style={{ color: item.esaurito ? '#999' : primaryColor }}
+                                    >
+                                      €{item.prezzo.toFixed(2)}
+                                    </span>
+                                    <Button
+                                      size="sm"
+                                      className="text-xs md:text-sm"
+                                      style={{ backgroundColor: isUnavailable ? '#ccc' : primaryColor }}
+                                      disabled={isUnavailable}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (!isUnavailable) quickAddFromFavorites(item);
+                                      }}
+                                    >
+                                      {isRestaurantBlocked ? 'Chiuso' : item.esaurito ? 'Esaurito' : hasProhibitedAllergeni ? 'Non disponibile' : 'Aggiungi'}
+                                    </Button>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                     {categoriesWithItems.map(({ category }) => {
                       const items = filteredMenuItems.filter((item) => item.category_id === category.id);
                       if (items.length === 0) return null;
@@ -825,6 +1106,7 @@ export default function RestaurantPublic() {
                                 selectedAllergeni.some((a) => (item.allergeni || []).includes(a));
 
                               const isUnavailable = item.esaurito || hasProhibitedAllergeni || isRestaurantBlocked;
+                              const isFav = favoriteIdSet.has(String(item.id));
 
                               return (
                                 <Card
@@ -834,7 +1116,20 @@ export default function RestaurantPublic() {
                                   } bg-background/95 backdrop-blur-sm`}
                                   onClick={() => !isUnavailable && setSelectedItem(item)}
                                 >
-                                  <CardContent className="p-4 md:p-6">
+                                  <CardContent className="p-4 md:p-6 relative">
+                                    <button
+                                      type="button"
+                                      className="absolute top-3 right-3"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleFavorite(item.id);
+                                      }}
+                                    >
+                                      <Heart
+                                        className="w-5 h-5"
+                                        style={isFav ? { color: primaryColor, fill: primaryColor } : { color: "hsl(var(--muted-foreground))", fill: "transparent" }}
+                                      />
+                                    </button>
                                     <div className="relative">
                                       {item.immagine_url && (
                                         <LazyImage
@@ -1008,6 +1303,7 @@ export default function RestaurantPublic() {
                           selectedAllergeni.some(a => (item.allergeni || []).includes(a));
 
                         const isUnavailable = item.esaurito || hasProhibitedAllergeni || isRestaurantBlocked;
+                        const isFav = favoriteIdSet.has(String(item.id));
 
                         return (
                           <Card 
@@ -1017,7 +1313,20 @@ export default function RestaurantPublic() {
                             } bg-background/95 backdrop-blur-sm`}
                             onClick={() => !isUnavailable && setSelectedItem(item)}
                           >
-                            <CardContent className="p-4 md:p-6">
+                            <CardContent className="p-4 md:p-6 relative">
+                              <button
+                                type="button"
+                                className="absolute top-3 right-3"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleFavorite(item.id);
+                                }}
+                              >
+                                <Heart
+                                  className="w-5 h-5"
+                                  style={isFav ? { color: primaryColor, fill: primaryColor } : { color: "hsl(var(--muted-foreground))", fill: "transparent" }}
+                                />
+                              </button>
                               <div className="relative">
                                 {item.immagine_url && (
                                   <LazyImage 
