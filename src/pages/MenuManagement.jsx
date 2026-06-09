@@ -838,7 +838,7 @@ export default function MenuManagement() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2 items-start">
               {filteredCategories.map((category) => {
                 const q = trimmedSearch.toLowerCase();
                 const categoryMatches = trimmedSearch
@@ -893,7 +893,7 @@ export default function MenuManagement() {
                               if (duplicateCategoryMutation.isPending) return;
                               setConfirmAction({ type: 'duplicate', category });
                             }}
-                            className="text-xs md:text-sm hidden sm:flex"
+                            className="text-xs md:text-sm hidden sm:flex h-9 md:h-10"
                             disabled={duplicateCategoryMutation.isPending}
                             title="Duplica questa categoria (con prodotti e modificatori)"
                           >
@@ -908,7 +908,7 @@ export default function MenuManagement() {
                               setCopyTargetEventId('');
                               setShowCopyToEventDialog(true);
                             }}
-                            className="text-xs md:text-sm hidden sm:flex"
+                            className="text-xs md:text-sm hidden sm:flex h-9 md:h-10"
                             disabled={copyToEventMutation.isPending}
                             title="Copia questa categoria in un evento"
                           >
@@ -922,7 +922,7 @@ export default function MenuManagement() {
                               if (deleteCategoryMutation.isPending) return;
                               setConfirmAction({ type: 'delete', category });
                             }}
-                            className="text-xs md:text-sm hidden sm:flex"
+                            className="text-xs md:text-sm hidden sm:flex h-9 md:h-10"
                             disabled={deleteCategoryMutation.isPending}
                           >
                             <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
@@ -933,7 +933,7 @@ export default function MenuManagement() {
                               e.stopPropagation();
                               handleAddItem(category);
                             }}
-                            className="bg-red-600 hover:bg-red-700 text-xs md:text-sm hidden sm:flex"
+                            className="bg-red-600 hover:bg-red-700 text-xs md:text-sm hidden sm:flex h-9 md:h-10"
                           >
                             <Plus className="w-3 h-3 md:w-4 md:h-4 md:mr-1" />
                             <span className="hidden md:inline">Prodotto</span>

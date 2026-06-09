@@ -357,11 +357,11 @@ export default function Orders() {
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm text-muted-foreground">{filteredOrders.length} ordini</div>
                   <div className="flex items-center gap-2">
-                    <Button type="button" variant={viewMode === "list" ? "default" : "outline"} size="sm" onClick={() => setViewMode("list")} className="h-8">
+                    <Button type="button" variant={viewMode === "list" ? "default" : "outline"} size="sm" onClick={() => setViewMode("list")} className="h-9 md:h-10">
                       <LayoutList className="w-4 h-4 mr-2" />
                       Lista
                     </Button>
-                    <Button type="button" variant={viewMode === "kanban" ? "default" : "outline"} size="sm" onClick={() => setViewMode("kanban")} className="h-8">
+                    <Button type="button" variant={viewMode === "kanban" ? "default" : "outline"} size="sm" onClick={() => setViewMode("kanban")} className="h-9 md:h-10">
                       <Columns3 className="w-4 h-4 mr-2" />
                       Kanban
                     </Button>
@@ -453,7 +453,7 @@ export default function Orders() {
                                   <Button
                                     type="button"
                                     size="sm"
-                                    className="h-8"
+                                    className="h-9 md:h-10"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       quickAction(order, primary.next);
@@ -468,7 +468,7 @@ export default function Orders() {
                                     type="button"
                                     size="sm"
                                     variant="outline"
-                                    className="h-8"
+                                    className="h-9 md:h-10"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       quickAction(order, "annullato");
@@ -491,7 +491,7 @@ export default function Orders() {
           )}
 
           {viewMode !== "kanban" && (
-          <div className="grid gap-3 md:gap-4">
+          <div className="grid gap-3 md:gap-4 md:grid-cols-2">
             {isLoading ? (
               <Card>
                 <CardContent className="p-6 md:p-8 text-center">
