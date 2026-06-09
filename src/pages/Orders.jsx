@@ -3,15 +3,23 @@ import { Restaurant, Order } from '@/api/entities';
 import { supabase } from '@/api/supabaseClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
+import { useToast } from "@/components/ui/use-toast";
+import {
   Search,
   Phone,
   MapPin,
   Clock,
   Package,
-  Truck
+  Truck,
+  LayoutList,
+  Columns3,
+  CheckCircle2,
+  ChefHat,
+  Flag,
+  XCircle
 } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -50,7 +58,15 @@ export default function Orders() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("tutti");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [viewMode, setViewMode] = useState(() => {
+    try {
+      return localStorage.getItem("orders_view_mode") || "list";
+    } catch {
+      return "list";
+    }
+  });
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const safeFormatDate = (value) => {
     if (!value) return "";
@@ -124,6 +140,12 @@ export default function Orders() {
     },
     enabled: !!restaurant,
     initialData: [],
+    refetchOnWindowFocus: true,
+    refetchInterval: () => {
+      if (!restaurant?.id) return false;
+      if (typeof document === "undefined") return false;
+      return document.visibilityState === "visible" ? 10000 : false;
+    },
   });
 
   const updateOrderMutation = useMutation({
@@ -155,6 +177,11 @@ export default function Orders() {
           const row = payload?.new;
           if (!row) return;
 
+          toast({
+            title: "Nuovo ordine",
+            description: `Ordine #${row.numero_ordine ?? row.order_number ?? ""}`,
+          });
+
           const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwPUKnk77ZkHQU7k9n0y3csBSF1yPDckUELFF+27OukVRULRp/h8r9vIQYshM/z2Io3CBxqvvHlnU8NEFCp5O+2ZB0FO5PZ9Mt3LAUgdcjw3JBBC');
           audio.volume = 0.7;
           audio.play().catch(e => console.log('Audio play failed:', e));
@@ -183,6 +210,13 @@ export default function Orders() {
       Notification.requestPermission();
     }
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("orders_view_mode", viewMode);
+    } catch {
+    }
+  }, [viewMode]);
 
   const loadRestaurant = async () => {
     try {
@@ -244,6 +278,46 @@ export default function Orders() {
     });
   };
 
+  const openOrderDetails = async (order) => {
+    try {
+      const items = await loadOrderItemsForOrder(order.id);
+      setSelectedOrder({ ...order, items });
+    } catch (e) {
+      console.error("Errore caricamento items ordine:", e);
+      setSelectedOrder(order);
+    }
+  };
+
+  const confirmCancelOrder = (order) => {
+    const orderNumber = order?.numero_ordine ?? "";
+    return window.confirm(`Annullare l’ordine #${orderNumber}?`);
+  };
+
+  const quickAction = (order, nextStatus) => {
+    if (nextStatus === "annullato" && !confirmCancelOrder(order)) return;
+    handleStatusChange(order, nextStatus);
+  };
+
+  const kanbanColumns = React.useMemo(() => {
+    return [
+      { key: "nuovo", title: "Nuovi", statuses: ["nuovo"] },
+      { key: "confermato", title: "Confermati", statuses: ["confermato"] },
+      { key: "in_preparazione", title: "In preparazione", statuses: ["in_preparazione"] },
+      { key: "pronto", title: "Pronti", statuses: ["pronto"] },
+      { key: "completato", title: "Completati", statuses: ["in_consegna", "completato"] },
+      { key: "annullato", title: "Annullati", statuses: ["annullato"] },
+    ];
+  }, []);
+
+  const getPrimaryActionForOrder = (order) => {
+    const status = String(order?.stato ?? "").toLowerCase();
+    if (status === "nuovo") return { label: "Accetta", next: "confermato", icon: CheckCircle2 };
+    if (status === "confermato") return { label: "In prep", next: "in_preparazione", icon: ChefHat };
+    if (status === "in_preparazione") return { label: "Pronto", next: "pronto", icon: Flag };
+    if (status === "pronto") return { label: "Completa", next: "completato", icon: CheckCircle2 };
+    return null;
+  };
+
   const filteredOrders = orders.filter(order => {
     const matchesSearch = 
       String(order.numero_ordine ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -254,6 +328,18 @@ export default function Orders() {
     
     return matchesSearch && matchesStatus;
   });
+
+  const kanbanOrdersByColumn = React.useMemo(() => {
+    const out = {};
+    kanbanColumns.forEach((c) => { out[c.key] = []; });
+    for (const o of filteredOrders) {
+      const status = String(o?.stato ?? "").toLowerCase();
+      const col = kanbanColumns.find((c) => c.statuses.includes(status));
+      if (!col) continue;
+      out[col.key].push(o);
+    }
+    return out;
+  }, [filteredOrders, kanbanColumns]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -268,6 +354,19 @@ export default function Orders() {
           <Card className="mb-4 md:mb-6">
             <CardContent className="p-4 md:p-6">
               <div className="flex flex-col gap-3 md:gap-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm text-muted-foreground">{filteredOrders.length} ordini</div>
+                  <div className="flex items-center gap-2">
+                    <Button type="button" variant={viewMode === "list" ? "default" : "outline"} size="sm" onClick={() => setViewMode("list")} className="h-8">
+                      <LayoutList className="w-4 h-4 mr-2" />
+                      Lista
+                    </Button>
+                    <Button type="button" variant={viewMode === "kanban" ? "default" : "outline"} size="sm" onClick={() => setViewMode("kanban")} className="h-8">
+                      <Columns3 className="w-4 h-4 mr-2" />
+                      Kanban
+                    </Button>
+                  </div>
+                </div>
                 <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 md:w-5 md:h-5" />
@@ -292,6 +391,7 @@ export default function Orders() {
                       <SelectItem value="pronto">Pronto</SelectItem>
                       <SelectItem value="in_consegna">In Consegna</SelectItem>
                       <SelectItem value="completato">Completato</SelectItem>
+                      <SelectItem value="annullato">Annullato</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -299,6 +399,98 @@ export default function Orders() {
             </CardContent>
           </Card>
 
+          {viewMode === "kanban" && (
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {kanbanColumns.map((col) => {
+                const list = kanbanOrdersByColumn[col.key] || [];
+                return (
+                  <div key={col.key} className="w-[320px] shrink-0 rounded-lg border border-border bg-background/60">
+                    <div className="px-3 py-2 border-b border-border flex items-center justify-between">
+                      <div className="font-semibold text-sm">{col.title}</div>
+                      <Badge variant="outline" className="text-xs">{list.length}</Badge>
+                    </div>
+                    <div className="p-3 space-y-3 max-h-[70vh] overflow-auto">
+                      {list.map((order) => {
+                        const primary = getPrimaryActionForOrder(order);
+                        const PrimaryIcon = primary?.icon;
+                        const status = String(order?.stato ?? "").toLowerCase();
+                        const canCancel = status !== "annullato" && status !== "completato";
+
+                        return (
+                          <Card key={order.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer" onClick={() => openOrderDetails(order)}>
+                            <CardContent className="p-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <div className="font-bold text-sm truncate">#{order.numero_ordine}</div>
+                                  <div className="text-xs text-muted-foreground truncate">
+                                    {order.cliente_nome}{order.cliente_telefono ? ` • ${order.cliente_telefono}` : ""}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mt-1">{safeFormatDate(order.created_date)}</div>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                  <div className="font-bold text-sm text-red-600">{Number(order.totale ?? 0).toFixed(2)}</div>
+                                  <div className="text-xs text-muted-foreground">{order.items_count ?? (order.items?.length || 0)} prod.</div>
+                                </div>
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-2 mt-3">
+                                <Badge className={`${statusColors[order.stato]} border text-[11px]`}>{statusLabels[order.stato]}</Badge>
+                                {order.tipo_consegna === "consegna" ? (
+                                  <Badge variant="outline" className="flex items-center gap-1 text-[11px]">
+                                    <Truck className="w-3 h-3" />
+                                    Consegna
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="flex items-center gap-1 text-[11px]">
+                                    <Package className="w-3 h-3" />
+                                    Asporto
+                                  </Badge>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-2 mt-3">
+                                {primary && (
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    className="h-8"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      quickAction(order, primary.next);
+                                    }}
+                                  >
+                                    {PrimaryIcon ? <PrimaryIcon className="w-4 h-4 mr-2" /> : null}
+                                    {primary.label}
+                                  </Button>
+                                )}
+                                {canCancel && (
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      quickAction(order, "annullato");
+                                    }}
+                                  >
+                                    <XCircle className="w-4 h-4 mr-2" />
+                                    Annulla
+                                  </Button>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {viewMode !== "kanban" && (
           <div className="grid gap-3 md:gap-4">
             {isLoading ? (
               <Card>
@@ -316,15 +508,7 @@ export default function Orders() {
             ) : (
               filteredOrders.map((order) => (
                 <Card key={order.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-                  onClick={async () => {
-                    try {
-                      const items = await loadOrderItemsForOrder(order.id);
-                      setSelectedOrder({ ...order, items });
-                    } catch (e) {
-                      console.error('Errore caricamento items ordine:', e);
-                      setSelectedOrder(order);
-                    }
-                  }}>
+                  onClick={() => openOrderDetails(order)}>
                   <CardContent className="p-4 md:p-6">
                     <div className="flex flex-col gap-3 md:gap-4">
                       <div className="flex-1">
@@ -405,6 +589,7 @@ export default function Orders() {
               ))
             )}
           </div>
+          )}
         </div>
       </div>
 

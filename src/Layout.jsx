@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { supabase } from '@/api/supabaseClient';
-import { Restaurant } from '@/api/entities';
+import { Restaurant, Order } from '@/api/entities';
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import ChatBot from "./components/layout/ChatBot.jsx";
 import TechnicalSupportDialog from "./components/support/TechnicalSupportDialog.jsx";
+import { useToast } from "@/components/ui/use-toast";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -23,6 +25,8 @@ import {
   Headphones,
   Ticket,
   Phone,
+  PauseCircle,
+  PlayCircle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -71,6 +75,9 @@ export default function Layout({ children }) {
   const [subscriptionExpired, setSubscriptionExpired] = useState(false);
   const [showSupportDialog, setShowSupportDialog] = useState(false);
   const [supportPhone, setSupportPhone] = useState(null);
+  const [isUpdatingRestaurantStatus, setIsUpdatingRestaurantStatus] = useState(false);
+
+  const { toast } = useToast();
 
   const adminViewMode = isMasterAccount
     ? (localStorage.getItem('admin_view_mode') || 'master')
@@ -79,6 +86,69 @@ export default function Layout({ children }) {
 
   const showMasterNavigation = isMasterAccount && !isImpersonating;
   const showRestaurantNavigation = !isMasterAccount || isImpersonating;
+
+  const ordersPaused = restaurant?.settings?.orders_paused === true;
+  const deliveryModes = Array.isArray(restaurant?.modalita_consegna) ? restaurant.modalita_consegna : [];
+  const hasDelivery = deliveryModes.includes('consegna');
+  const hasPickup = deliveryModes.includes('asporto');
+
+  const { data: pendingOrdersCount = 0 } = useQuery({
+    queryKey: ['layout-pending-orders', restaurant?.id],
+    queryFn: async () => {
+      if (!restaurant?.id) return 0;
+      const rows = await Order.filter({ restaurant_id: restaurant.id }, '-created_at', 50);
+      const list = Array.isArray(rows) ? rows : [];
+      return list.filter((o) => {
+        const dbStatus = String(o?.status ?? '').toLowerCase();
+        const itStatus = String(o?.stato ?? '').toLowerCase();
+        return dbStatus === 'pending' || dbStatus === 'confirmed' || itStatus === 'nuovo' || itStatus === 'confermato';
+      }).length;
+    },
+    enabled: !!restaurant?.id && showRestaurantNavigation,
+    initialData: 0,
+    refetchOnWindowFocus: true,
+    refetchInterval: () => {
+      if (!restaurant?.id) return false;
+      if (typeof document === 'undefined') return false;
+      return document.visibilityState === 'visible' ? 10000 : false;
+    },
+  });
+
+  const updateRestaurantQuickStatus = async ({ settingsPatch, modalitaConsegna }) => {
+    if (!restaurant?.id) return;
+
+    const prevRestaurant = restaurant;
+    const nextSettings = {
+      ...(prevRestaurant?.settings && typeof prevRestaurant.settings === 'object' ? prevRestaurant.settings : {}),
+      ...(settingsPatch && typeof settingsPatch === 'object' ? settingsPatch : {}),
+    };
+
+    const patch = {
+      ...(settingsPatch ? { settings: nextSettings } : {}),
+      ...(Array.isArray(modalitaConsegna) ? { modalita_consegna: modalitaConsegna } : {}),
+    };
+
+    setIsUpdatingRestaurantStatus(true);
+    setRestaurant((r) => ({
+      ...r,
+      ...(patch.settings ? { settings: nextSettings } : {}),
+      ...(patch.modalita_consegna ? { modalita_consegna: patch.modalita_consegna } : {}),
+    }));
+
+    try {
+      const updated = await Restaurant.update(prevRestaurant.id, patch);
+      if (updated) setRestaurant(updated);
+    } catch (e) {
+      setRestaurant(prevRestaurant);
+      toast({
+        title: 'Errore',
+        description: 'Impossibile salvare le modifiche. Riprova.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdatingRestaurantStatus(false);
+    }
+  };
 
   useEffect(() => {
     loadUserData();
@@ -422,6 +492,88 @@ export default function Layout({ children }) {
           </header>
 
           <div className="flex-1 overflow-auto">
+            {restaurant && showRestaurantNavigation && (
+              <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
+                <div className="px-4 py-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      variant={ordersPaused ? 'destructive' : 'default'}
+                      className="h-8 px-3"
+                      disabled={isUpdatingRestaurantStatus}
+                      onClick={() => {
+                        updateRestaurantQuickStatus({
+                          settingsPatch: { orders_paused: !ordersPaused },
+                        });
+                      }}
+                    >
+                      {ordersPaused ? (
+                        <PauseCircle className="w-4 h-4 mr-2" />
+                      ) : (
+                        <PlayCircle className="w-4 h-4 mr-2" />
+                      )}
+                      {ordersPaused ? 'Chiuso (ordini in pausa)' : 'Aperto'}
+                    </Button>
+
+                    <Button
+                      variant={hasDelivery ? 'default' : 'outline'}
+                      className="h-8 px-3"
+                      disabled={isUpdatingRestaurantStatus}
+                      onClick={() => {
+                        const next = hasDelivery
+                          ? deliveryModes.filter((m) => m !== 'consegna')
+                          : Array.from(new Set([...deliveryModes, 'consegna']));
+
+                        if (next.length === 0) {
+                          toast({
+                            title: 'Seleziona almeno una modalità',
+                            description: 'Devi lasciare attiva almeno Consegna o Asporto.',
+                            variant: 'destructive',
+                          });
+                          return;
+                        }
+
+                        updateRestaurantQuickStatus({ modalitaConsegna: next });
+                      }}
+                    >
+                      Consegna
+                    </Button>
+
+                    <Button
+                      variant={hasPickup ? 'default' : 'outline'}
+                      className="h-8 px-3"
+                      disabled={isUpdatingRestaurantStatus}
+                      onClick={() => {
+                        const next = hasPickup
+                          ? deliveryModes.filter((m) => m !== 'asporto')
+                          : Array.from(new Set([...deliveryModes, 'asporto']));
+
+                        if (next.length === 0) {
+                          toast({
+                            title: 'Seleziona almeno una modalità',
+                            description: 'Devi lasciare attiva almeno Consegna o Asporto.',
+                            variant: 'destructive',
+                          });
+                          return;
+                        }
+
+                        updateRestaurantQuickStatus({ modalitaConsegna: next });
+                      }}
+                    >
+                      Asporto
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-sm">
+                    <a
+                      href={`${createPageUrl('Orders')}?status=in_attesa`}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      In attesa: <span className="font-semibold">{pendingOrdersCount}</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
             {children}
           </div>
         </main>

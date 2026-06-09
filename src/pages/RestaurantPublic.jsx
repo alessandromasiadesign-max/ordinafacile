@@ -187,6 +187,7 @@ export default function RestaurantPublic() {
 
   const isRestaurantBlocked = useMemo(() => {
     if (!restaurant) return false;
+    if (restaurant?.settings?.orders_paused === true) return true;
     if (restaurant.abbonamento_attivo !== true) return true;
     if (!restaurant.abbonamento_scadenza) return false;
     const expiry = new Date(restaurant.abbonamento_scadenza);
