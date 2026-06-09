@@ -1,5 +1,5 @@
 import { Restaurant, MenuItem, Category, Promotion, Event } from '@/api/entities';
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,13 @@ const ALLERGENI = [
   { value: "molluschi", label: "Molluschi", icon: "🦪" }
 ];
 
+const normalizeSearchText = (value) =>
+  String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+
 export default function RestaurantPublic() {
   const { resolvedTheme } = useTheme();
   const params = useParams();
@@ -65,6 +72,18 @@ export default function RestaurantPublic() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
+  const [activeMobileCategoryId, setActiveMobileCategoryId] = useState(null);
+  const mobileCategorySectionsRef = useRef(new Map());
+
+  const scrollToMobileCategory = (categoryId) => {
+    if (typeof window === "undefined") return;
+    const el = mobileCategorySectionsRef.current.get(String(categoryId));
+    if (!el) return;
+
+    const offset = 190;
+    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: "smooth" });
+  };
 
   useEffect(() => {
     if (restaurantId) {
@@ -74,11 +93,14 @@ export default function RestaurantPublic() {
 
   useEffect(() => {
     setActiveCategoryId(null);
+    setActiveMobileCategoryId(null);
   }, [restaurantId, eventId]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAllergeni, setSelectedAllergeni] = useState([]);
   const [showAllergeniFilter, setShowAllergeniFilter] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchBlurTimeoutRef = useRef(null);
 
   const isRestaurantBlocked = useMemo(() => {
     if (!restaurant) return false;
@@ -268,6 +290,76 @@ export default function RestaurantPublic() {
       .map((c) => ({ category: c, count: counts.get(c.id) || 0 }))
       .filter((x) => x.count > 0);
   }, [categories, filteredMenuItems]);
+
+  useEffect(() => {
+    if (activeMobileCategoryId != null) return;
+    if (categoriesWithItems.length === 0) return;
+    setActiveMobileCategoryId(String(categoriesWithItems[0]?.category?.id ?? ""));
+  }, [activeMobileCategoryId, categoriesWithItems]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!window.matchMedia || !window.matchMedia("(max-width: 767px)").matches) return;
+
+    const targets = Array.from(mobileCategorySectionsRef.current.values());
+    if (targets.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        const first = visible[0];
+        if (!first?.target) return;
+        const id = first.target.getAttribute("data-category-id");
+        if (!id) return;
+        setActiveMobileCategoryId(String(id));
+      },
+      {
+        threshold: [0.1, 0.25, 0.5],
+        rootMargin: "-190px 0px -65% 0px",
+      }
+    );
+
+    targets.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [categoriesWithItems]);
+
+  const categoryById = useMemo(() => {
+    return new Map((categories || []).map((c) => [c.id, c]));
+  }, [categories]);
+
+  const searchSuggestions = useMemo(() => {
+    const q = normalizeSearchText(searchQuery);
+    if (!q) return [];
+
+    const out = [];
+    for (const item of menuItems || []) {
+      const hasProhibitedAllergeni = selectedAllergeni.length > 0 &&
+        selectedAllergeni.some((a) => (item.allergeni || []).includes(a));
+      if (hasProhibitedAllergeni) continue;
+
+      const name = normalizeSearchText(item?.nome);
+      const desc = normalizeSearchText(item?.descrizione);
+      const catName = normalizeSearchText(categoryById.get(item?.category_id)?.nome);
+
+      if (name.includes(q) || desc.includes(q) || catName.includes(q)) {
+        out.push(item);
+      }
+    }
+
+    out.sort((a, b) => {
+      const aName = normalizeSearchText(a?.nome);
+      const bName = normalizeSearchText(b?.nome);
+      const aStarts = aName.startsWith(q) ? 0 : 1;
+      const bStarts = bName.startsWith(q) ? 0 : 1;
+      if (aStarts !== bStarts) return aStarts - bStarts;
+      return aName.localeCompare(bName);
+    });
+
+    return out.slice(0, 8);
+  }, [searchQuery, menuItems, selectedAllergeni, categoryById]);
 
   if (loading) {
     return (
@@ -492,7 +584,7 @@ export default function RestaurantPublic() {
 
       <div className="max-w-6xl mx-auto p-4">
         {/* Barra di Ricerca e Filtri */}
-        <Card className="mb-4 md:mb-6 bg-background/95 backdrop-blur-sm">
+        <Card className="mb-4 md:mb-6 bg-background/95 backdrop-blur-sm sticky top-16 z-20 md:static">
           <CardContent className="p-3 md:p-4 space-y-3 md:space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 md:w-5 md:h-5" />
@@ -500,8 +592,72 @@ export default function RestaurantPublic() {
                 placeholder="Cerca prodotti nel menu..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (searchBlurTimeoutRef.current) {
+                    clearTimeout(searchBlurTimeoutRef.current);
+                    searchBlurTimeoutRef.current = null;
+                  }
+                  setIsSearchFocused(true);
+                }}
+                onBlur={() => {
+                  searchBlurTimeoutRef.current = setTimeout(() => {
+                    setIsSearchFocused(false);
+                  }, 150);
+                }}
                 className="pl-9 md:pl-10 text-sm md:text-lg"
               />
+
+              {isSearchFocused && normalizeSearchText(searchQuery) !== "" && (
+                <div className="absolute left-0 right-0 top-full mt-2 z-40 rounded-lg border border-border bg-background/95 backdrop-blur-sm shadow-lg overflow-hidden">
+                  {searchSuggestions.length > 0 ? (
+                    <div className="max-h-72 overflow-y-auto">
+                      {searchSuggestions.map((item) => {
+                        const catName = categoryById.get(item?.category_id)?.nome;
+                        const isUnavailable = item.esaurito || isRestaurantBlocked;
+
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            className="w-full text-left px-3 py-2 hover:bg-accent/40 transition-colors disabled:opacity-60"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                              setSelectedItem(item);
+                              if (item?.category_id) {
+                                setActiveCategoryId(item.category_id);
+                                setActiveMobileCategoryId(String(item.category_id));
+                                scrollToMobileCategory(item.category_id);
+                              }
+                              setSearchQuery("");
+                              setIsSearchFocused(false);
+                            }}
+                            disabled={isUnavailable}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="font-semibold truncate">{item.nome}</div>
+                                {catName && (
+                                  <div className="text-xs text-muted-foreground truncate">{catName}</div>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                {item.esaurito && (
+                                  <Badge className="bg-red-600 text-white">Esaurito</Badge>
+                                )}
+                                {Number.isFinite(Number(item?.prezzo)) && (
+                                  <div className="text-sm font-bold">€{Number(item.prezzo).toFixed(2)}</div>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="px-3 py-3 text-sm text-muted-foreground">Nessun risultato</div>
+                  )}
+                </div>
+              )}
             </div>
 
             <Button
@@ -552,6 +708,162 @@ export default function RestaurantPublic() {
           </Card>
         ) : (
           <>
+            <div className="md:hidden">
+              {categoriesWithItems.length === 0 ? (
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <p className="text-muted-foreground">Nessun prodotto disponibile con i filtri attivi</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-6">
+                  <div className="h-[52px]" />
+                  <div className="fixed top-32 left-0 right-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
+                    <div className="max-w-6xl mx-auto px-4 py-2">
+                      <div className="flex gap-2 overflow-x-auto whitespace-nowrap">
+                        {categoriesWithItems.map(({ category }) => {
+                          const key = String(category.id);
+                          const isActive = String(activeMobileCategoryId) === key;
+
+                          return (
+                            <Button
+                              key={category.id}
+                              type="button"
+                              size="sm"
+                              variant={isActive ? "default" : "outline"}
+                              className="shrink-0"
+                              style={isActive ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
+                              onClick={() => {
+                                setActiveMobileCategoryId(key);
+                                scrollToMobileCategory(key);
+                              }}
+                            >
+                              {category.nome}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-10">
+                    {categoriesWithItems.map(({ category }) => {
+                      const items = filteredMenuItems.filter((item) => item.category_id === category.id);
+                      if (items.length === 0) return null;
+
+                      const sectionKey = String(category.id);
+
+                      return (
+                        <div
+                          key={category.id}
+                          data-category-id={sectionKey}
+                          ref={(el) => {
+                            if (el) mobileCategorySectionsRef.current.set(sectionKey, el);
+                            else mobileCategorySectionsRef.current.delete(sectionKey);
+                          }}
+                        >
+                          <div className="space-y-1">
+                            <div className="font-bold text-lg truncate">{category.nome}</div>
+                            {category.descrizione && (
+                              <div className="text-sm text-muted-foreground line-clamp-2">{category.descrizione}</div>
+                            )}
+                          </div>
+
+                          <div className="mt-4 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {items.map((item) => {
+                              const hasProhibitedAllergeni = selectedAllergeni.length > 0 &&
+                                selectedAllergeni.some((a) => (item.allergeni || []).includes(a));
+
+                              const isUnavailable = item.esaurito || hasProhibitedAllergeni || isRestaurantBlocked;
+
+                              return (
+                                <Card
+                                  key={item.id}
+                                  className={`hover:shadow-xl transition-all duration-300 ${
+                                    isUnavailable ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+                                  } bg-background/95 backdrop-blur-sm`}
+                                  onClick={() => !isUnavailable && setSelectedItem(item)}
+                                >
+                                  <CardContent className="p-4 md:p-6">
+                                    <div className="relative">
+                                      {item.immagine_url && (
+                                        <LazyImage
+                                          src={item.immagine_url}
+                                          alt={item.nome}
+                                          className="w-full h-48 object-cover rounded-lg mb-4"
+                                        />
+                                      )}
+                                      {item.esaurito && (
+                                        <div className={`absolute ${item.immagine_url ? 'inset-0' : 'top-0 right-0'} ${item.immagine_url ? 'bg-black bg-opacity-60 rounded-lg flex items-center justify-center' : ''}`}>
+                                          <Badge className="bg-red-600 text-white font-bold text-lg px-4 py-2 shadow-lg border-2 border-white">
+                                            🚫 ESAURITO
+                                          </Badge>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex items-start justify-between mb-2">
+                                      <h3 className="text-base md:text-xl font-bold">
+                                        {item.nome}
+                                      </h3>
+                                      {item.esaurito && !item.immagine_url && (
+                                        <Badge className="ml-2 bg-red-600 text-white font-bold">
+                                          🚫 ESAURITO
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    {item.descrizione && (
+                                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                                        {item.descrizione}
+                                      </p>
+                                    )}
+
+                                    {item.allergeni && item.allergeni.length > 0 && (
+                                      <div className="flex flex-wrap gap-1 mb-3">
+                                        {item.allergeni.map((a) => {
+                                          const allergene = ALLERGENI.find((al) => al.value === a);
+                                          return allergene ? (
+                                            <span key={a} className="text-lg" title={allergene.label}>
+                                              {allergene.icon}
+                                            </span>
+                                          ) : null;
+                                        })}
+                                      </div>
+                                    )}
+
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span
+                                        className="text-xl md:text-2xl font-bold"
+                                        style={{ color: item.esaurito ? '#999' : primaryColor }}
+                                      >
+                                        €{item.prezzo.toFixed(2)}
+                                      </span>
+                                      <Button
+                                        size="sm"
+                                        className="text-xs md:text-sm"
+                                        style={{ backgroundColor: isUnavailable ? '#ccc' : primaryColor }}
+                                        disabled={isUnavailable}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (!isUnavailable) setSelectedItem(item);
+                                        }}
+                                      >
+                                        {isRestaurantBlocked ? 'Chiuso' : item.esaurito ? 'Esaurito' : hasProhibitedAllergeni ? 'Non disponibile' : 'Scegli'}
+                                      </Button>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="hidden md:block">
             {!activeCategoryId ? (
               <div className="space-y-4">
                 {categoriesWithItems.map(({ category, count }) => (
@@ -601,8 +913,33 @@ export default function RestaurantPublic() {
 
                 return (
                   <div className="space-y-6">
+		<div className="md:hidden h-[52px]" />
+		<div className="md:hidden fixed top-32 left-0 right-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-2">
+  <div className="flex gap-2 overflow-x-auto whitespace-nowrap">
+    {categoriesWithItems.map(({ category }) => {
+      const isActive = category.id === activeCategoryId;
+
+      return (
+        <Button
+          key={category.id}
+          type="button"
+          size="sm"
+          variant={isActive ? "default" : "outline"}
+          className="shrink-0"
+          style={isActive ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
+          onClick={() => {
+            setActiveCategoryId(category.id);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        >
+          {category.nome}
+        </Button>
+      );
+    })}
+  </div>
+</div>
                     <div className="flex items-center justify-between gap-3">
-                      <Button variant="outline" onClick={() => setActiveCategoryId(null)}>
+                      <Button className="hidden md:inline-flex" variant="outline" onClick={() => setActiveCategoryId(null)}>
                         <ChevronLeft className="w-4 h-4 mr-2" />
                         Categorie
                       </Button>
@@ -612,7 +949,7 @@ export default function RestaurantPublic() {
                           <div className="text-sm text-muted-foreground line-clamp-1">{activeCategory.descrizione}</div>
                         )}
                       </div>
-                      <div className="w-[98px]" />
+                      <div className="hidden md:block w-[98px]" />
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -705,6 +1042,7 @@ export default function RestaurantPublic() {
                 );
               })()
             )}
+            </div>
           </>
         )}
 
