@@ -155,6 +155,11 @@ export default function Orders() {
     },
   });
 
+  const ordersRef = React.useRef([]);
+  React.useEffect(() => {
+    ordersRef.current = orders;
+  }, [orders]);
+
   useEffect(() => {
     loadRestaurant();
   }, []);
@@ -260,7 +265,9 @@ export default function Orders() {
     }));
   };
 
-  const handleStatusChange = (order, newStatus) => {
+  const handleStatusChange = (order, newStatus, options = {}) => {
+    const { enableUndo = true } = options;
+
     const dbStatus = (() => {
       if (newStatus === 'nuovo') return 'pending';
       if (newStatus === 'confermato') return 'confirmed';
@@ -272,10 +279,88 @@ export default function Orders() {
       return newStatus;
     })();
 
-    updateOrderMutation.mutate({
-      id: order.id,
-      data: { status: dbStatus, stato: newStatus }
-    });
+    const prevStatus = String(order?.stato ?? '').toLowerCase();
+    const prevDbStatus = (() => {
+      if (prevStatus === 'nuovo') return 'pending';
+      if (prevStatus === 'confermato') return 'confirmed';
+      if (prevStatus === 'in_preparazione') return 'preparing';
+      if (prevStatus === 'pronto') return 'ready';
+      if (prevStatus === 'in_consegna') return 'delivered';
+      if (prevStatus === 'completato') return 'delivered';
+      if (prevStatus === 'annullato') return 'cancelled';
+      return prevStatus;
+    })();
+
+    const toastTitle = newStatus === 'annullato'
+      ? 'Ordine annullato'
+      : 'Stato aggiornato';
+    const toastDescription = `Ordine #${order?.numero_ordine ?? ''}`;
+
+    updateOrderMutation.mutate(
+      {
+        id: order.id,
+        data: { status: dbStatus, stato: newStatus },
+      },
+      {
+        onMutate: async () => {
+          await queryClient.cancelQueries({ queryKey: ['orders'] });
+          const previousOrders = queryClient.getQueryData(['orders', restaurant?.id]);
+
+          queryClient.setQueryData(['orders', restaurant?.id], (old) => {
+            if (!Array.isArray(old)) return old;
+            return old.map((o) => (o?.id === order.id ? { ...o, stato: newStatus } : o));
+          });
+
+          if (enableUndo && prevStatus && prevStatus !== newStatus) {
+            toast({
+              title: toastTitle,
+              description: toastDescription,
+              duration: 5000,
+              action: {
+                label: 'Annulla',
+                onClick: () => {
+                  const current = (ordersRef.current || []).find((o) => o?.id === order.id);
+                  const currentStatus = String(current?.stato ?? '').toLowerCase();
+                  if (currentStatus !== newStatus) return;
+
+                  updateOrderMutation.mutate({
+                    id: order.id,
+                    data: { status: prevDbStatus, stato: prevStatus },
+                  }, {
+                    onMutate: async () => {
+                      await queryClient.cancelQueries({ queryKey: ['orders'] });
+                      queryClient.setQueryData(['orders', restaurant?.id], (old) => {
+                        if (!Array.isArray(old)) return old;
+                        return old.map((o) => (o?.id === order.id ? { ...o, stato: prevStatus } : o));
+                      });
+                    },
+                    onSettled: () => {
+                      queryClient.invalidateQueries({ queryKey: ['orders'] });
+                    },
+                  });
+                },
+              },
+            });
+          }
+
+          return { previousOrders };
+        },
+        onError: (error, _vars, context) => {
+          console.error('Errore aggiornamento ordine:', error);
+          if (context?.previousOrders !== undefined) {
+            queryClient.setQueryData(['orders', restaurant?.id], context.previousOrders);
+          }
+          toast({
+            title: 'Errore',
+            description: error?.message || 'Impossibile aggiornare lo stato',
+            type: 'error',
+          });
+        },
+        onSettled: () => {
+          queryClient.invalidateQueries({ queryKey: ['orders'] });
+        },
+      }
+    );
   };
 
   const openOrderDetails = async (order) => {
@@ -295,7 +380,7 @@ export default function Orders() {
 
   const quickAction = (order, nextStatus) => {
     if (nextStatus === "annullato" && !confirmCancelOrder(order)) return;
-    handleStatusChange(order, nextStatus);
+    handleStatusChange(order, nextStatus, { enableUndo: true });
   };
 
   const kanbanColumns = React.useMemo(() => {

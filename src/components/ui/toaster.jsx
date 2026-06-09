@@ -20,6 +20,21 @@ export function Toaster() {
             {t?.title && <p className="font-semibold text-sm">{t.title}</p>}
             {t?.description && <p className="text-xs mt-1 opacity-90">{t.description}</p>}
           </div>
+          {t?.action?.label && typeof t?.action?.onClick === 'function' && (
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  t.action.onClick();
+                } finally {
+                  dismiss(t.id);
+                }
+              }}
+              className="text-xs font-semibold text-primary hover:opacity-90 transition-opacity px-2 py-1 rounded"
+            >
+              {t.action.label}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => dismiss(t.id)}
