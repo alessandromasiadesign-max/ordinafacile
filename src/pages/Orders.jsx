@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { safeAuditLog } from "@/lib/audit";
 import {
   Search,
   Phone,
@@ -334,6 +335,19 @@ export default function Orders() {
                         return old.map((o) => (o?.id === order.id ? { ...o, stato: prevStatus } : o));
                       });
                     },
+                    onSuccess: () => {
+                      safeAuditLog({
+                        action: 'order_status_undo',
+                        entity_type: 'order',
+                        entity_id: order?.id,
+                        restaurant_id: restaurant?.id,
+                        meta: {
+                          order_number: order?.numero_ordine ?? null,
+                          from: newStatus,
+                          to: prevStatus,
+                        },
+                      });
+                    },
                     onSettled: () => {
                       queryClient.invalidateQueries({ queryKey: ['orders'] });
                     },
@@ -354,6 +368,19 @@ export default function Orders() {
             title: 'Errore',
             description: error?.message || 'Impossibile aggiornare lo stato',
             type: 'error',
+          });
+        },
+        onSuccess: () => {
+          safeAuditLog({
+            action: newStatus === 'annullato' ? 'order_cancelled' : 'order_status_changed',
+            entity_type: 'order',
+            entity_id: order?.id,
+            restaurant_id: restaurant?.id,
+            meta: {
+              order_number: order?.numero_ordine ?? null,
+              from: prevStatus,
+              to: newStatus,
+            },
           });
         },
         onSettled: () => {

@@ -51,7 +51,7 @@ export default function EditCategoryDialog({ open, onClose, category }) {
   });
 
   const buildUpdatePayload = (fd) => ({
-    name: fd?.nome,
+    name: String(fd?.nome ?? '').trim(),
     description: fd?.descrizione,
     image_url: fd?.immagine_url,
   });
@@ -72,6 +72,10 @@ export default function EditCategoryDialog({ open, onClose, category }) {
     autosaveTimerRef.current = setTimeout(() => {
       setAutosaveState('saving');
       const payload = buildUpdatePayload(formData);
+      if (!payload?.name) {
+        setAutosaveState('dirty');
+        return;
+      }
       updateMutation.mutate(payload, {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -106,6 +110,14 @@ export default function EditCategoryDialog({ open, onClose, category }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     const payload = buildUpdatePayload(formData);
+    if (!payload?.name) {
+      toast({
+        title: "Errore",
+        description: "Inserisci un nome categoria",
+        type: "error",
+      });
+      return;
+    }
     updateMutation.mutate(payload, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['categories'] });

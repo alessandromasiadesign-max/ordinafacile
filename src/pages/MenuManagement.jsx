@@ -37,6 +37,7 @@ import CategorySection from "../components/menu/CategorySection";
 import AddCategoryDialog from "../components/menu/AddCategoryDialog";
 import AddMenuItemDialog from "../components/menu/AddMenuItemDialog";
 import { useToast } from "../components/ui/use-toast";
+import { safeAuditLog } from "@/lib/audit";
 
 export default function MenuManagement() {
   const [restaurant, setRestaurant] = useState(null);
@@ -510,6 +511,15 @@ export default function MenuManagement() {
       toast({
         title: 'Categoria rimossa',
         type: 'success',
+      });
+      safeAuditLog({
+        action: 'category_deleted',
+        entity_type: 'category',
+        entity_id: confirmCategory?.id ?? null,
+        restaurant_id: restaurant?.id,
+        meta: {
+          name: confirmCategory?.nome ?? null,
+        },
       });
     },
     onError: (error) => {

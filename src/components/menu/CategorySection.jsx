@@ -5,9 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { CopyPlus, Pencil, Plus, Trash2 } from "lucide-react";
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { useToast } from "../ui/use-toast";
+import { safeAuditLog } from "@/lib/audit";
 
 import EditCategoryDialog from "./EditCategoryDialog";
 import EditMenuItemDialog from "./EditMenuItemDialog";
@@ -17,6 +28,7 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
   const [showEditCategory, setShowEditCategory] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [selectedItemIds, setSelectedItemIds] = useState([]);
+  const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = useState(false);
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -25,14 +37,26 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
 
   const toggleEsauritoMutation = useMutation({
     mutationFn: ({ id, esaurito }) => MenuItem.update(id, { esaurito }),
+    onMutate: async ({ id, esaurito }) => {
+      await queryClient.cancelQueries({ queryKey: ['menuItems'] });
+      const previous = queryClient.getQueriesData({ queryKey: ['menuItems'] });
+
+      queryClient.setQueriesData({ queryKey: ['menuItems'] }, (old) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((i) => (i?.id === id ? { ...i, esaurito } : i));
+      });
+
+      return { previous };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menuItems'] });
-      toast({
-        title: "Stato aggiornato",
-        type: "success"
-      });
     },
-    onError: (error) => {
+    onError: (error, _vars, context) => {
+      if (context?.previous) {
+        for (const [key, value] of context.previous) {
+          queryClient.setQueryData(key, value);
+        }
+      }
       console.error("Errore aggiornamento:", error);
       toast({
         title: "Errore",
@@ -40,14 +64,63 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
         type: "error"
       });
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+    },
   });
+
+  const undoEsaurito = async ({ id, esaurito }) => {
+    try {
+      await MenuItem.update(id, { esaurito });
+      queryClient.setQueriesData({ queryKey: ['menuItems'] }, (old) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((i) => (i?.id === id ? { ...i, esaurito } : i));
+      });
+      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      safeAuditLog({
+        action: 'menu_item_esaurito_undo',
+        entity_type: 'menu_item',
+        entity_id: id,
+        restaurant_id: category?.restaurant_id,
+        meta: { esaurito },
+      });
+    } catch (error) {
+      console.error('Errore undo esaurito:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile annullare la modifica",
+        type: "error"
+      });
+    }
+  };
 
   // Handler for toggling 'esaurito' status
   const handleToggleEsaurito = (item, e) => {
     e.stopPropagation(); // Prevent the card's onClick from firing
-    toggleEsauritoMutation.mutate({ 
-      id: item.id, 
-      esaurito: !item.esaurito 
+    const prev = !!item.esaurito;
+    const next = !prev;
+
+    toggleEsauritoMutation.mutate({
+      id: item.id,
+      esaurito: next,
+    }, {
+      onSuccess: () => {
+        toast({
+          title: "Stato aggiornato",
+          type: "success",
+          action: {
+            label: 'Annulla',
+            onClick: () => undoEsaurito({ id: item.id, esaurito: prev }),
+          },
+        });
+        safeAuditLog({
+          action: 'menu_item_esaurito_changed',
+          entity_type: 'menu_item',
+          entity_id: item?.id,
+          restaurant_id: category?.restaurant_id,
+          meta: { from: prev, to: next },
+        });
+      },
     });
   };
 
@@ -66,21 +139,124 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
         .in('id', ids);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
-      setSelectedItemIds([]);
-      toast({
-        title: 'Aggiornato',
-        type: 'success',
+    onMutate: async ({ ids, patch }) => {
+      await queryClient.cancelQueries({ queryKey: ['menuItems'] });
+      const previous = queryClient.getQueriesData({ queryKey: ['menuItems'] });
+
+      const prevById = new Map();
+      for (const [_key, list] of previous) {
+        if (!Array.isArray(list)) continue;
+        for (const i of list) {
+          if (i?.id && ids.includes(i.id)) prevById.set(i.id, i);
+        }
+      }
+
+      queryClient.setQueriesData({ queryKey: ['menuItems'] }, (old) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((i) => {
+          if (!i?.id || !ids.includes(i.id)) return i;
+          return { ...i, ...patch };
+        });
       });
+
+      return { previous, prevById, ids, patch };
     },
-    onError: (error) => {
+    onError: (error, _vars, context) => {
+      if (context?.previous) {
+        for (const [key, value] of context.previous) {
+          queryClient.setQueryData(key, value);
+        }
+      }
+
       console.error('Errore bulk update prodotti:', error);
       toast({
         title: 'Errore',
         description: error?.message || 'Impossibile aggiornare i prodotti',
         type: 'error',
       });
+    },
+    onSuccess: (_data, vars, context) => {
+      const ids = vars?.ids;
+      const patch = vars?.patch;
+      if (!Array.isArray(ids) || !patch || typeof patch !== 'object') {
+        queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+        return;
+      }
+
+      toast({
+        title: 'Aggiornato',
+        type: 'success',
+        action: {
+          label: 'Annulla',
+          onClick: async () => {
+            try {
+              const prevById = context?.prevById;
+              if (!prevById || typeof prevById.get !== 'function') return;
+
+              queryClient.setQueriesData({ queryKey: ['menuItems'] }, (old) => {
+                if (!Array.isArray(old)) return old;
+                return old.map((i) => {
+                  if (!i?.id || !ids.includes(i.id)) return i;
+                  const prev = prevById.get(i.id);
+                  if (!prev) return i;
+                  const restored = { ...i };
+                  if (Object.prototype.hasOwnProperty.call(patch, 'is_available')) restored.is_available = prev.is_available;
+                  if (Object.prototype.hasOwnProperty.call(patch, 'esaurito')) restored.esaurito = prev.esaurito;
+                  return restored;
+                });
+              });
+
+              await Promise.all(
+                ids.map(async (id) => {
+                  const prev = prevById.get(id);
+                  if (!prev) return;
+
+                  const restore = {};
+                  if (Object.prototype.hasOwnProperty.call(patch, 'is_available')) restore.is_available = prev.is_available;
+                  if (Object.prototype.hasOwnProperty.call(patch, 'esaurito')) restore.esaurito = prev.esaurito;
+                  if (Object.keys(restore).length === 0) return;
+
+                  const { error } = await supabase
+                    .from('menu_items')
+                    .update(restore)
+                    .eq('id', id);
+                  if (error) throw error;
+                })
+              );
+
+              queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+              safeAuditLog({
+                action: 'menu_item_bulk_update_undo',
+                entity_type: 'menu_item',
+                entity_id: null,
+                restaurant_id: category?.restaurant_id,
+                meta: { ids, patch },
+              });
+            } catch (e) {
+              console.error('Errore undo bulk update:', e);
+              toast({
+                title: 'Errore',
+                description: e?.message || 'Impossibile annullare la modifica',
+                type: 'error',
+              });
+              queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+            }
+          },
+        },
+      });
+
+      setSelectedItemIds([]);
+      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      safeAuditLog({
+        action: 'menu_item_bulk_updated',
+        entity_type: 'menu_item',
+        entity_id: null,
+        restaurant_id: category?.restaurant_id,
+        meta: { ids, patch },
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
     },
   });
 
@@ -100,12 +276,22 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
         .in('id', ids);
       if (delItemsError) throw delItemsError;
     },
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ['menuItems'] });
       setSelectedItemIds([]);
       toast({
         title: 'Prodotti eliminati',
         type: 'success',
+      });
+      safeAuditLog({
+        action: 'menu_item_bulk_deleted',
+        entity_type: 'menu_item',
+        entity_id: null,
+        restaurant_id: category?.restaurant_id,
+        meta: {
+          ids: Array.isArray(vars?.ids) ? vars.ids : [],
+          count: Array.isArray(vars?.ids) ? vars.ids.length : 0,
+        },
       });
     },
     onError: (error) => {
@@ -249,11 +435,7 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => {
-                    if (confirm(`Eliminare ${selectedItemIds.length} prodotti?`)) {
-                      bulkDeleteMutation.mutate({ ids: selectedItemIds });
-                    }
-                  }}
+                  onClick={() => setIsBulkDeleteConfirmOpen(true)}
                   disabled={bulkUpdateMutation.isPending || bulkDeleteMutation.isPending}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -279,6 +461,7 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
               Nessun prodotto in questa categoria
             </div>
           ) : (
+            <>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {menuItems.map(item => (
                 (() => {
@@ -398,6 +581,31 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                 })()
               ))}
             </div>
+
+            <AlertDialog open={isBulkDeleteConfirmOpen} onOpenChange={setIsBulkDeleteConfirmOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Eliminare prodotti?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Stai per eliminare {selectedItemIds.length} prodotti. L’operazione è definitiva.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={bulkDeleteMutation.isPending}>Annulla</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-red-600 hover:bg-red-700"
+                    disabled={bulkDeleteMutation.isPending || selectedItemIds.length === 0}
+                    onClick={() => {
+                      bulkDeleteMutation.mutate({ ids: selectedItemIds });
+                      setIsBulkDeleteConfirmOpen(false);
+                    }}
+                  >
+                    Elimina
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            </>
           )}
         </CardContent>
       </Card>

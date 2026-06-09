@@ -1,4 +1,4 @@
-﻿import { Core } from '@/api/integrations';
+import { Core } from '@/api/integrations';
 import { MenuItem } from '@/api/entities';
 import React, { useState, useRef } from 'react';
 import {
@@ -8,6 +8,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,22 +29,23 @@ import { supabase } from '@/api/supabaseClient';
 import { useToast } from "../ui/use-toast";
 import LazyImage from "../ui/lazy-image";
 import { Checkbox } from "@/components/ui/checkbox";
+import { safeAuditLog } from "@/lib/audit";
 
 const ALLERGENI = [
-  { value: "glutine", label: "Glutine", icon: "🌾" },
-  { value: "crostacei", label: "Crostacei", icon: "🦐" },
-  { value: "uova", label: "Uova", icon: "🥚" },
-  { value: "pesce", label: "Pesce", icon: "🐟" },
-  { value: "arachidi", label: "Arachidi", icon: "🥜" },
-  { value: "soia", label: "Soia", icon: "🫘" },
-  { value: "latte", label: "Latte", icon: "🥛" },
-  { value: "frutta_a_guscio", label: "Frutta a guscio", icon: "🌰" },
-  { value: "sedano", label: "Sedano", icon: "🥬" },
-  { value: "senape", label: "Senape", icon: "🌭" },
-  { value: "sesamo", label: "Sesamo", icon: "🫘" },
-  { value: "solfiti", label: "Solfiti", icon: "🍷" },
-  { value: "lupini", label: "Lupini", icon: "🫘" },
-  { value: "molluschi", label: "Molluschi", icon: "🦪" }
+  { value: "glutine", label: "Glutine", icon: "??" },
+  { value: "crostacei", label: "Crostacei", icon: "??" },
+  { value: "uova", label: "Uova", icon: "??" },
+  { value: "pesce", label: "Pesce", icon: "??" },
+  { value: "arachidi", label: "Arachidi", icon: "??" },
+  { value: "soia", label: "Soia", icon: "??" },
+  { value: "latte", label: "Latte", icon: "??" },
+  { value: "frutta_a_guscio", label: "Frutta a guscio", icon: "??" },
+  { value: "sedano", label: "Sedano", icon: "??" },
+  { value: "senape", label: "Senape", icon: "??" },
+  { value: "sesamo", label: "Sesamo", icon: "??" },
+  { value: "solfiti", label: "Solfiti", icon: "??" },
+  { value: "lupini", label: "Lupini", icon: "??" },
+  { value: "molluschi", label: "Molluschi", icon: "??" }
 ];
 
 export default function EditMenuItemDialog({ open, onClose, menuItem }) {
@@ -42,6 +53,7 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("dettagli");
   const [selectedCategoryModifierIds, setSelectedCategoryModifierIds] = useState([]);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [autosaveState, setAutosaveState] = useState('saved');
   const autosaveInitRef = useRef(true);
   const autosaveTimerRef = useRef(null);
@@ -106,11 +118,13 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
   });
 
   const buildUpdatePayload = (fd) => {
+    const name = String(fd?.nome ?? '').trim();
     const price = Number(fd?.prezzo);
+    const safePrice = Number.isFinite(price) ? Math.max(0, price) : 0;
     return {
-      name: fd?.nome,
+      name,
       description: fd?.descrizione,
-      price: Number.isFinite(price) ? price : 0,
+      price: safePrice,
       image_url: fd?.immagine_url,
       allergens: Array.isArray(fd?.allergeni) ? fd.allergeni : [],
       is_available: !!fd?.disponibile,
@@ -134,6 +148,10 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
     autosaveTimerRef.current = setTimeout(() => {
       setAutosaveState('saving');
       const payload = buildUpdatePayload(formData);
+      if (!payload?.name) {
+        setAutosaveState('dirty');
+        return;
+      }
       updateMutation.mutate(payload, {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['menuItems'] });
@@ -237,6 +255,22 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     const payload = buildUpdatePayload(formData);
+    if (!payload?.name) {
+      toast({
+        title: "Errore",
+        description: "Inserisci un nome prodotto",
+        type: "error",
+      });
+      return;
+    }
+    if (!Number.isFinite(payload?.price) || payload.price < 0) {
+      toast({
+        title: "Errore",
+        description: "Inserisci un prezzo valido",
+        type: "error",
+      });
+      return;
+    }
     updateMutation.mutate(payload, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['menuItems'] });
@@ -258,9 +292,7 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
   };
 
   const handleDelete = () => {
-    if (confirm(`Eliminare "${menuItem.nome}"?`)) {
-      deleteMutation.mutate();
-    }
+    setIsDeleteConfirmOpen(true);
   };
 
   if (!menuItem) return null;
@@ -311,10 +343,11 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Prezzo (€) *</Label>
+                  <Label>Prezzo (�) *</Label>
                   <Input
                     type="number"
                     step="0.01"
+                    min="0"
                     value={formData.prezzo || 0}
                     onChange={(e) => setFormData(prev => ({ ...prev, prezzo: parseFloat(e.target.value) }))}
                     required
@@ -489,7 +522,7 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
                           <div className="font-semibold">{m.nome}</div>
                           <div className="text-xs text-muted-foreground">
                             {m.tipo === 'singolo' ? 'Selezione singola' : 'Selezione multipla'}
-                            {m.obbligatorio ? ' • obbligatorio' : ''}
+                            {m.obbligatorio ? ' � obbligatorio' : ''}
                           </div>
                         </div>
                       </div>
@@ -509,7 +542,42 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
               </div>
             </div>
           </TabsContent>
-        </Tabs>
+        </Tabs>
+
+        <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Eliminare prodotto?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Vuoi eliminare "{menuItem?.nome}"? L�operazione � definitiva.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteMutation.isPending}>Annulla</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                disabled={deleteMutation.isPending}
+                onClick={() => {
+                  deleteMutation.mutate(undefined, {
+                    onSuccess: () => {
+                      safeAuditLog({
+                        action: 'menu_item_deleted',
+                        entity_type: 'menu_item',
+                        entity_id: menuItem?.id ?? null,
+                        restaurant_id: menuItem?.restaurant_id ?? null,
+                        meta: { name: menuItem?.nome ?? null },
+                      });
+                    },
+                  });
+                  setIsDeleteConfirmOpen(false);
+                }}
+              >
+                Elimina
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
       </DialogContent>
     </Dialog>
   );
