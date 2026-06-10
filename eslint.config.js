@@ -36,6 +36,21 @@ export default [
     },
     rules: {
       "no-unused-vars": "off",
+      "no-restricted-globals": [
+        "error",
+        {
+          name: "confirm",
+          message: "Non usare confirm(). Usa AlertDialog (src/components/ui/alert-dialog).",
+        },
+      ],
+      "no-restricted-properties": [
+        "error",
+        {
+          object: "window",
+          property: "confirm",
+          message: "Non usare window.confirm(). Usa AlertDialog (src/components/ui/alert-dialog).",
+        },
+      ],
       "react/jsx-uses-vars": "error",
       "react/jsx-uses-react": "error",
       "unused-imports/no-unused-imports": "error",

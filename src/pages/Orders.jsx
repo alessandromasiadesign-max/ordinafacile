@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Restaurant, Order } from '@/api/entities';
 import { supabase } from '@/api/supabaseClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -726,6 +726,31 @@ export default function Orders() {
         onClose={() => setSelectedOrder(null)}
         onStatusChange={handleStatusChange}
       />
+
+      <AlertDialog open={!!orderToCancel} onOpenChange={(open) => { if (!open) setOrderToCancel(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Annullare ordine?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sei sicuro di voler annullare l'ordine #{orderToCancel?.numero_ordine ?? ''}? L'operazione è definitiva.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={updateOrderMutation.isPending}>Annulla</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              disabled={updateOrderMutation.isPending}
+              onClick={() => {
+                const o = orderToCancel;
+                setOrderToCancel(null);
+                if (o) handleStatusChange(o, "annullato", { enableUndo: true });
+              }}
+            >
+              Annulla ordine
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
