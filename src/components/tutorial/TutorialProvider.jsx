@@ -13,6 +13,8 @@ import {
 
 const TutorialContext = createContext(null);
 
+const STORAGE_KEY = "of_tutorial_progress";
+
 export function useTutorial() {
   return useContext(TutorialContext);
 }
@@ -119,12 +121,55 @@ export default function TutorialProvider({ includeAdminTours = false }) {
   const [run, setRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [steps, setSteps] = useState([]);
+  const [currentKind, setCurrentKind] = useState(null);
+  const [savedProgress, setSavedProgress] = useState(null);
 
   const value = useMemo(() => {
     return {
       openSelector: () => setSelectorOpen(true),
     };
   }, []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        setSavedProgress(null);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") {
+        setSavedProgress(null);
+        return;
+      }
+      const kind = parsed.kind;
+      const idx = parsed.stepIndex;
+      if (!kind || !Number.isFinite(Number(idx))) {
+        setSavedProgress(null);
+        return;
+      }
+      setSavedProgress({ kind, stepIndex: Number(idx) });
+    } catch {
+      setSavedProgress(null);
+    }
+  }, [includeAdminTours]);
+
+  const persistProgress = (nextKind, nextIndex) => {
+    try {
+      if (!nextKind || !Number.isFinite(Number(nextIndex))) return;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ kind: nextKind, stepIndex: Number(nextIndex) }));
+      setSavedProgress({ kind: nextKind, stepIndex: Number(nextIndex) });
+    } catch {
+    }
+  };
+
+  const clearProgress = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+    }
+    setSavedProgress(null);
+  };
 
   const startTour = (kind) => {
     const nextSteps = (() => {
@@ -135,13 +180,43 @@ export default function TutorialProvider({ includeAdminTours = false }) {
     })();
 
     setSelectorOpen(false);
+    setCurrentKind(kind);
     setSteps(nextSteps);
     setStepIndex(0);
     setRun(true);
+    persistProgress(kind, 0);
 
     const firstRoute = nextSteps?.[0]?.route;
     if (firstRoute && location.pathname !== firstRoute) {
       navigate(firstRoute);
+    }
+  };
+
+  const resumeTour = () => {
+    const kind = savedProgress?.kind;
+    const idx = savedProgress?.stepIndex ?? 0;
+    if (!kind) return;
+
+    const nextSteps = (() => {
+      if (kind === "menu") return buildMenuTour();
+      if (kind === "orders") return buildOrdersTour();
+      if (kind === "marketing") return buildMarketingTour(includeAdminTours);
+      return [];
+    })();
+
+    const maxIndex = Math.max((nextSteps?.length ?? 1) - 1, 0);
+    const safeIndex = Math.max(0, Math.min(Number(idx) || 0, maxIndex));
+
+    setSelectorOpen(false);
+    setCurrentKind(kind);
+    setSteps(nextSteps);
+    setStepIndex(safeIndex);
+    setRun(true);
+    persistProgress(kind, safeIndex);
+
+    const route = nextSteps?.[safeIndex]?.route ?? nextSteps?.[0]?.route;
+    if (route && location.pathname !== route) {
+      navigate(route);
     }
   };
 
@@ -154,6 +229,12 @@ export default function TutorialProvider({ includeAdminTours = false }) {
     navigate(route);
   }, [run, stepIndex, steps, location.pathname, navigate]);
 
+  useEffect(() => {
+    if (!run) return;
+    if (!currentKind) return;
+    persistProgress(currentKind, stepIndex);
+  }, [run, currentKind, stepIndex]);
+
   const handleJoyrideCallback = (data) => {
     const { action, index, status, type } = data;
 
@@ -161,6 +242,8 @@ export default function TutorialProvider({ includeAdminTours = false }) {
       setRun(false);
       setSteps([]);
       setStepIndex(0);
+      setCurrentKind(null);
+      clearProgress();
       return;
     }
 
@@ -181,6 +264,8 @@ export default function TutorialProvider({ includeAdminTours = false }) {
       setRun(false);
       setSteps([]);
       setStepIndex(0);
+      setCurrentKind(null);
+      clearProgress();
     }
   };
 
@@ -211,6 +296,11 @@ export default function TutorialProvider({ includeAdminTours = false }) {
             <DialogTitle>Guida</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
+            {savedProgress?.kind && (
+              <Button type="button" variant="outline" className="w-full" onClick={resumeTour}>
+                Riprendi tour
+              </Button>
+            )}
             <Button type="button" className="w-full" onClick={() => startTour("menu")}>
               Tour Menu
             </Button>
