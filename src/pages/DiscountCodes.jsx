@@ -1,4 +1,4 @@
-﻿import { SubscriptionDiscountCode, DiscountUsage } from '@/api/entities';
+import { SubscriptionDiscountCode, DiscountUsage } from '@/api/entities';
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +8,16 @@ import { Plus, Ticket, Edit2, Trash2 } from "lucide-react";
 import { useToast } from "../components/ui/use-toast";
 import AddDiscountCodeDialog from "../components/subscriptions/AddDiscountCodeDialog";
 import EditDiscountCodeDialog from "../components/subscriptions/EditDiscountCodeDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const tipoScontoLabels = {
   percentuale: "Percentuale",
@@ -25,6 +35,7 @@ const durataScontoLabels = {
 export default function DiscountCodes() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingCode, setEditingCode] = useState(null);
+  const [codeToDelete, setCodeToDelete] = useState(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -205,11 +216,8 @@ export default function DiscountCodes() {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => {
-                          if (confirm("Eliminare questo codice sconto?")) {
-                            deleteMutation.mutate(code.id);
-                          }
-                        }}
+                        onClick={() => setCodeToDelete(code)}
+                        disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
                         Elimina
@@ -251,6 +259,30 @@ export default function DiscountCodes() {
             code={editingCode}
           />
         )}
+        <AlertDialog open={!!codeToDelete} onOpenChange={(open) => !open && setCodeToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Eliminare codice sconto?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Vuoi eliminare il codice "{codeToDelete?.codice ?? ''}"? L’operazione è definitiva.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteMutation.isPending}>Annulla</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                disabled={deleteMutation.isPending}
+                onClick={() => {
+                  if (!codeToDelete?.id) return;
+                  deleteMutation.mutate(codeToDelete.id);
+                  setCodeToDelete(null);
+                }}
+              >
+                Elimina
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

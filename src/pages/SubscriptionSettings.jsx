@@ -16,10 +16,21 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function SubscriptionSettings() {
   const [showAddPlan, setShowAddPlan] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
+  const [planToDelete, setPlanToDelete] = useState(null);
 
   const [platformSettings, setPlatformSettings] = useState({
     payment_info: {
@@ -464,11 +475,8 @@ export default function SubscriptionSettings() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => {
-                            if (confirm("Eliminare questo piano?")) {
-                              deletePlanMutation.mutate(plan.id);
-                            }
-                          }}
+                          onClick={() => setPlanToDelete(plan)}
+                          disabled={deletePlanMutation.isPending}
                         >
                           <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>
@@ -524,6 +532,31 @@ export default function SubscriptionSettings() {
           }}
           plan={editingPlan}
         />
+
+        <AlertDialog open={!!planToDelete} onOpenChange={(open) => !open && setPlanToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Eliminare piano?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Vuoi eliminare il piano "{planToDelete?.nome ?? ''}"? L’operazione è definitiva.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deletePlanMutation.isPending}>Annulla</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                disabled={deletePlanMutation.isPending}
+                onClick={() => {
+                  if (!planToDelete?.id) return;
+                  deletePlanMutation.mutate(planToDelete.id);
+                  setPlanToDelete(null);
+                }}
+              >
+                Elimina
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

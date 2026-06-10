@@ -15,6 +15,16 @@ import {
 } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function CategoryModifierManager({ category, onClose }) {
   const [newModifier, setNewModifier] = useState({
@@ -24,6 +34,7 @@ export default function CategoryModifierManager({ category, onClose }) {
     opzioni: [],
   });
   const [newOption, setNewOption] = useState({ nome: "", prezzo_extra: 0 });
+  const [modifierToDelete, setModifierToDelete] = useState(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -133,11 +144,8 @@ export default function CategoryModifierManager({ category, onClose }) {
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => {
-                      if (confirm('Eliminare questo modificatore?')) {
-                        deleteModifierMutation.mutate(mod.id);
-                      }
-                    }}
+                    onClick={() => setModifierToDelete(mod)}
+                    disabled={deleteModifierMutation.isPending}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -279,6 +287,31 @@ export default function CategoryModifierManager({ category, onClose }) {
           </Button>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!modifierToDelete} onOpenChange={(open) => !open && setModifierToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminare modificatore?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vuoi eliminare il modificatore "{modifierToDelete?.nome ?? ''}"? L’operazione è definitiva.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteModifierMutation.isPending}>Annulla</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteModifierMutation.isPending}
+              onClick={() => {
+                if (!modifierToDelete?.id) return;
+                deleteModifierMutation.mutate(modifierToDelete.id);
+                setModifierToDelete(null);
+              }}
+            >
+              Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

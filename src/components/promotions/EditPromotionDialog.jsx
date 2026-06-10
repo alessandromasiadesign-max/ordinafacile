@@ -1,4 +1,4 @@
-﻿import { Promotion } from '@/api/entities';
+import { Promotion } from '@/api/entities';
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -22,9 +22,20 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check } from 'lucide-react';
 import StatusToggle from "../ui/status-toggle";
 import { useToast } from "../ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function EditPromotionDialog({ open, onClose, promotion }) {
   const [formData, setFormData] = useState(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -419,9 +430,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
               type="button" 
               variant="destructive"
               onClick={() => {
-                if (confirm("Sei sicuro di voler eliminare questa promozione?")) {
-                  deleteMutation.mutate();
-                }
+                setConfirmDeleteOpen(true);
               }}
             >
               Elimina
@@ -436,6 +445,30 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
             </div>
           </DialogFooter>
         </form>
+
+        <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Eliminare promozione?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Sei sicuro di voler eliminare questa promozione? L’operazione è definitiva.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteMutation.isPending}>Annulla</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                disabled={deleteMutation.isPending}
+                onClick={() => {
+                  setConfirmDeleteOpen(false);
+                  deleteMutation.mutate();
+                }}
+              >
+                Elimina
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );

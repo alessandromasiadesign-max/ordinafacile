@@ -22,6 +22,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import AddLocationDialog from "../components/locations/AddLocationDialog";
 import StatusToggle from "../components/ui/status-toggle";
@@ -30,6 +40,7 @@ import { useToast } from "../components/ui/use-toast";
 export default function Locations() {
   const [restaurant, setRestaurant] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [locationToDelete, setLocationToDelete] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: locations = [] } = useQuery({
@@ -317,9 +328,7 @@ export default function Locations() {
                               <DropdownMenuItem
                                 className="text-red-600 focus:text-red-600 focus:bg-red-50"
                                 onClick={() => {
-                                  if (confirm(`Eliminare la sede "${location.nome || location.name}"? Questa azione è irreversibile.`)) {
-                                    deleteMutation.mutate(location.id);
-                                  }
+                                  setLocationToDelete(location);
                                 }}
                               >
                                 <Trash2 className="w-4 h-4 mr-2" /> Elimina Sede
@@ -365,6 +374,31 @@ export default function Locations() {
             onClose={() => setShowAddDialog(false)}
             restaurantId={restaurant?.id}
           />
+
+          <AlertDialog open={!!locationToDelete} onOpenChange={(open) => !open && setLocationToDelete(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Eliminare sede?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Eliminare la sede "{locationToDelete?.nome || locationToDelete?.name || ''}"? Questa azione è irreversibile.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleteMutation.isPending}>Annulla</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-red-600 hover:bg-red-700"
+                  disabled={deleteMutation.isPending}
+                  onClick={() => {
+                    if (!locationToDelete?.id) return;
+                    deleteMutation.mutate(locationToDelete.id);
+                    setLocationToDelete(null);
+                  }}
+                >
+                  Elimina
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>

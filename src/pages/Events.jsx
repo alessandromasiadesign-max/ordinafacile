@@ -9,11 +9,23 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Calendar, Trash2, Power, PowerOff, QrCode, ExternalLink, Menu } from "lucide-react";
 import { createPageUrl } from "@/utils";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 import AddEventDialog from "../components/events/AddEventDialog";
 
 export default function Events() {
   const [restaurant, setRestaurant] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: events = [] } = useQuery({
@@ -157,11 +169,8 @@ export default function Events() {
                         <Button 
                           size="icon" 
                           variant="ghost"
-                          onClick={() => {
-                            if (confirm("Eliminare questo evento?")) {
-                              deleteMutation.mutate(event.id);
-                            }
-                          }}
+                          onClick={() => setEventToDelete(event)}
+                          disabled={deleteMutation.isPending}
                         >
                           <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>
@@ -240,6 +249,31 @@ export default function Events() {
             })}
           </div>
         )}
+
+        <AlertDialog open={!!eventToDelete} onOpenChange={(open) => !open && setEventToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Eliminare evento?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Vuoi eliminare l’evento "{eventToDelete?.nome}"? L’operazione è definitiva.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteMutation.isPending}>Annulla</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                disabled={deleteMutation.isPending}
+                onClick={() => {
+                  if (!eventToDelete?.id) return;
+                  deleteMutation.mutate(eventToDelete.id);
+                  setEventToDelete(null);
+                }}
+              >
+                Elimina
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <AddEventDialog
           open={showAddDialog}

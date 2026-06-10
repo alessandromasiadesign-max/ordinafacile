@@ -1,4 +1,4 @@
-﻿import { Restaurant, MenuItem, Category, Event } from '@/api/entities';
+import { Restaurant, MenuItem, Category, Event } from '@/api/entities';
 import React, { useState, useEffect } from "react";
 import { supabase } from '@/api/supabaseClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -18,6 +18,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
@@ -44,6 +54,7 @@ export default function EventMenu() {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importCategoryId, setImportCategoryId] = useState("");
   const [copyBusyCategoryId, setCopyBusyCategoryId] = useState(null);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -427,9 +438,8 @@ export default function EventMenu() {
                           disabled={deleteCategoryMutation.isPending}
                           onClick={(e) => {
                             e.stopPropagation();
-                            const ok = confirm("Eliminare questa categoria?");
-                            if (!ok) return;
-                            deleteCategoryMutation.mutate(category);
+                            if (deleteCategoryMutation.isPending) return;
+                            setCategoryToDelete(category);
                           }}
                           title="Elimina questa categoria"
                         >
@@ -525,6 +535,30 @@ export default function EventMenu() {
           </DialogContent>
         </Dialog>
       </div>
+        <AlertDialog open={!!categoryToDelete} onOpenChange={(open) => !open && setCategoryToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Eliminare categoria?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Vuoi eliminare la categoria "{categoryToDelete?.nome ?? ''}"? L’operazione è definitiva.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteCategoryMutation.isPending}>Annulla</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                disabled={deleteCategoryMutation.isPending}
+                onClick={() => {
+                  if (!categoryToDelete?.id) return;
+                  deleteCategoryMutation.mutate(categoryToDelete);
+                  setCategoryToDelete(null);
+                }}
+              >
+                Elimina
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 }

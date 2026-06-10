@@ -32,6 +32,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 import OrderDetailsModal from "../components/orders/OrderDetailsModal";
 
 const statusColors = {
@@ -59,6 +70,7 @@ export default function Orders() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("tutti");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orderToCancel, setOrderToCancel] = useState(null);
   const [viewMode, setViewMode] = useState(() => {
     try {
       return localStorage.getItem("orders_view_mode") || "list";
@@ -400,13 +412,11 @@ export default function Orders() {
     }
   };
 
-  const confirmCancelOrder = (order) => {
-    const orderNumber = order?.numero_ordine ?? "";
-    return window.confirm(`Annullare l’ordine #${orderNumber}?`);
-  };
-
   const quickAction = (order, nextStatus) => {
-    if (nextStatus === "annullato" && !confirmCancelOrder(order)) return;
+    if (nextStatus === "annullato") {
+      setOrderToCancel(order);
+      return;
+    }
     handleStatusChange(order, nextStatus, { enableUndo: true });
   };
 
@@ -678,7 +688,13 @@ export default function Orders() {
 
                         <Select 
                           value={order.stato} 
-                          onValueChange={(value) => handleStatusChange(order, value)}
+                          onValueChange={(value) => {
+                            if (value === "annullato") {
+                              setOrderToCancel(order);
+                              return;
+                            }
+                            handleStatusChange(order, value);
+                          }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <SelectTrigger className="w-full sm:w-40 text-xs md:text-sm">
