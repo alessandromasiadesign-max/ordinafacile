@@ -540,7 +540,7 @@ export default function EventMenu() {
             <AlertDialogHeader>
               <AlertDialogTitle>Eliminare categoria?</AlertDialogTitle>
               <AlertDialogDescription>
-                Vuoi eliminare la categoria "{categoryToDelete?.nome ?? ''}"? L’operazione è definitiva.
+                Vuoi eliminare la categoria "{categoryToDelete?.nome ?? ''}"? L'operazione è definitiva.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -549,9 +549,10 @@ export default function EventMenu() {
                 className="bg-red-600 hover:bg-red-700"
                 disabled={deleteCategoryMutation.isPending}
                 onClick={() => {
-                  if (!categoryToDelete?.id) return;
-                  deleteCategoryMutation.mutate(categoryToDelete);
+                  const c = categoryToDelete;
                   setCategoryToDelete(null);
+                  if (!c?.id) return;
+                  deleteCategoryMutation.mutate(c);
                 }}
               >
                 Elimina

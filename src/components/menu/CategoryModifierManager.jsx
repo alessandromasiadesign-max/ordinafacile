@@ -293,7 +293,7 @@ export default function CategoryModifierManager({ category, onClose }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminare modificatore?</AlertDialogTitle>
             <AlertDialogDescription>
-              Vuoi eliminare il modificatore "{modifierToDelete?.nome ?? ''}"? L’operazione è definitiva.
+              Vuoi eliminare il modificatore "{modifierToDelete?.nome ?? ''}"? L'operazione è definitiva.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -302,9 +302,10 @@ export default function CategoryModifierManager({ category, onClose }) {
               className="bg-red-600 hover:bg-red-700"
               disabled={deleteModifierMutation.isPending}
               onClick={() => {
-                if (!modifierToDelete?.id) return;
-                deleteModifierMutation.mutate(modifierToDelete.id);
+                const id = modifierToDelete?.id;
                 setModifierToDelete(null);
+                if (!id) return;
+                deleteModifierMutation.mutate(id);
               }}
             >
               Elimina

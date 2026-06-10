@@ -379,7 +379,7 @@ export default function Locations() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Eliminare sede?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Eliminare la sede "{locationToDelete?.nome || locationToDelete?.name || ''}"? Questa azione è irreversibile.
+                  Vuoi eliminare la sede "{locationToDelete?.nome || locationToDelete?.name || ''}"? L'operazione è definitiva.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

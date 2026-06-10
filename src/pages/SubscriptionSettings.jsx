@@ -538,7 +538,7 @@ export default function SubscriptionSettings() {
             <AlertDialogHeader>
               <AlertDialogTitle>Eliminare piano?</AlertDialogTitle>
               <AlertDialogDescription>
-                Vuoi eliminare il piano "{planToDelete?.nome ?? ''}"? L’operazione è definitiva.
+                Vuoi eliminare il piano "{planToDelete?.nome ?? ''}"? L'operazione è definitiva.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -547,9 +547,10 @@ export default function SubscriptionSettings() {
                 className="bg-red-600 hover:bg-red-700"
                 disabled={deletePlanMutation.isPending}
                 onClick={() => {
-                  if (!planToDelete?.id) return;
-                  deletePlanMutation.mutate(planToDelete.id);
+                  const id = planToDelete?.id;
                   setPlanToDelete(null);
+                  if (!id) return;
+                  deletePlanMutation.mutate(id);
                 }}
               >
                 Elimina

@@ -255,7 +255,7 @@ export default function Events() {
             <AlertDialogHeader>
               <AlertDialogTitle>Eliminare evento?</AlertDialogTitle>
               <AlertDialogDescription>
-                Vuoi eliminare l’evento "{eventToDelete?.nome}"? L’operazione è definitiva.
+                Vuoi eliminare l'evento "{eventToDelete?.nome}"? L'operazione è definitiva.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -264,9 +264,10 @@ export default function Events() {
                 className="bg-red-600 hover:bg-red-700"
                 disabled={deleteMutation.isPending}
                 onClick={() => {
-                  if (!eventToDelete?.id) return;
-                  deleteMutation.mutate(eventToDelete.id);
+                  const id = eventToDelete?.id;
                   setEventToDelete(null);
+                  if (!id) return;
+                  deleteMutation.mutate(id);
                 }}
               >
                 Elimina

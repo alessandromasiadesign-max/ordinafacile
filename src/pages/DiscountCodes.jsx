@@ -264,7 +264,7 @@ export default function DiscountCodes() {
             <AlertDialogHeader>
               <AlertDialogTitle>Eliminare codice sconto?</AlertDialogTitle>
               <AlertDialogDescription>
-                Vuoi eliminare il codice "{codeToDelete?.codice ?? ''}"? L’operazione è definitiva.
+                Vuoi eliminare il codice "{codeToDelete?.codice ?? ''}"? L'operazione è definitiva.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -273,9 +273,10 @@ export default function DiscountCodes() {
                 className="bg-red-600 hover:bg-red-700"
                 disabled={deleteMutation.isPending}
                 onClick={() => {
-                  if (!codeToDelete?.id) return;
-                  deleteMutation.mutate(codeToDelete.id);
+                  const id = codeToDelete?.id;
                   setCodeToDelete(null);
+                  if (!id) return;
+                  deleteMutation.mutate(id);
                 }}
               >
                 Elimina

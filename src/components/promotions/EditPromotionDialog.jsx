@@ -451,7 +451,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
             <AlertDialogHeader>
               <AlertDialogTitle>Eliminare promozione?</AlertDialogTitle>
               <AlertDialogDescription>
-                Sei sicuro di voler eliminare questa promozione? L’operazione è definitiva.
+                Sei sicuro di voler eliminare questa promozione? L'operazione è definitiva.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
