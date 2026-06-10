@@ -446,7 +446,7 @@ export default function ChatBot({ restaurant }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             // Responsive positioning and sizing for mobile/tablet
-            className="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-40 w-[calc(100vw-2rem)] sm:w-96 max-w-md"
+            className="fixed bottom-36 right-4 md:bottom-40 md:right-6 z-40 w-[calc(100vw-2rem)] sm:w-96 max-w-md"
           >
             <Card className="shadow-2xl border-2 border-red-200 overflow-hidden">
               {/* Header */}

@@ -398,7 +398,7 @@ export default function TutorialProvider({ includeAdminTours = false }) {
 
       <Button
         type="button"
-        className="fixed bottom-4 right-20 md:bottom-6 md:right-24 z-50 h-12 w-12 md:w-auto md:px-4 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 shadow-2xl"
+        className="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-50 h-12 w-12 md:w-auto md:px-4 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 shadow-2xl"
         onClick={() => setSelectorOpen(true)}
         aria-label="Apri guida"
         title="Guida"
