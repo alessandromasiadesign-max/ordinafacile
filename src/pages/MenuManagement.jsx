@@ -619,6 +619,7 @@ export default function MenuManagement() {
               <p className="text-sm md:text-base text-muted-foreground mt-1">Organizza il tuo menu in categorie</p>
             </div>
             <Button 
+              data-tour="menu-add-category"
               onClick={() => setShowAddCategory(true)}
               className="bg-red-600 hover:bg-red-700 w-full sm:w-auto text-sm md:text-base"
             >
@@ -634,6 +635,7 @@ export default function MenuManagement() {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
                     <Input
+                      data-tour="menu-search"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Cerca categoria o prodotto..."

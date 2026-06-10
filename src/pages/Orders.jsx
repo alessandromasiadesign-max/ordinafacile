@@ -478,7 +478,7 @@ export default function Orders() {
               <div className="flex flex-col gap-3 md:gap-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm text-muted-foreground">{filteredOrders.length} ordini</div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2" data-tour="orders-view-toggle">
                     <Button type="button" variant={viewMode === "list" ? "default" : "outline"} size="sm" onClick={() => setViewMode("list")} className="h-9 md:h-10">
                       <LayoutList className="w-4 h-4 mr-2" />
                       Lista
@@ -494,6 +494,7 @@ export default function Orders() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 md:w-5 md:h-5" />
                     <Input
                       placeholder="Cerca ordine..."
+                      data-tour="orders-search"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="pl-9 md:pl-10 text-sm md:text-base"
@@ -502,7 +503,7 @@ export default function Orders() {
                 </div>
                 <div className="w-full md:w-48">
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="text-sm md:text-base">
+                    <SelectTrigger data-tour="orders-filter" className="text-sm md:text-base">
                       <SelectValue placeholder="Filtra per stato" />
                     </SelectTrigger>
                     <SelectContent>

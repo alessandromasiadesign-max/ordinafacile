@@ -88,6 +88,7 @@ export default function Events() {
             <p className="text-muted-foreground mt-1">Crea menu speciali per eventi e occasioni</p>
           </div>
           <Button 
+            data-tour="events-add"
             className="bg-red-600 hover:bg-red-700"
             onClick={() => setShowAddDialog(true)}
           >

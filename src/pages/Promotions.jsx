@@ -308,6 +308,7 @@ export default function Promotions() {
           </Button>
           <Button
             variant={activeTab === 'create' ? 'default' : 'ghost'}
+            data-tour="promotions-create"
             onClick={() => {
               setActiveTab('create');
               setShowAddDialog(true);

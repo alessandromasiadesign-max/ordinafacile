@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import ChatBot from "./components/layout/ChatBot.jsx";
 import TechnicalSupportDialog from "./components/support/TechnicalSupportDialog.jsx";
+import TutorialProvider from "./components/tutorial/TutorialProvider.jsx";
 import { useToast } from "@/components/ui/use-toast";
 import {
   LayoutDashboard,
@@ -54,12 +55,12 @@ import ThemeToggle from "./components/layout/ThemeToggle.jsx";
 
 const navigationItems = [
   { title: "Dashboard",        url: createPageUrl("Dashboard"),       icon: LayoutDashboard },
-  { title: "Ordini",           url: createPageUrl("Orders"),          icon: ShoppingBag },
+  { title: "Ordini",           url: createPageUrl("Orders"),          icon: ShoppingBag, tour: "nav-orders" },
   { title: "Storico",          url: createPageUrl("OrderHistory"),    icon: History },
-  { title: "Menu",             url: createPageUrl("MenuManagement"),  icon: UtensilsCrossed },
+  { title: "Menu",             url: createPageUrl("MenuManagement"),  icon: UtensilsCrossed, tour: "nav-menu" },
   { title: "Sedi",             url: createPageUrl("Locations"),       icon: Building2 },
-  { title: "Eventi",           url: createPageUrl("Events"),          icon: Calendar },
-  { title: "Promozioni",       url: createPageUrl("Promotions"),      icon: Tag },
+  { title: "Eventi",           url: createPageUrl("Events"),          icon: Calendar, tour: "nav-events" },
+  { title: "Promozioni",       url: createPageUrl("Promotions"),      icon: Tag, tour: "nav-promotions" },
   { title: "Stampa Comande",   url: createPageUrl("PrintOrders"),     icon: Printer },
   { title: "Impostazioni",     url: createPageUrl("Settings"),        icon: Settings },
   { title: "Richiedi Assistenza", url: "#", icon: Headphones, special: "support" },
@@ -384,7 +385,7 @@ export default function Layout({ children }) {
                       </SidebarMenuItem>
                       <SidebarMenuItem>
                         <SidebarMenuButton asChild className={`hover:bg-red-50 hover:text-red-700 transition-colors duration-200 rounded-lg mb-1 ${location.pathname === createPageUrl("DiscountCodes") ? 'bg-red-50 text-red-700' : ''}`}>
-                          <Link to={createPageUrl("DiscountCodes")} className="flex items-center gap-3 px-3 py-2">
+                          <Link to={createPageUrl("DiscountCodes")} data-tour="nav-discount-codes" className="flex items-center gap-3 px-3 py-2">
                             <Ticket className="w-4 h-4" />
                             <span className="font-medium">Codici Sconto</span>
                           </Link>
@@ -419,7 +420,7 @@ export default function Layout({ children }) {
                         </SidebarMenuButton>
                       ) : (
                         <SidebarMenuButton asChild className={`hover:bg-red-50 hover:text-red-700 transition-colors duration-200 rounded-lg mb-1 ${location.pathname === item.url ? 'bg-red-50 text-red-700' : ''}`}>
-                          <Link to={item.url} className="flex items-center gap-3 px-3 py-2">
+                          <Link to={item.url} data-tour={item.tour} className="flex items-center gap-3 px-3 py-2">
                             <item.icon className="w-4 h-4" />
                             <span className="font-medium">{item.title}</span>
                           </Link>
@@ -442,6 +443,7 @@ export default function Layout({ children }) {
                       href={`/r/${restaurant.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      data-tour="public-menu-link"
                       className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
                     >
                       <Store className="w-4 h-4" />
@@ -585,6 +587,8 @@ export default function Layout({ children }) {
           onClose={() => setShowSupportDialog(false)}
           restaurant={restaurant}
         />
+
+        <TutorialProvider includeAdminTours={showMasterNavigation} />
       </div>
     </SidebarProvider>
   );
