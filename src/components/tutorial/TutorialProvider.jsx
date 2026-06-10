@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import Joyride, { ACTIONS, EVENTS, STATUS } from "react-joyride";
 import { useLocation, useNavigate } from "react-router-dom";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, ShoppingBag, Tag, UtensilsCrossed } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
 
@@ -130,6 +131,38 @@ export default function TutorialProvider({ includeAdminTours = false }) {
     };
   }, []);
 
+  const getStepsForKind = (kind) => {
+    if (kind === "menu") return buildMenuTour();
+    if (kind === "orders") return buildOrdersTour();
+    if (kind === "marketing") return buildMarketingTour(includeAdminTours);
+    return [];
+  };
+
+  const getKindMeta = (kind) => {
+    if (kind === "menu") {
+      return {
+        title: "Tour Menu",
+        description: "Categorie, prodotti e link pubblico",
+        icon: UtensilsCrossed,
+      };
+    }
+    if (kind === "orders") {
+      return {
+        title: "Tour Ordini",
+        description: "Ricerca, filtri e vista lista/kanban",
+        icon: ShoppingBag,
+      };
+    }
+    if (kind === "marketing") {
+      return {
+        title: "Tour Marketing",
+        description: "Eventi e promozioni",
+        icon: Tag,
+      };
+    }
+    return { title: "Tour", description: "", icon: HelpCircle };
+  };
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -172,12 +205,7 @@ export default function TutorialProvider({ includeAdminTours = false }) {
   };
 
   const startTour = (kind) => {
-    const nextSteps = (() => {
-      if (kind === "menu") return buildMenuTour();
-      if (kind === "orders") return buildOrdersTour();
-      if (kind === "marketing") return buildMarketingTour(includeAdminTours);
-      return [];
-    })();
+    const nextSteps = getStepsForKind(kind);
 
     setSelectorOpen(false);
     setCurrentKind(kind);
@@ -197,12 +225,7 @@ export default function TutorialProvider({ includeAdminTours = false }) {
     const idx = savedProgress?.stepIndex ?? 0;
     if (!kind) return;
 
-    const nextSteps = (() => {
-      if (kind === "menu") return buildMenuTour();
-      if (kind === "orders") return buildOrdersTour();
-      if (kind === "marketing") return buildMarketingTour(includeAdminTours);
-      return [];
-    })();
+    const nextSteps = getStepsForKind(kind);
 
     const maxIndex = Math.max((nextSteps?.length ?? 1) - 1, 0);
     const safeIndex = Math.max(0, Math.min(Number(idx) || 0, maxIndex));
@@ -281,11 +304,35 @@ export default function TutorialProvider({ includeAdminTours = false }) {
         hideCloseButton
         disableOverlayClose
         scrollToFirstStep
-        spotlightPadding={8}
+        spotlightPadding={12}
+        locale={{
+          back: "Indietro",
+          close: "Chiudi",
+          last: "Fine",
+          next: "Avanti",
+          skip: "Salta",
+        }}
         styles={{
           options: {
             zIndex: 10000,
             primaryColor: "#e74c3c",
+            backgroundColor: "hsl(var(--background))",
+            textColor: "hsl(var(--foreground))",
+            arrowColor: "hsl(var(--background))",
+          },
+          overlay: {
+            backgroundColor: "rgba(0,0,0,0.55)",
+          },
+          tooltipContainer: {
+            borderRadius: 12,
+            padding: 14,
+            boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
+          },
+          buttonNext: {
+            backgroundColor: "#e74c3c",
+          },
+          buttonBack: {
+            color: "hsl(var(--foreground))",
           },
         }}
       />
@@ -293,35 +340,71 @@ export default function TutorialProvider({ includeAdminTours = false }) {
       <Dialog open={selectorOpen} onOpenChange={setSelectorOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Guida</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <HelpCircle className="h-5 w-5" />
+              Guida
+            </DialogTitle>
+            <DialogDescription>
+              Scegli un tour per imparare le funzioni principali. Puoi interrompere e riprendere quando vuoi.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2">
-            {savedProgress?.kind && (
-              <Button type="button" variant="outline" className="w-full" onClick={resumeTour}>
-                Riprendi tour
-              </Button>
-            )}
-            <Button type="button" className="w-full" onClick={() => startTour("menu")}>
-              Tour Menu
-            </Button>
-            <Button type="button" className="w-full" onClick={() => startTour("orders")}>
-              Tour Ordini
-            </Button>
-            <Button type="button" className="w-full" onClick={() => startTour("marketing")}>
-              Tour Marketing
-            </Button>
+          <div className="space-y-3">
+            {savedProgress?.kind && (() => {
+              const meta = getKindMeta(savedProgress.kind);
+              const total = getStepsForKind(savedProgress.kind)?.length ?? 0;
+              const current = Math.min((savedProgress.stepIndex ?? 0) + 1, Math.max(total, 1));
+              const Icon = meta.icon;
+
+              return (
+                <Button type="button" variant="outline" className="w-full justify-start h-auto py-3" onClick={resumeTour}>
+                  <div className="flex items-start gap-3">
+                    <Icon className="h-5 w-5 mt-0.5 text-red-600" />
+                    <div className="text-left">
+                      <div className="font-semibold">Riprendi</div>
+                      <div className="text-xs text-muted-foreground">
+                        {meta.title}{total ? ` • step ${current}/${total}` : ""}
+                      </div>
+                    </div>
+                  </div>
+                </Button>
+              );
+            })()}
+
+            {(["menu", "orders", "marketing"]).map((kind) => {
+              const meta = getKindMeta(kind);
+              const Icon = meta.icon;
+
+              return (
+                <Button
+                  key={kind}
+                  type="button"
+                  variant="default"
+                  className="w-full justify-start h-auto py-3"
+                  onClick={() => startTour(kind)}
+                >
+                  <div className="flex items-start gap-3">
+                    <Icon className="h-5 w-5 mt-0.5" />
+                    <div className="text-left">
+                      <div className="font-semibold">{meta.title}</div>
+                      <div className="text-xs text-white/80">{meta.description}</div>
+                    </div>
+                  </div>
+                </Button>
+              );
+            })}
           </div>
         </DialogContent>
       </Dialog>
 
       <Button
         type="button"
-        className="fixed bottom-5 right-5 z-[9999] h-12 w-12 rounded-full bg-red-600 hover:bg-red-700 shadow-lg"
+        className="fixed bottom-4 right-20 md:bottom-6 md:right-24 z-50 h-12 w-12 md:w-auto md:px-4 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 shadow-2xl"
         onClick={() => setSelectorOpen(true)}
         aria-label="Apri guida"
         title="Guida"
       >
-        <HelpCircle className="h-5 w-5" />
+        <HelpCircle className="h-5 w-5 md:mr-2" />
+        <span className="hidden md:inline">Guida</span>
       </Button>
     </TutorialContext.Provider>
   );
