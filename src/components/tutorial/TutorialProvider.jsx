@@ -315,10 +315,10 @@ export default function TutorialProvider({ includeAdminTours = false }) {
         styles={{
           options: {
             zIndex: 10000,
-            primaryColor: "#e74c3c",
-            backgroundColor: "hsl(var(--background))",
-            textColor: "hsl(var(--foreground))",
-            arrowColor: "hsl(var(--background))",
+            primaryColor: "#111827",
+            backgroundColor: "#fbbf24",
+            textColor: "#111827",
+            arrowColor: "#fbbf24",
           },
           overlay: {
             backgroundColor: "rgba(0,0,0,0.55)",
@@ -329,22 +329,23 @@ export default function TutorialProvider({ includeAdminTours = false }) {
             boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
           },
           buttonNext: {
-            backgroundColor: "#e74c3c",
+            backgroundColor: "#111827",
+            color: "#ffffff",
           },
           buttonBack: {
-            color: "hsl(var(--foreground))",
+            color: "#111827",
           },
         }}
       />
 
       <Dialog open={selectorOpen} onOpenChange={setSelectorOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md overflow-hidden border-amber-300/70 dark:border-amber-400/40 bg-gradient-to-br from-amber-50 to-background dark:from-amber-950/40 dark:to-background">
+          <DialogHeader className="-mx-6 -mt-6 px-6 pt-5 pb-4 bg-gradient-to-r from-amber-400 to-amber-300 text-slate-900">
             <DialogTitle className="flex items-center gap-2">
               <HelpCircle className="h-5 w-5" />
               Guida
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-slate-900/80">
               Scegli un tour per imparare le funzioni principali. Puoi interrompere e riprendere quando vuoi.
             </DialogDescription>
           </DialogHeader>
@@ -356,12 +357,17 @@ export default function TutorialProvider({ includeAdminTours = false }) {
               const Icon = meta.icon;
 
               return (
-                <Button type="button" variant="outline" className="w-full justify-start h-auto py-3" onClick={resumeTour}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start h-auto py-3 border-amber-300 bg-amber-50 hover:bg-amber-100 text-slate-900 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 dark:text-amber-50 dark:border-amber-500/50"
+                  onClick={resumeTour}
+                >
                   <div className="flex items-start gap-3">
-                    <Icon className="h-5 w-5 mt-0.5 text-red-600" />
+                    <Icon className="h-5 w-5 mt-0.5 text-amber-700 dark:text-amber-300" />
                     <div className="text-left">
                       <div className="font-semibold">Riprendi</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-slate-700/80 dark:text-amber-50/80">
                         {meta.title}{total ? ` • step ${current}/${total}` : ""}
                       </div>
                     </div>
@@ -379,14 +385,14 @@ export default function TutorialProvider({ includeAdminTours = false }) {
                   key={kind}
                   type="button"
                   variant="default"
-                  className="w-full justify-start h-auto py-3"
+                  className="w-full justify-start h-auto py-3 bg-amber-400 hover:bg-amber-500 text-slate-900"
                   onClick={() => startTour(kind)}
                 >
                   <div className="flex items-start gap-3">
                     <Icon className="h-5 w-5 mt-0.5" />
                     <div className="text-left">
                       <div className="font-semibold">{meta.title}</div>
-                      <div className="text-xs text-white/80">{meta.description}</div>
+                      <div className="text-xs text-slate-900/80">{meta.description}</div>
                     </div>
                   </div>
                 </Button>
@@ -398,7 +404,7 @@ export default function TutorialProvider({ includeAdminTours = false }) {
 
       <Button
         type="button"
-        className="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-50 h-12 w-12 md:w-auto md:px-4 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 shadow-2xl"
+        className="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-50 h-12 w-12 md:w-auto md:px-4 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10"
         onClick={() => setSelectorOpen(true)}
         aria-label="Apri guida"
         title="Guida"
