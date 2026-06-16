@@ -482,14 +482,14 @@ export default function Orders() {
                     <div className="inline-flex rounded-lg border border-border bg-slate-100/80 p-1 dark:bg-slate-900/50 dark:border-slate-700/60">
                       <Button
                         type="button"
-                        variant={viewMode === "list" ? "default" : "ghost"}
+                        variant="ghost"
                         size="sm"
                         aria-pressed={viewMode === "list"}
                         onClick={() => setViewMode("list")}
                         className={`h-8 shadow-none ${
                           viewMode === "list"
-                            ? ""
-                            : "text-slate-900/70 hover:text-slate-900 hover:bg-white/70 dark:text-slate-100/80 dark:hover:text-white dark:hover:bg-slate-800/60"
+                            ? "bg-white text-slate-900 hover:bg-white dark:bg-slate-800 dark:text-white dark:hover:bg-slate-800"
+                            : "text-slate-700 hover:text-slate-900 hover:bg-white/70 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60"
                         }`}
                       >
                         <LayoutList className="w-4 h-4 mr-2" />
@@ -497,14 +497,14 @@ export default function Orders() {
                       </Button>
                       <Button
                         type="button"
-                        variant={viewMode === "kanban" ? "default" : "ghost"}
+                        variant="ghost"
                         size="sm"
                         aria-pressed={viewMode === "kanban"}
                         onClick={() => setViewMode("kanban")}
                         className={`h-8 shadow-none ${
                           viewMode === "kanban"
-                            ? ""
-                            : "text-slate-900/70 hover:text-slate-900 hover:bg-white/70 dark:text-slate-100/80 dark:hover:text-white dark:hover:bg-slate-800/60"
+                            ? "bg-white text-slate-900 hover:bg-white dark:bg-slate-800 dark:text-white dark:hover:bg-slate-800"
+                            : "text-slate-700 hover:text-slate-900 hover:bg-white/70 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60"
                         }`}
                       >
                         <Columns3 className="w-4 h-4 mr-2" />
