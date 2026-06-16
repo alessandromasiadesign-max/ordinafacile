@@ -499,6 +499,7 @@ export default function Layout({ children }) {
                 <div className="px-4 py-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Button
+                      data-tour="quick-open-close"
                       variant={ordersPaused ? 'destructive' : 'default'}
                       className="h-8 px-3"
                       disabled={isUpdatingRestaurantStatus}
@@ -517,6 +518,7 @@ export default function Layout({ children }) {
                     </Button>
 
                     <Button
+                      data-tour="quick-delivery"
                       variant={hasDelivery ? 'default' : 'outline'}
                       className="h-8 px-3"
                       disabled={isUpdatingRestaurantStatus}
@@ -541,6 +543,7 @@ export default function Layout({ children }) {
                     </Button>
 
                     <Button
+                      data-tour="quick-pickup"
                       variant={hasPickup ? 'default' : 'outline'}
                       className="h-8 px-3"
                       disabled={isUpdatingRestaurantStatus}
@@ -567,6 +570,7 @@ export default function Layout({ children }) {
 
                   <div className="flex items-center gap-3 text-sm">
                     <a
+                      data-tour="pending-orders"
                       href={`${createPageUrl('Orders')}?status=in_attesa`}
                       className="text-muted-foreground hover:text-foreground"
                     >
