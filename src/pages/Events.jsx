@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Calendar, Trash2, Power, PowerOff, QrCode, ExternalLink, Menu } from "lucide-react";
+import { Plus, Calendar, Clock, Repeat, Trash2, Power, PowerOff, QrCode, ExternalLink, Menu } from "lucide-react";
 import { createPageUrl } from "@/utils";
 
 import {
@@ -28,7 +28,7 @@ export default function Events() {
   const [eventToDelete, setEventToDelete] = useState(null);
   const queryClient = useQueryClient();
 
-  const { data: events = [] } = useQuery({
+  const { data: events = [], isLoading } = useQuery({
     queryKey: ['events', restaurant?.id],
     queryFn: async () => {
       if (!restaurant) return [];
@@ -82,10 +82,10 @@ export default function Events() {
   return (
     <div className="p-4 md:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Gestione Eventi</h1>
-            <p className="text-muted-foreground mt-1">Crea menu speciali per eventi e occasioni</p>
+            <h1 className="text-2xl md:text-3xl font-bold">Gestione Eventi</h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-1">Crea menu speciali per eventi e occasioni</p>
           </div>
           <Button 
             data-tour="events-add"
@@ -97,7 +97,20 @@ export default function Events() {
           </Button>
         </div>
 
-        {events.length === 0 ? (
+        {isLoading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-6">
+                  <div className="h-5 w-2/3 bg-muted rounded mb-4" />
+                  <div className="h-4 w-1/3 bg-muted rounded mb-6" />
+                  <div className="h-32 bg-muted rounded mb-4" />
+                  <div className="h-9 bg-muted rounded" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : events.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
               <Calendar className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
@@ -130,7 +143,7 @@ export default function Events() {
               const weekdays = event?.giorni_settimana;
               
               return (
-                <Card key={event.id} className="hover:shadow-lg transition-shadow">
+                <Card key={event.id} className="transition-shadow hover:shadow-lg">
                   <CardContent className="p-6">
                     {eventImageUrl && (
                       <img 
@@ -139,9 +152,9 @@ export default function Events() {
                         className="w-full h-32 object-cover rounded-lg mb-4"
                       />
                     )}
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold mb-2">{eventName}</h3>
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-lg md:text-xl font-bold mb-2 truncate">{eventName}</h3>
                         <Badge
                           className={
                             isActive
@@ -155,11 +168,14 @@ export default function Events() {
                       <div className="flex gap-2">
                         <Button 
                           size="icon" 
-                          variant="ghost"
+                          variant="outline"
+                          aria-label={isActive ? "Disattiva evento" : "Attiva evento"}
+                          title={isActive ? "Disattiva evento" : "Attiva evento"}
                           onClick={() => toggleActiveMutation.mutate({ 
                             id: event.id, 
                             attivo: !isActive 
                           })}
+                          disabled={toggleActiveMutation.isPending}
                         >
                           {isActive ? (
                             <PowerOff className="w-4 h-4 text-red-600" />
@@ -169,7 +185,9 @@ export default function Events() {
                         </Button>
                         <Button 
                           size="icon" 
-                          variant="ghost"
+                          variant="outline"
+                          aria-label="Elimina evento"
+                          title="Elimina evento"
                           onClick={() => setEventToDelete(event)}
                           disabled={deleteMutation.isPending}
                         >
@@ -180,68 +198,79 @@ export default function Events() {
                     {eventDescription && (
                       <p className="text-muted-foreground text-sm mb-4">{eventDescription}</p>
                     )}
-                    <div className="space-y-1 text-xs text-muted-foreground mb-4">
+                    <div className="space-y-1.5 text-sm text-muted-foreground mb-4">
                       {startDate && (
-                        <p>
-                          📅 Dal {new Date(startDate).toLocaleDateString('it-IT')}
-                          {endDate && ` al ${new Date(endDate).toLocaleDateString('it-IT')}`}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          <span>
+                            Dal {new Date(startDate).toLocaleDateString('it-IT')}
+                            {endDate && ` al ${new Date(endDate).toLocaleDateString('it-IT')}`}
+                          </span>
+                        </div>
                       )}
                       {startTime && (
-                        <p>
-                          🕐 {startTime} - {endTime || "Fine giornata"}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          <span>
+                            {startTime} - {endTime || "Fine giornata"}
+                          </span>
+                        </div>
                       )}
                       {weekdays && weekdays.length > 0 && (
-                        <p>
-                          📆 {weekdays.map(g => g.charAt(0).toUpperCase() + g.slice(1, 3)).join(', ')}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <Repeat className="w-4 h-4" />
+                          <span>
+                            {weekdays.map(g => g.charAt(0).toUpperCase() + g.slice(1, 3)).join(', ')}
+                          </span>
+                        </div>
                       )}
                     </div>
 
                     {/* QR Code e Link */}
-                    <div className="border-t border-border pt-4 space-y-3">
-                      <div className="flex justify-center mb-3">
-                        <img 
-                          src={qrCodeUrl}
-                          alt="QR Code Evento"
-                          className="w-32 h-32 border-2 border-border rounded-lg p-2"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => {
-                            const link = document.createElement('a');
-                            link.href = qrCodeUrl;
-                            link.download = `qr-evento-${String(eventName || 'evento').replace(/\s/g, '-')}.png`;
-                            document.body.appendChild(link); // Required for Firefox
-                            link.click();
-                            document.body.removeChild(link); // Clean up
-                          }}
-                        >
-                          <QrCode className="w-4 h-4 mr-2" />
-                          Scarica QR Code
-                        </Button>
-                        
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => window.open(eventMenuUrl, '_blank')}
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Apri Menu Evento
-                        </Button>
+                    <div className="border-t border-border pt-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-[128px_1fr] gap-4 items-start">
+                        <div className="flex justify-center sm:justify-start">
+                          <img 
+                            src={qrCodeUrl}
+                            alt="QR Code Evento"
+                            className="w-32 h-32 border-2 border-border rounded-lg p-2 bg-background"
+                          />
+                        </div>
 
-                        <Button
-                          className="w-full bg-red-600 hover:bg-red-700"
-                          onClick={() => window.location.href = createPageUrl(`EventMenu?id=${event.id}`)}
-                        >
-                          <Menu className="w-4 h-4 mr-2" />
-                          Gestisci Menu Evento
-                        </Button>
+                        <div className="space-y-2">
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = qrCodeUrl;
+                              link.download = `qr-evento-${String(eventName || 'evento').replace(/\s/g, '-')}.png`;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }}
+                          >
+                            <QrCode className="w-4 h-4 mr-2" />
+                            Scarica QR Code
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                            onClick={() => window.open(eventMenuUrl, '_blank')}
+                          >
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Apri Menu Evento
+                          </Button>
+
+                          <Button
+                            className="w-full bg-red-600 hover:bg-red-700 justify-start"
+                            onClick={() => window.location.href = createPageUrl(`EventMenu?id=${event.id}`)}
+                          >
+                            <Menu className="w-4 h-4 mr-2" />
+                            Gestisci Menu Evento
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

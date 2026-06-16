@@ -328,7 +328,7 @@ export default function EventMenu() {
 
   if (!event) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8 bg-background min-h-screen">
         <Card>
           <CardContent className="p-12 text-center">
             <p className="text-muted-foreground">Caricamento evento...</p>
@@ -341,7 +341,7 @@ export default function EventMenu() {
   return (
     <div className="p-4 md:p-8 bg-background min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <Button
             variant="ghost"
             onClick={() => navigate(createPageUrl("Events"))}
@@ -351,19 +351,28 @@ export default function EventMenu() {
             Torna agli Eventi
           </Button>
           
-          <div className="flex items-center gap-4 mb-4">
-            <Calendar className="w-8 h-8 text-red-600" />
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">{event?.nome}</h1>
-              <p className="text-muted-foreground">Menu Evento</p>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <Calendar className="w-8 h-8 text-red-600 shrink-0" />
+              <div className="min-w-0">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground truncate">{event?.nome}</h1>
+                <p className="text-sm md:text-base text-muted-foreground">Menu Evento</p>
+              </div>
             </div>
-            <Badge className={event?.attivo ? "bg-green-500" : "bg-muted text-muted-foreground"}>
+
+            <Badge
+              className={
+                event?.attivo
+                  ? "bg-green-500 text-white dark:bg-green-950/30 dark:text-green-100"
+                  : "bg-muted text-muted-foreground"
+              }
+            >
               {event?.attivo ? "Attivo" : "Disattivato"}
             </Badge>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-end gap-3 mb-6">
           <Button
             onClick={() => {
               setImportCategoryId("");
@@ -375,9 +384,7 @@ export default function EventMenu() {
             <Copy className="w-4 h-4 mr-2" />
             Importa dal Menu Standard
           </Button>
-        </div>
 
-        <div className="flex justify-end gap-3 mb-6">
           <Button
             onClick={() => setShowAddCategory(true)}
             variant="outline"
