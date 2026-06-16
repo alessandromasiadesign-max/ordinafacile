@@ -479,14 +479,14 @@ export default function Orders() {
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm text-muted-foreground">{filteredOrders.length} ordini</div>
                   <div className="flex items-center gap-2" data-tour="orders-view-toggle">
-                    <div className="inline-flex rounded-lg border border-border bg-muted p-1">
+                    <div className="inline-flex rounded-lg border border-border bg-muted p-1 dark:bg-slate-900/40 dark:border-slate-700/60">
                       <Button
                         type="button"
                         variant={viewMode === "list" ? "default" : "ghost"}
                         size="sm"
                         aria-pressed={viewMode === "list"}
                         onClick={() => setViewMode("list")}
-                        className="h-8"
+                        className={`h-8 shadow-none ${viewMode === "list" ? "" : "text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white"}`}
                       >
                         <LayoutList className="w-4 h-4 mr-2" />
                         Lista
@@ -497,7 +497,7 @@ export default function Orders() {
                         size="sm"
                         aria-pressed={viewMode === "kanban"}
                         onClick={() => setViewMode("kanban")}
-                        className="h-8"
+                        className={`h-8 shadow-none ${viewMode === "kanban" ? "" : "text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white"}`}
                       >
                         <Columns3 className="w-4 h-4 mr-2" />
                         Griglia
