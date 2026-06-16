@@ -455,12 +455,53 @@ export default function Settings() {
     setUploading(prev => ({ ...prev, [type]: false }));
   };
 
+  const showExtendedSections = !isOnboardingWizard;
+  const showDeliverySections = formData.modalita_consegna?.includes('consegna');
+  const navSections = [
+    { id: 'settings-general', label: 'Generali', show: true },
+    { id: 'settings-fiscal', label: 'Fiscale', show: showExtendedSections },
+    { id: 'settings-social', label: 'Social', show: showExtendedSections },
+    { id: 'settings-branding', label: 'Grafica', show: showExtendedSections },
+    { id: 'settings-opening-hours', label: 'Orari', show: true },
+    { id: 'settings-delivery-hours', label: 'Consegna', show: showDeliverySections },
+    { id: 'settings-order-modes', label: 'Ordini', show: true },
+    { id: 'settings-order-capacity', label: 'Capacità', show: showExtendedSections },
+    { id: 'settings-delivery-zones', label: 'Zone', show: showDeliverySections },
+    { id: 'settings-featured-promos', label: 'Promo', show: showExtendedSections },
+    { id: 'settings-payments', label: 'Pagamenti', show: showExtendedSections },
+  ].filter((s) => !!s.show);
+
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <div className="p-4 md:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 md:mb-8">
           <h1 className="text-2xl md:text-3xl font-bold">Impostazioni Ristorante</h1>
           <p className="text-sm md:text-base text-muted-foreground mt-1">Configura i dettagli del tuo ristorante</p>
+        </div>
+
+        <div className="mb-4 md:mb-6">
+          <div className="text-sm text-muted-foreground mb-2">Vai a sezione</div>
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+            {navSections.map((s) => (
+              <a
+                key={s.id}
+                href={`#${s.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection(s.id);
+                }}
+                className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-sm text-foreground whitespace-nowrap hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                {s.label}
+              </a>
+            ))}
+          </div>
         </div>
 
         {isOnboarding && !restaurant && (
@@ -494,7 +535,7 @@ export default function Settings() {
         )}
 
         <form onSubmit={handleSubmit}>
-          <Card className="mb-4 md:mb-6">
+          <Card id="settings-general" className="mb-4 md:mb-6 scroll-mt-24">
             <CardHeader className="p-4 md:p-6">
               <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                 <Store className="w-4 h-4 md:w-5 md:h-5" />
@@ -604,7 +645,7 @@ export default function Settings() {
           {!isOnboardingWizard && (
             <>
           {/* Configurazione Fiscale */}
-          <Card className="mb-4 md:mb-6">
+          <Card id="settings-fiscal" className="mb-4 md:mb-6 scroll-mt-24">
             <CardHeader className="p-4 md:p-6">
               <CardTitle className="text-base md:text-lg">Configurazione Fiscale</CardTitle>
             </CardHeader>
@@ -730,7 +771,7 @@ export default function Settings() {
           </Card>
 
           {/* Social Media */}
-          <Card className="mb-4 md:mb-6">
+          <Card id="settings-social" className="mb-4 md:mb-6 scroll-mt-24">
             <CardHeader className="p-4 md:p-6">
               <CardTitle className="text-base md:text-lg">Social Media</CardTitle>
             </CardHeader>
@@ -750,7 +791,7 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          <Card className="mb-4 md:mb-6">
+          <Card id="settings-branding" className="mb-4 md:mb-6 scroll-mt-24">
             <CardHeader className="p-4 md:p-6">
               <CardTitle className="text-base md:text-lg">Personalizzazione Pagina</CardTitle>
             </CardHeader>
@@ -923,7 +964,7 @@ export default function Settings() {
             </>
           )}
 
-          <Card className="mb-4 md:mb-6">
+          <Card id="settings-opening-hours" className="mb-4 md:mb-6 scroll-mt-24">
             <CardHeader className="p-4 md:p-6">
               <CardTitle className="text-base md:text-lg">Orari di Apertura</CardTitle>
             </CardHeader>
@@ -1067,7 +1108,7 @@ export default function Settings() {
           </Card>
 
           {formData.modalita_consegna?.includes('consegna') && (
-            <Card className="mb-4 md:mb-6">
+            <Card id="settings-delivery-hours" className="mb-4 md:mb-6 scroll-mt-24">
               <CardHeader className="p-4 md:p-6">
                 <CardTitle className="text-base md:text-lg">Orari di Consegna</CardTitle>
               </CardHeader>
@@ -1211,7 +1252,7 @@ export default function Settings() {
             </Card>
           )}
 
-          <Card className="mb-4 md:mb-6">
+          <Card id="settings-order-modes" className="mb-4 md:mb-6 scroll-mt-24">
             <CardHeader className="p-4 md:p-6">
               <CardTitle className="text-base md:text-lg">Modalità Ordini</CardTitle>
             </CardHeader>
@@ -1284,7 +1325,7 @@ export default function Settings() {
 
           {!isOnboardingWizard && (
             <>
-          <Card className="mb-4 md:mb-6">
+          <Card id="settings-order-capacity" className="mb-4 md:mb-6 scroll-mt-24">
             <CardHeader className="p-4 md:p-6">
               <CardTitle className="text-base md:text-lg">Capacità Ordini</CardTitle>
             </CardHeader>
@@ -1375,17 +1416,19 @@ export default function Settings() {
           </Card>
 
           {formData.modalita_consegna?.includes("consegna") && (
-            <DeliveryZonesMap
-              zones={formData.zone_consegna || []}
-              onZonesChange={(zones) => handleChange("zone_consegna", zones)}
-              restaurantCoords={formData.coordinate_ristorante}
-              restaurantAddress={formData.indirizzo || null}
-              restaurantCity={formData.citta || null}
-            />
+            <div id="settings-delivery-zones" className="scroll-mt-24">
+              <DeliveryZonesMap
+                zones={formData.zone_consegna || []}
+                onZonesChange={(zones) => handleChange("zone_consegna", zones)}
+                restaurantCoords={formData.coordinate_ristorante}
+                restaurantAddress={formData.indirizzo || null}
+                restaurantCity={formData.citta || null}
+              />
+            </div>
           )}
 
           {/* New: Promozioni in Evidenza */}
-          <Card className="mb-4 md:mb-6">
+          <Card id="settings-featured-promos" className="mb-4 md:mb-6 scroll-mt-24">
               <CardHeader className="p-4 md:p-6">
                 <CardTitle className="text-base md:text-lg">Promozioni in Evidenza</CardTitle>
                 <p className="text-xs md:text-sm text-muted-foreground mt-1">
@@ -1402,13 +1445,15 @@ export default function Settings() {
             </Card>
 
           {/* New: Payment Settings */}
-          <PaymentSettings
-            paymentSettings={formData.payment_settings}
-            onChange={(settings) => setFormData(prev => ({ 
-              ...prev, 
-              payment_settings: settings 
-            }))}
-          />
+          <div id="settings-payments" className="scroll-mt-24">
+            <PaymentSettings
+              paymentSettings={formData.payment_settings}
+              onChange={(settings) => setFormData(prev => ({ 
+                ...prev, 
+                payment_settings: settings 
+              }))}
+            />
+          </div>
 
             </>
           )}
