@@ -463,13 +463,13 @@ export default function Settings() {
         </div>
 
         {isOnboarding && !restaurant && (
-          <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900">
+          <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900 dark:border-yellow-900/60 dark:bg-yellow-950/30 dark:text-yellow-100">
             Benvenuto! Per iniziare a ricevere ordini, completa i dati del ristorante e salva.
           </div>
         )}
 
         {!!restaurant?.id && (menuCategories.length === 0 || menuItems.length === 0) && (
-          <Card className="mb-4 md:mb-6 border-yellow-200 bg-yellow-50">
+          <Card className="mb-4 md:mb-6 border-yellow-200 bg-yellow-50 dark:border-yellow-900/60 dark:bg-yellow-950/30">
             <CardContent className="p-4 md:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
@@ -1389,7 +1389,7 @@ export default function Settings() {
             </>
           )}
 
-          <div className="flex justify-end mt-6 sticky bottom-0 bg-background py-4 -mx-4 px-4 md:static md:bg-transparent md:py-0 md:mx-0 md:px-0">
+          <div className="flex justify-end mt-6 sticky bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 -mx-4 px-4 md:static md:border-0 md:bg-transparent md:backdrop-blur-none md:py-0 md:mx-0 md:px-0">
             <Button 
               type="submit" 
               className="bg-red-600 hover:bg-red-700 w-full md:w-auto text-sm md:text-base"
