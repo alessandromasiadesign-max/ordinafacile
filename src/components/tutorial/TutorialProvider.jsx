@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { HelpCircle, ShoppingBag, Tag, UtensilsCrossed } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -15,88 +16,118 @@ import {
 const TutorialContext = createContext(null);
 
 const STORAGE_KEY = "of_tutorial_progress";
+const PREFS_KEY = "of_tutorial_prefs";
 
 export function useTutorial() {
   return useContext(TutorialContext);
 }
 
-const buildMenuTour = () => [
-  {
-    target: '[data-tour="nav-menu"]',
-    content: "Da qui gestisci le categorie e i prodotti del menu.",
-    placement: "right",
-    route: "/MenuManagement",
-  },
-  {
-    target: '[data-tour="menu-add-category"]',
-    content: "Inizia creando una categoria (es. Pizze, Bevande).",
-    placement: "bottom",
-    route: "/MenuManagement",
-  },
-  {
-    target: '[data-tour="menu-search"]',
-    content: "Puoi cercare velocemente categorie e prodotti.",
-    placement: "bottom",
-    route: "/MenuManagement",
-  },
-  {
-    target: '[data-tour="public-menu-link"]',
-    content: "Qui trovi la pagina pubblica del menu da condividere ai clienti.",
-    placement: "right",
-  },
-];
+const buildMenuTour = ({ advanced }) => {
+  const base = [
+    {
+      target: '[data-tour="nav-menu"]',
+      content: "Da qui gestisci le categorie e i prodotti del menu.",
+      placement: "right",
+      route: "/MenuManagement",
+    },
+    {
+      target: '[data-tour="menu-add-category"]',
+      content: "Inizia creando una categoria (es. Pizze, Bevande).",
+      placement: "bottom",
+      route: "/MenuManagement",
+    },
+    {
+      target: '[data-tour="public-menu-link"]',
+      content: "Qui trovi la pagina pubblica del menu da condividere ai clienti.",
+      placement: "right",
+    },
+  ];
 
-const buildQuickControlsTour = () => [
-  {
-    target: '[data-tour="quick-open-close"]',
-    content: "Apre/chiude velocemente la sede. Utile se vuoi mettere gli ordini in pausa in pochi secondi.",
-    placement: "bottom",
-  },
-  {
-    target: '[data-tour="quick-delivery"]',
-    content: "Attiva/disattiva la modalità Consegna al volo.",
-    placement: "bottom",
-  },
-  {
-    target: '[data-tour="quick-pickup"]',
-    content: "Attiva/disattiva la modalità Asporto al volo.",
-    placement: "bottom",
-  },
-];
+  if (!advanced) return base;
 
-const buildOrdersTour = () => [
-  {
-    target: '[data-tour="pending-orders"]',
-    content: "Qui vedi quanti ordini sono in attesa. Clicca per aprire subito la lista filtrata.",
-    placement: "bottom",
-  },
-  {
-    target: '[data-tour="nav-orders"]',
-    content: "Qui visualizzi e gestisci gli ordini in arrivo.",
-    placement: "right",
-    route: "/Orders",
-  },
-  {
-    target: '[data-tour="orders-view-toggle"]',
-    content: "Puoi scegliere la vista Lista o Kanban.",
-    placement: "bottom",
-    route: "/Orders",
-  },
-  {
-    target: '[data-tour="orders-search"]',
-    content: "Cerca rapidamente un ordine per numero o cliente.",
-    placement: "bottom",
-    route: "/Orders",
-  },
-  {
-    target: '[data-tour="orders-filter"]',
-    content: "Filtra gli ordini per stato.",
-    placement: "bottom",
-    route: "/Orders",
-  },
-];
+  return [
+    ...base,
+    {
+      target: '[data-tour="menu-search"]',
+      content: "Puoi cercare velocemente categorie e prodotti. Tip: quando il menu cresce ti fa risparmiare molto tempo.",
+      placement: "bottom",
+      route: "/MenuManagement",
+    },
+  ];
+};
 
-const buildMarketingTour = (includeAdmin) => {
+const buildQuickControlsTour = ({ advanced }) => {
+  const base = [
+    {
+      target: '[data-tour="quick-open-close"]',
+      content: "Apre/chiude velocemente la sede. Utile se vuoi mettere gli ordini in pausa in pochi secondi.",
+      placement: "bottom",
+    },
+    {
+      target: '[data-tour="quick-delivery"]',
+      content: "Attiva/disattiva la modalità Consegna al volo.",
+      placement: "bottom",
+    },
+    {
+      target: '[data-tour="quick-pickup"]',
+      content: "Attiva/disattiva la modalità Asporto al volo.",
+      placement: "bottom",
+    },
+  ];
+
+  if (!advanced) return base;
+
+  return [
+    ...base,
+    {
+      target: '[data-tour="pending-orders"]',
+      content: "Tip: tieni d’occhio gli ordini in attesa per rispondere rapidamente ai clienti.",
+      placement: "bottom",
+    },
+  ];
+};
+
+const buildOrdersTour = ({ advanced }) => {
+  const base = [
+    {
+      target: '[data-tour="pending-orders"]',
+      content: "Qui vedi quanti ordini sono in attesa. Clicca per aprire subito la lista filtrata.",
+      placement: "bottom",
+    },
+    {
+      target: '[data-tour="nav-orders"]',
+      content: "Qui visualizzi e gestisci gli ordini in arrivo.",
+      placement: "right",
+      route: "/Orders",
+    },
+    {
+      target: '[data-tour="orders-search"]',
+      content: "Cerca rapidamente un ordine per numero o cliente.",
+      placement: "bottom",
+      route: "/Orders",
+    },
+    {
+      target: '[data-tour="orders-filter"]',
+      content: "Filtra gli ordini per stato.",
+      placement: "bottom",
+      route: "/Orders",
+    },
+  ];
+
+  if (!advanced) return base;
+
+  return [
+    ...base,
+    {
+      target: '[data-tour="orders-view-toggle"]',
+      content: "Puoi scegliere la vista Lista o Kanban. Tip: Kanban è ottima nei momenti di punta per spostare gli ordini per stato.",
+      placement: "bottom",
+      route: "/Orders",
+    },
+  ];
+};
+
+const buildMarketingTour = (includeAdmin, { advanced }) => {
   const base = [
     {
       target: '[data-tour="nav-events"]',
@@ -124,15 +155,27 @@ const buildMarketingTour = (includeAdmin) => {
     },
   ];
 
-  if (!includeAdmin) return base;
+  const withAdmin = includeAdmin
+    ? [
+        ...base,
+        {
+          target: '[data-tour="nav-discount-codes"]',
+          content: "Da qui puoi gestire i codici sconto (solo admin).",
+          placement: "right",
+          route: "/DiscountCodes",
+        },
+      ]
+    : base;
+
+  if (!advanced) return withAdmin;
 
   return [
-    ...base,
+    ...withAdmin,
     {
-      target: '[data-tour="nav-discount-codes"]',
-      content: "Da qui puoi gestire i codici sconto (solo admin).",
+      target: '[data-tour="nav-promotions"]',
+      content: "Tip: usa promozioni semplici (es. -10% sopra 30€) per aumentare lo scontrino medio.",
       placement: "right",
-      route: "/DiscountCodes",
+      route: "/Promotions",
     },
   ];
 };
@@ -147,6 +190,7 @@ export default function TutorialProvider({ includeAdminTours = false }) {
   const [steps, setSteps] = useState([]);
   const [currentKind, setCurrentKind] = useState(null);
   const [savedProgress, setSavedProgress] = useState(null);
+  const [includeAdvanced, setIncludeAdvanced] = useState(false);
 
   const value = useMemo(() => {
     return {
@@ -154,11 +198,15 @@ export default function TutorialProvider({ includeAdminTours = false }) {
     };
   }, []);
 
-  const getStepsForKind = (kind) => {
-    if (kind === "menu") return buildMenuTour();
-    if (kind === "orders") return buildOrdersTour();
-    if (kind === "marketing") return buildMarketingTour(includeAdminTours);
-    if (kind === "quick") return buildQuickControlsTour();
+  const getStepsForKind = (kind, options = {}) => {
+    const advanced =
+      typeof options.advancedOverride === "boolean" ? options.advancedOverride : includeAdvanced;
+    const cfg = { advanced };
+
+    if (kind === "menu") return buildMenuTour(cfg);
+    if (kind === "orders") return buildOrdersTour(cfg);
+    if (kind === "marketing") return buildMarketingTour(includeAdminTours, cfg);
+    if (kind === "quick") return buildQuickControlsTour(cfg);
     return [];
   };
 
@@ -196,6 +244,25 @@ export default function TutorialProvider({ includeAdminTours = false }) {
 
   useEffect(() => {
     try {
+      const raw = localStorage.getItem(PREFS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && typeof parsed.includeAdvanced === "boolean") {
+        setIncludeAdvanced(parsed.includeAdvanced);
+      }
+    } catch {
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PREFS_KEY, JSON.stringify({ includeAdvanced }));
+    } catch {
+    }
+  }, [includeAdvanced]);
+
+  useEffect(() => {
+    try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
         setSavedProgress(null);
@@ -208,21 +275,25 @@ export default function TutorialProvider({ includeAdminTours = false }) {
       }
       const kind = parsed.kind;
       const idx = parsed.stepIndex;
+      const advanced = typeof parsed.advanced === "boolean" ? parsed.advanced : false;
       if (!kind || !Number.isFinite(Number(idx))) {
         setSavedProgress(null);
         return;
       }
-      setSavedProgress({ kind, stepIndex: Number(idx) });
+      setSavedProgress({ kind, stepIndex: Number(idx), advanced });
     } catch {
       setSavedProgress(null);
     }
   }, [includeAdminTours]);
 
-  const persistProgress = (nextKind, nextIndex) => {
+  const persistProgress = (nextKind, nextIndex, advancedFlag = includeAdvanced) => {
     try {
       if (!nextKind || !Number.isFinite(Number(nextIndex))) return;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ kind: nextKind, stepIndex: Number(nextIndex) }));
-      setSavedProgress({ kind: nextKind, stepIndex: Number(nextIndex) });
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ kind: nextKind, stepIndex: Number(nextIndex), advanced: !!advancedFlag })
+      );
+      setSavedProgress({ kind: nextKind, stepIndex: Number(nextIndex), advanced: !!advancedFlag });
     } catch {
     }
   };
@@ -243,7 +314,7 @@ export default function TutorialProvider({ includeAdminTours = false }) {
     setSteps(nextSteps);
     setStepIndex(0);
     setRun(true);
-    persistProgress(kind, 0);
+    persistProgress(kind, 0, includeAdvanced);
 
     const firstRoute = nextSteps?.[0]?.route;
     if (firstRoute && location.pathname !== firstRoute) {
@@ -254,9 +325,11 @@ export default function TutorialProvider({ includeAdminTours = false }) {
   const resumeTour = () => {
     const kind = savedProgress?.kind;
     const idx = savedProgress?.stepIndex ?? 0;
+    const advancedFlag = savedProgress?.advanced ?? false;
     if (!kind) return;
 
-    const nextSteps = getStepsForKind(kind);
+    setIncludeAdvanced(advancedFlag);
+    const nextSteps = getStepsForKind(kind, { advancedOverride: advancedFlag });
 
     const maxIndex = Math.max((nextSteps?.length ?? 1) - 1, 0);
     const safeIndex = Math.max(0, Math.min(Number(idx) || 0, maxIndex));
@@ -266,7 +339,7 @@ export default function TutorialProvider({ includeAdminTours = false }) {
     setSteps(nextSteps);
     setStepIndex(safeIndex);
     setRun(true);
-    persistProgress(kind, safeIndex);
+    persistProgress(kind, safeIndex, advancedFlag);
 
     const route = nextSteps?.[safeIndex]?.route ?? nextSteps?.[0]?.route;
     if (route && location.pathname !== route) {
@@ -286,8 +359,8 @@ export default function TutorialProvider({ includeAdminTours = false }) {
   useEffect(() => {
     if (!run) return;
     if (!currentKind) return;
-    persistProgress(currentKind, stepIndex);
-  }, [run, currentKind, stepIndex]);
+    persistProgress(currentKind, stepIndex, includeAdvanced);
+  }, [run, currentKind, stepIndex, includeAdvanced]);
 
   const handleJoyrideCallback = (data) => {
     const { action, index, status, type } = data;
@@ -381,9 +454,17 @@ export default function TutorialProvider({ includeAdminTours = false }) {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-200/80 bg-white/60 px-3 py-2 text-slate-900 dark:border-amber-400/20 dark:bg-amber-950/10 dark:text-amber-50">
+              <div className="min-w-0">
+                <div className="text-sm font-semibold">Mostra anche avanzati</div>
+                <div className="text-xs opacity-80">Aggiunge tip e passaggi extra (puoi sempre saltare).</div>
+              </div>
+              <Switch checked={includeAdvanced} onCheckedChange={setIncludeAdvanced} />
+            </div>
+
             {savedProgress?.kind && (() => {
               const meta = getKindMeta(savedProgress.kind);
-              const total = getStepsForKind(savedProgress.kind)?.length ?? 0;
+              const total = getStepsForKind(savedProgress.kind, { advancedOverride: savedProgress.advanced })?.length ?? 0;
               const current = Math.min((savedProgress.stepIndex ?? 0) + 1, Math.max(total, 1));
               const Icon = meta.icon;
 
@@ -399,7 +480,7 @@ export default function TutorialProvider({ includeAdminTours = false }) {
                     <div className="text-left">
                       <div className="font-semibold">Riprendi</div>
                       <div className="text-xs text-slate-700/80 dark:text-amber-50/80">
-                        {meta.title}{total ? ` • step ${current}/${total}` : ""}
+                        {meta.title}{total ? ` • step ${current}/${total}` : ""}{savedProgress.advanced ? " • avanzato" : " • base"}
                       </div>
                     </div>
                   </div>
