@@ -192,6 +192,24 @@ export default function TutorialProvider({ includeAdminTours = false }) {
   const [savedProgress, setSavedProgress] = useState(null);
   const [includeAdvanced, setIncludeAdvanced] = useState(false);
 
+  const recommendedKind = useMemo(() => {
+    const p = String(location.pathname ?? "");
+
+    if (p === "/Orders" || p.startsWith("/Orders")) return "orders";
+    if (p === "/MenuManagement" || p.startsWith("/MenuManagement")) return "menu";
+    if (p === "/Events" || p.startsWith("/Events")) return "marketing";
+    if (p === "/Promotions" || p.startsWith("/Promotions")) return "marketing";
+    if (p === "/DiscountCodes" || p.startsWith("/DiscountCodes")) return "marketing";
+    if (p === "/Dashboard" || p.startsWith("/Dashboard")) return "quick";
+    return "quick";
+  }, [location.pathname]);
+
+  const kindsForDialog = useMemo(() => {
+    const base = ["quick", "menu", "orders", "marketing"];
+    if (!recommendedKind) return base;
+    return [recommendedKind, ...base.filter((k) => k !== recommendedKind)];
+  }, [recommendedKind]);
+
   const value = useMemo(() => {
     return {
       openSelector: () => setSelectorOpen(true),
@@ -462,6 +480,10 @@ export default function TutorialProvider({ includeAdminTours = false }) {
               <Switch checked={includeAdvanced} onCheckedChange={setIncludeAdvanced} />
             </div>
 
+            <div className="text-xs text-slate-700/80 dark:text-amber-50/70">
+              Consigliato per questa pagina: <span className="font-semibold">{getKindMeta(recommendedKind).title}</span>
+            </div>
+
             {savedProgress?.kind && (() => {
               const meta = getKindMeta(savedProgress.kind);
               const total = getStepsForKind(savedProgress.kind, { advancedOverride: savedProgress.advanced })?.length ?? 0;
@@ -488,24 +510,30 @@ export default function TutorialProvider({ includeAdminTours = false }) {
               );
             })()}
 
-            {(["quick", "menu", "orders", "marketing"]).map((kind) => {
+            {kindsForDialog.map((kind) => {
               const meta = getKindMeta(kind);
               const Icon = meta.icon;
+              const isRecommended = kind === recommendedKind;
 
               return (
                 <Button
                   key={kind}
                   type="button"
                   variant="default"
-                  className="w-full justify-start h-auto py-3 bg-amber-200 hover:bg-amber-300 text-slate-900 dark:bg-amber-300/30 dark:hover:bg-amber-300/40 dark:text-amber-50"
+                  className={`w-full justify-start h-auto py-3 bg-amber-200 hover:bg-amber-300 text-slate-900 dark:bg-amber-300/30 dark:hover:bg-amber-300/40 dark:text-amber-50 ${isRecommended ? "ring-2 ring-amber-400/60 dark:ring-amber-200/30" : ""}`}
                   onClick={() => startTour(kind)}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3 w-full">
                     <Icon className="h-5 w-5 mt-0.5" />
                     <div className="text-left">
                       <div className="font-semibold">{meta.title}</div>
                       <div className="text-xs text-slate-900/70 dark:text-amber-50/70">{meta.description}</div>
                     </div>
+                    {isRecommended && (
+                      <span className="ml-auto mt-0.5 inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-900 ring-1 ring-amber-200 dark:bg-amber-200/10 dark:text-amber-100 dark:ring-amber-200/20">
+                        Consigliato
+                      </span>
+                    )}
                   </div>
                 </Button>
               );
