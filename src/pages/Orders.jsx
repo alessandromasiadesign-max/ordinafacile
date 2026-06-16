@@ -479,14 +479,18 @@ export default function Orders() {
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm text-muted-foreground">{filteredOrders.length} ordini</div>
                   <div className="flex items-center gap-2" data-tour="orders-view-toggle">
-                    <div className="inline-flex rounded-lg border border-border bg-muted p-1 dark:bg-slate-900/40 dark:border-slate-700/60">
+                    <div className="inline-flex rounded-lg border border-border bg-slate-100/80 p-1 dark:bg-slate-900/50 dark:border-slate-700/60">
                       <Button
                         type="button"
                         variant={viewMode === "list" ? "default" : "ghost"}
                         size="sm"
                         aria-pressed={viewMode === "list"}
                         onClick={() => setViewMode("list")}
-                        className={`h-8 shadow-none ${viewMode === "list" ? "" : "text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white"}`}
+                        className={`h-8 shadow-none ${
+                          viewMode === "list"
+                            ? ""
+                            : "text-slate-900/70 hover:text-slate-900 hover:bg-white/70 dark:text-slate-100/80 dark:hover:text-white dark:hover:bg-slate-800/60"
+                        }`}
                       >
                         <LayoutList className="w-4 h-4 mr-2" />
                         Lista
@@ -497,7 +501,11 @@ export default function Orders() {
                         size="sm"
                         aria-pressed={viewMode === "kanban"}
                         onClick={() => setViewMode("kanban")}
-                        className={`h-8 shadow-none ${viewMode === "kanban" ? "" : "text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white"}`}
+                        className={`h-8 shadow-none ${
+                          viewMode === "kanban"
+                            ? ""
+                            : "text-slate-900/70 hover:text-slate-900 hover:bg-white/70 dark:text-slate-100/80 dark:hover:text-white dark:hover:bg-slate-800/60"
+                        }`}
                       >
                         <Columns3 className="w-4 h-4 mr-2" />
                         Griglia
