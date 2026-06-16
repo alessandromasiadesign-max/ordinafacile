@@ -480,6 +480,33 @@ export default function TutorialProvider({ includeAdminTours = false }) {
               <Switch checked={includeAdvanced} onCheckedChange={setIncludeAdvanced} />
             </div>
 
+            {(() => {
+              const meta = getKindMeta(recommendedKind);
+              const Icon = meta.icon;
+
+              return (
+                <Button
+                  type="button"
+                  variant="default"
+                  className="w-full justify-start h-auto py-3 bg-amber-300 hover:bg-amber-400 text-slate-900 dark:bg-amber-200/20 dark:hover:bg-amber-200/30 dark:text-amber-50 ring-2 ring-amber-400/50 dark:ring-amber-200/20"
+                  onClick={() => startTour(recommendedKind)}
+                >
+                  <div className="flex items-start gap-3 w-full">
+                    <Icon className="h-5 w-5 mt-0.5" />
+                    <div className="text-left">
+                      <div className="font-semibold">Avvia consigliato</div>
+                      <div className="text-xs text-slate-900/70 dark:text-amber-50/70">
+                        {meta.title} • ideale per la pagina corrente
+                      </div>
+                    </div>
+                    <span className="ml-auto mt-0.5 inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-900 ring-1 ring-amber-200 dark:bg-amber-200/10 dark:text-amber-100 dark:ring-amber-200/20">
+                      Consigliato
+                    </span>
+                  </div>
+                </Button>
+              );
+            })()}
+
             <div className="text-xs text-slate-700/80 dark:text-amber-50/70">
               Consigliato per questa pagina: <span className="font-semibold">{getKindMeta(recommendedKind).title}</span>
             </div>
