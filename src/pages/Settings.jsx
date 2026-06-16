@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -926,154 +927,20 @@ export default function Settings() {
             <CardHeader className="p-4 md:p-6">
               <CardTitle className="text-base md:text-lg">Orari di Apertura</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 p-4 md:p-6">
-              {DAYS.map((day) => {
-                const dayUI = openingHoursUI?.[day] ?? { closed: true, ranges: [{ start: '', end: '' }] };
-                return (
-                  <div key={day} className="border rounded-lg p-3 md:p-4 space-y-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <Label className="capitalize text-sm font-medium">{day}</Label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={!!dayUI.closed}
-                          onChange={(e) => {
-                            const closed = !!e.target.checked;
-                            setOpeningHoursUI((prev) => {
-                              const next = {
-                                ...(prev && typeof prev === 'object' ? prev : {}),
-                                [day]: {
-                                  closed,
-                                  ranges: closed ? [{ start: '', end: '' }] : (dayUI?.ranges?.length ? dayUI.ranges : [{ start: '', end: '' }]),
-                                },
-                              };
-                              persistOpeningHoursUI(next);
-                              return next;
-                            });
-                          }}
-                        />
-                        <span className="text-sm text-muted-foreground">Chiuso</span>
-                      </div>
-                    </div>
-
-                    {!dayUI.closed && (
-                      <div className="space-y-2">
-                        {(Array.isArray(dayUI.ranges) ? dayUI.ranges : []).map((r, idx) => (
-                          <div key={idx} className="grid grid-cols-1 md:grid-cols-7 gap-2 items-center">
-                            <div className="md:col-span-3">
-                              <Label className="text-xs text-muted-foreground">Da</Label>
-                              <Input
-                                type="time"
-                                value={String(r?.start ?? '')}
-                                onChange={(e) => {
-                                  const start = e.target.value;
-                                  setOpeningHoursUI((prev) => {
-                                    const current = prev?.[day] ?? dayUI;
-                                    const nextRanges = (Array.isArray(current?.ranges) ? current.ranges : []).map((x, i) =>
-                                      i === idx ? { ...(x || {}), start } : x
-                                    );
-                                    const next = {
-                                      ...(prev && typeof prev === 'object' ? prev : {}),
-                                      [day]: { ...current, closed: false, ranges: nextRanges },
-                                    };
-                                    persistOpeningHoursUI(next);
-                                    return next;
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div className="md:col-span-3">
-                              <Label className="text-xs text-muted-foreground">A</Label>
-                              <Input
-                                type="time"
-                                value={String(r?.end ?? '')}
-                                onChange={(e) => {
-                                  const end = e.target.value;
-                                  setOpeningHoursUI((prev) => {
-                                    const current = prev?.[day] ?? dayUI;
-                                    const nextRanges = (Array.isArray(current?.ranges) ? current.ranges : []).map((x, i) =>
-                                      i === idx ? { ...(x || {}), end } : x
-                                    );
-                                    const next = {
-                                      ...(prev && typeof prev === 'object' ? prev : {}),
-                                      [day]: { ...current, closed: false, ranges: nextRanges },
-                                    };
-                                    persistOpeningHoursUI(next);
-                                    return next;
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div className="md:col-span-1 flex md:justify-end">
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                onClick={() => {
-                                  setOpeningHoursUI((prev) => {
-                                    const current = prev?.[day] ?? dayUI;
-                                    const nextRanges = (Array.isArray(current?.ranges) ? current.ranges : []).filter((_, i) => i !== idx);
-                                    const normalizedRanges = nextRanges.length > 0 ? nextRanges : [{ start: '', end: '' }];
-                                    const next = {
-                                      ...(prev && typeof prev === 'object' ? prev : {}),
-                                      [day]: { ...current, closed: false, ranges: normalizedRanges },
-                                    };
-                                    persistOpeningHoursUI(next);
-                                    return next;
-                                  });
-                                }}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            setOpeningHoursUI((prev) => {
-                              const current = prev?.[day] ?? dayUI;
-                              const nextRanges = [...(Array.isArray(current?.ranges) ? current.ranges : []), { start: '', end: '' }];
-                              const next = {
-                                ...(prev && typeof prev === 'object' ? prev : {}),
-                                [day]: { ...current, closed: false, ranges: nextRanges },
-                              };
-                              persistOpeningHoursUI(next);
-                              return next;
-                            });
-                          }}
-                        >
-                          Aggiungi fascia
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-
-          {formData.modalita_consegna?.includes('consegna') && (
-            <Card className="mb-4 md:mb-6">
-              <CardHeader className="p-4 md:p-6">
-                <CardTitle className="text-base md:text-lg">Orari di Consegna</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 p-4 md:p-6">
+            <CardContent className="p-4 md:p-6">
+              <div className="rounded-lg border border-border divide-y divide-border">
                 {DAYS.map((day) => {
-                  const dayUI = deliveryHoursUI?.[day] ?? { closed: true, ranges: [{ start: '', end: '' }] };
+                  const dayUI = openingHoursUI?.[day] ?? { closed: true, ranges: [{ start: '', end: '' }] };
                   return (
-                    <div key={day} className="border rounded-lg p-3 md:p-4 space-y-3">
-                      <div className="flex items-center justify-between gap-3">
+                    <div key={day} className="p-3 md:p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <Label className="capitalize text-sm font-medium">{day}</Label>
                         <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
+                          <Switch
                             checked={!!dayUI.closed}
-                            onChange={(e) => {
-                              const closed = !!e.target.checked;
-                              setDeliveryHoursUI((prev) => {
+                            onCheckedChange={(checked) => {
+                              const closed = !!checked;
+                              setOpeningHoursUI((prev) => {
                                 const next = {
                                   ...(prev && typeof prev === 'object' ? prev : {}),
                                   [day]: {
@@ -1081,70 +948,77 @@ export default function Settings() {
                                     ranges: closed ? [{ start: '', end: '' }] : (dayUI?.ranges?.length ? dayUI.ranges : [{ start: '', end: '' }]),
                                   },
                                 };
-                                persistDeliveryHoursUI(next);
+                                persistOpeningHoursUI(next);
                                 return next;
                               });
                             }}
+                            aria-label={`Segna ${day} come chiuso`}
+                            className="data-[state=unchecked]:bg-slate-300 data-[state=checked]:bg-slate-900 dark:data-[state=unchecked]:bg-slate-700 dark:data-[state=checked]:bg-slate-200 [&>span]:bg-white"
                           />
-                          <span className="text-sm text-muted-foreground">Non disponibile</span>
+                          <span className="text-sm text-muted-foreground">Chiuso</span>
                         </div>
                       </div>
 
                       {!dayUI.closed && (
-                        <div className="space-y-2">
+                        <div className="mt-3 space-y-2">
                           {(Array.isArray(dayUI.ranges) ? dayUI.ranges : []).map((r, idx) => (
-                            <div key={idx} className="grid grid-cols-1 md:grid-cols-7 gap-2 items-center">
-                              <div className="md:col-span-3">
-                                <Label className="text-xs text-muted-foreground">Da</Label>
-                                <Input
-                                  type="time"
-                                  value={String(r?.start ?? '')}
-                                  onChange={(e) => {
-                                    const start = e.target.value;
-                                    setDeliveryHoursUI((prev) => {
-                                      const current = prev?.[day] ?? dayUI;
-                                      const nextRanges = (Array.isArray(current?.ranges) ? current.ranges : []).map((x, i) =>
-                                        i === idx ? { ...(x || {}), start } : x
-                                      );
-                                      const next = {
-                                        ...(prev && typeof prev === 'object' ? prev : {}),
-                                        [day]: { ...current, closed: false, ranges: nextRanges },
-                                      };
-                                      persistDeliveryHoursUI(next);
-                                      return next;
-                                    });
-                                  }}
-                                />
+                            <div key={idx} className="flex flex-col sm:flex-row sm:items-end gap-2">
+                              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className="space-y-1">
+                                  <Label className="text-xs text-muted-foreground">Da</Label>
+                                  <Input
+                                    type="time"
+                                    className="h-9"
+                                    value={String(r?.start ?? '')}
+                                    onChange={(e) => {
+                                      const start = e.target.value;
+                                      setOpeningHoursUI((prev) => {
+                                        const current = prev?.[day] ?? dayUI;
+                                        const nextRanges = (Array.isArray(current?.ranges) ? current.ranges : []).map((x, i) =>
+                                          i === idx ? { ...(x || {}), start } : x
+                                        );
+                                        const next = {
+                                          ...(prev && typeof prev === 'object' ? prev : {}),
+                                          [day]: { ...current, closed: false, ranges: nextRanges },
+                                        };
+                                        persistOpeningHoursUI(next);
+                                        return next;
+                                      });
+                                    }}
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-xs text-muted-foreground">A</Label>
+                                  <Input
+                                    type="time"
+                                    className="h-9"
+                                    value={String(r?.end ?? '')}
+                                    onChange={(e) => {
+                                      const end = e.target.value;
+                                      setOpeningHoursUI((prev) => {
+                                        const current = prev?.[day] ?? dayUI;
+                                        const nextRanges = (Array.isArray(current?.ranges) ? current.ranges : []).map((x, i) =>
+                                          i === idx ? { ...(x || {}), end } : x
+                                        );
+                                        const next = {
+                                          ...(prev && typeof prev === 'object' ? prev : {}),
+                                          [day]: { ...current, closed: false, ranges: nextRanges },
+                                        };
+                                        persistOpeningHoursUI(next);
+                                        return next;
+                                      });
+                                    }}
+                                  />
+                                </div>
                               </div>
-                              <div className="md:col-span-3">
-                                <Label className="text-xs text-muted-foreground">A</Label>
-                                <Input
-                                  type="time"
-                                  value={String(r?.end ?? '')}
-                                  onChange={(e) => {
-                                    const end = e.target.value;
-                                    setDeliveryHoursUI((prev) => {
-                                      const current = prev?.[day] ?? dayUI;
-                                      const nextRanges = (Array.isArray(current?.ranges) ? current.ranges : []).map((x, i) =>
-                                        i === idx ? { ...(x || {}), end } : x
-                                      );
-                                      const next = {
-                                        ...(prev && typeof prev === 'object' ? prev : {}),
-                                        [day]: { ...current, closed: false, ranges: nextRanges },
-                                      };
-                                      persistDeliveryHoursUI(next);
-                                      return next;
-                                    });
-                                  }}
-                                />
-                              </div>
-                              <div className="md:col-span-1 flex md:justify-end">
+                              <div className="flex sm:justify-end">
                                 <Button
                                   type="button"
                                   variant="destructive"
                                   size="icon"
+                                  className="h-9 w-9"
                                   onClick={() => {
-                                    setDeliveryHoursUI((prev) => {
+                                    setOpeningHoursUI((prev) => {
                                       const current = prev?.[day] ?? dayUI;
                                       const nextRanges = (Array.isArray(current?.ranges) ? current.ranges : []).filter((_, i) => i !== idx);
                                       const normalizedRanges = nextRanges.length > 0 ? nextRanges : [{ start: '', end: '' }];
@@ -1152,7 +1026,7 @@ export default function Settings() {
                                         ...(prev && typeof prev === 'object' ? prev : {}),
                                         [day]: { ...current, closed: false, ranges: normalizedRanges },
                                       };
-                                      persistDeliveryHoursUI(next);
+                                      persistOpeningHoursUI(next);
                                       return next;
                                     });
                                   }}
@@ -1166,15 +1040,17 @@ export default function Settings() {
                           <Button
                             type="button"
                             variant="outline"
+                            size="sm"
+                            className="h-9"
                             onClick={() => {
-                              setDeliveryHoursUI((prev) => {
+                              setOpeningHoursUI((prev) => {
                                 const current = prev?.[day] ?? dayUI;
                                 const nextRanges = [...(Array.isArray(current?.ranges) ? current.ranges : []), { start: '', end: '' }];
                                 const next = {
                                   ...(prev && typeof prev === 'object' ? prev : {}),
                                   [day]: { ...current, closed: false, ranges: nextRanges },
                                 };
-                                persistDeliveryHoursUI(next);
+                                persistOpeningHoursUI(next);
                                 return next;
                               });
                             }}
@@ -1186,6 +1062,151 @@ export default function Settings() {
                     </div>
                   );
                 })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {formData.modalita_consegna?.includes('consegna') && (
+            <Card className="mb-4 md:mb-6">
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-base md:text-lg">Orari di Consegna</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 md:p-6">
+                <div className="rounded-lg border border-border divide-y divide-border">
+                  {DAYS.map((day) => {
+                    const dayUI = deliveryHoursUI?.[day] ?? { closed: true, ranges: [{ start: '', end: '' }] };
+                    return (
+                      <div key={day} className="p-3 md:p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <Label className="capitalize text-sm font-medium">{day}</Label>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={!!dayUI.closed}
+                              onCheckedChange={(checked) => {
+                                const closed = !!checked;
+                                setDeliveryHoursUI((prev) => {
+                                  const next = {
+                                    ...(prev && typeof prev === 'object' ? prev : {}),
+                                    [day]: {
+                                      closed,
+                                      ranges: closed ? [{ start: '', end: '' }] : (dayUI?.ranges?.length ? dayUI.ranges : [{ start: '', end: '' }]),
+                                    },
+                                  };
+                                  persistDeliveryHoursUI(next);
+                                  return next;
+                                });
+                              }}
+                              aria-label={`Segna ${day} come non disponibile per la consegna`}
+                              className="data-[state=unchecked]:bg-slate-300 data-[state=checked]:bg-slate-900 dark:data-[state=unchecked]:bg-slate-700 dark:data-[state=checked]:bg-slate-200 [&>span]:bg-white"
+                            />
+                            <span className="text-sm text-muted-foreground">Non disponibile</span>
+                          </div>
+                        </div>
+
+                        {!dayUI.closed && (
+                          <div className="mt-3 space-y-2">
+                            {(Array.isArray(dayUI.ranges) ? dayUI.ranges : []).map((r, idx) => (
+                              <div key={idx} className="flex flex-col sm:flex-row sm:items-end gap-2">
+                                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  <div className="space-y-1">
+                                    <Label className="text-xs text-muted-foreground">Da</Label>
+                                    <Input
+                                      type="time"
+                                      className="h-9"
+                                      value={String(r?.start ?? '')}
+                                      onChange={(e) => {
+                                        const start = e.target.value;
+                                        setDeliveryHoursUI((prev) => {
+                                          const current = prev?.[day] ?? dayUI;
+                                          const nextRanges = (Array.isArray(current?.ranges) ? current.ranges : []).map((x, i) =>
+                                            i === idx ? { ...(x || {}), start } : x
+                                          );
+                                          const next = {
+                                            ...(prev && typeof prev === 'object' ? prev : {}),
+                                            [day]: { ...current, closed: false, ranges: nextRanges },
+                                          };
+                                          persistDeliveryHoursUI(next);
+                                          return next;
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-xs text-muted-foreground">A</Label>
+                                    <Input
+                                      type="time"
+                                      className="h-9"
+                                      value={String(r?.end ?? '')}
+                                      onChange={(e) => {
+                                        const end = e.target.value;
+                                        setDeliveryHoursUI((prev) => {
+                                          const current = prev?.[day] ?? dayUI;
+                                          const nextRanges = (Array.isArray(current?.ranges) ? current.ranges : []).map((x, i) =>
+                                            i === idx ? { ...(x || {}), end } : x
+                                          );
+                                          const next = {
+                                            ...(prev && typeof prev === 'object' ? prev : {}),
+                                            [day]: { ...current, closed: false, ranges: nextRanges },
+                                          };
+                                          persistDeliveryHoursUI(next);
+                                          return next;
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex sm:justify-end">
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="h-9 w-9"
+                                    onClick={() => {
+                                      setDeliveryHoursUI((prev) => {
+                                        const current = prev?.[day] ?? dayUI;
+                                        const nextRanges = (Array.isArray(current?.ranges) ? current.ranges : []).filter((_, i) => i !== idx);
+                                        const normalizedRanges = nextRanges.length > 0 ? nextRanges : [{ start: '', end: '' }];
+                                        const next = {
+                                          ...(prev && typeof prev === 'object' ? prev : {}),
+                                          [day]: { ...current, closed: false, ranges: normalizedRanges },
+                                        };
+                                        persistDeliveryHoursUI(next);
+                                        return next;
+                                      });
+                                    }}
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-9"
+                              onClick={() => {
+                                setDeliveryHoursUI((prev) => {
+                                  const current = prev?.[day] ?? dayUI;
+                                  const nextRanges = [...(Array.isArray(current?.ranges) ? current.ranges : []), { start: '', end: '' }];
+                                  const next = {
+                                    ...(prev && typeof prev === 'object' ? prev : {}),
+                                    [day]: { ...current, closed: false, ranges: nextRanges },
+                                  };
+                                  persistDeliveryHoursUI(next);
+                                  return next;
+                                });
+                              }}
+                            >
+                              Aggiungi fascia
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
           )}
