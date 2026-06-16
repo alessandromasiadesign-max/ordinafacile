@@ -1219,11 +1219,12 @@ export default function Settings() {
               <div className="space-y-3">
                 <Label>Modalità disponibili</Label>
                 
-                <div 
-                  className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                    formData.modalita_consegna?.includes("consegna") 
-                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
-                      : 'border-border hover:bg-accent'
+                <button
+                  type="button"
+                  className={`flex w-full items-center gap-3 rounded-lg border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                    formData.modalita_consegna?.includes("consegna")
+                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
+                      : 'border-border hover:bg-accent/60'
                   }`}
                   onClick={() => toggleModalita("consegna")}
                 >
@@ -1236,16 +1237,17 @@ export default function Settings() {
                       <Check className="w-3 h-3 text-white" />
                     )}
                   </div>
-                  <label className="text-sm font-medium cursor-pointer flex-1">
+                  <span className="text-sm font-medium flex-1">
                     Consegna a domicilio
-                  </label>
-                </div>
+                  </span>
+                </button>
                 
-                <div 
-                  className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                    formData.modalita_consegna?.includes("asporto") 
-                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
-                      : 'border-border hover:bg-accent'
+                <button
+                  type="button"
+                  className={`flex w-full items-center gap-3 rounded-lg border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                    formData.modalita_consegna?.includes("asporto")
+                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
+                      : 'border-border hover:bg-accent/60'
                   }`}
                   onClick={() => toggleModalita("asporto")}
                 >
@@ -1258,10 +1260,10 @@ export default function Settings() {
                       <Check className="w-3 h-3 text-white" />
                     )}
                   </div>
-                  <label className="text-sm font-medium cursor-pointer flex-1">
+                  <span className="text-sm font-medium flex-1">
                     Asporto
-                  </label>
-                </div>
+                  </span>
+                </button>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -1287,11 +1289,12 @@ export default function Settings() {
               <CardTitle className="text-base md:text-lg">Capacità Ordini</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-4 md:p-6">
-              <div
-                className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
+              <button
+                type="button"
+                className={`flex w-full items-center gap-3 rounded-lg border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   formData.settings?.order_capacity?.enabled
                     ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
-                    : 'border-border hover:bg-accent'
+                    : 'border-border hover:bg-accent/60'
                 }`}
                 onClick={() => setFormData(prev => ({
                   ...prev,
@@ -1313,10 +1316,10 @@ export default function Settings() {
                     <Check className="w-3 h-3 text-white" />
                   )}
                 </div>
-                <label className="text-sm font-medium cursor-pointer flex-1">
+                <span className="text-sm font-medium flex-1">
                   Limita il numero di ordini ricevibili
-                </label>
-              </div>
+                </span>
+              </button>
 
               {formData.settings?.order_capacity?.enabled && (
                 <div className="grid md:grid-cols-2 gap-4">

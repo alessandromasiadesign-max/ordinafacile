@@ -14,24 +14,25 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-4 md:p-6">
         <CardTitle className="flex items-center gap-2">
           <CreditCard className="w-5 h-5" />
           Metodi di Pagamento
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 p-4 md:p-6">
         {/* PayPal */}
         <div className="space-y-3">
-          <div 
-            className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-              paymentSettings.paypal_enabled 
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' 
-                : 'border-border hover:bg-accent'
+          <button
+            type="button"
+            className={`flex w-full items-center gap-3 rounded-lg border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+              paymentSettings.paypal_enabled
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30'
+                : 'border-border hover:bg-accent/60'
             }`}
             onClick={() => togglePaymentMethod('paypal')}
           >
-            <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
               paymentSettings.paypal_enabled 
                 ? 'border-blue-500 bg-blue-500' 
                 : 'border-border'
@@ -42,7 +43,7 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
               <div className="font-semibold">PayPal</div>
               <div className="text-sm text-muted-foreground">Accetta pagamenti tramite PayPal</div>
             </div>
-          </div>
+          </button>
           
           {paymentSettings.paypal_enabled && (
             <div className="ml-4 pl-4 border-l-2 border-blue-200 dark:border-blue-900 space-y-2">
@@ -62,15 +63,16 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
 
         {/* Stripe */}
         <div className="space-y-3">
-          <div 
-            className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-              paymentSettings.stripe_enabled 
-                ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/30' 
-                : 'border-border hover:bg-accent'
+          <button
+            type="button"
+            className={`flex w-full items-center gap-3 rounded-lg border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+              paymentSettings.stripe_enabled
+                ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/30'
+                : 'border-border hover:bg-accent/60'
             }`}
             onClick={() => togglePaymentMethod('stripe')}
           >
-            <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
               paymentSettings.stripe_enabled 
                 ? 'border-purple-500 bg-purple-500' 
                 : 'border-border'
@@ -81,7 +83,7 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
               <div className="font-semibold">Carta di Credito (Stripe)</div>
               <div className="text-sm text-muted-foreground">Accetta carte di credito/debito</div>
             </div>
-          </div>
+          </button>
           
           {paymentSettings.stripe_enabled && (
             <div className="ml-4 pl-4 border-l-2 border-purple-200 dark:border-purple-900 space-y-3">
@@ -107,15 +109,16 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
         </div>
 
         {/* Contanti */}
-        <div 
-          className={`flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-            paymentSettings.cash_enabled 
-              ? 'border-green-500 bg-green-50 dark:bg-green-950/30' 
-              : 'border-border hover:bg-accent'
+        <button
+          type="button"
+          className={`flex w-full items-center gap-3 rounded-lg border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+            paymentSettings.cash_enabled
+              ? 'border-green-500 bg-green-50 dark:bg-green-950/30'
+              : 'border-border hover:bg-accent/60'
           }`}
           onClick={() => togglePaymentMethod('cash')}
         >
-          <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
             paymentSettings.cash_enabled 
               ? 'border-green-500 bg-green-500' 
               : 'border-border'
@@ -129,7 +132,7 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
             </div>
             <div className="text-sm text-muted-foreground">Pagamento in contanti al momento della consegna</div>
           </div>
-        </div>
+        </button>
 
         <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-900 rounded-lg p-4 text-sm text-amber-800 dark:text-amber-100">
           <strong>⚠️ Importante:</strong> I pagamenti online richiedono la configurazione di un account su PayPal o Stripe. I fondi saranno trasferiti direttamente sul tuo conto.
