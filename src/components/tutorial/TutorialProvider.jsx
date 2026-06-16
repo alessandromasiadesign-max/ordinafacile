@@ -120,7 +120,7 @@ const buildOrdersTour = ({ advanced }) => {
     ...base,
     {
       target: '[data-tour="orders-view-toggle"]',
-      content: "Puoi scegliere la vista Lista o Kanban. Tip: Kanban è ottima nei momenti di punta per spostare gli ordini per stato.",
+      content: "Puoi scegliere la vista Lista o Griglia. Tip: la Griglia raggruppa gli ordini per stato ed è ottima nei momenti di punta.",
       placement: "bottom",
       route: "/Orders",
     },

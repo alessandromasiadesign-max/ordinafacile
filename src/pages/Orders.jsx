@@ -479,14 +479,30 @@ export default function Orders() {
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm text-muted-foreground">{filteredOrders.length} ordini</div>
                   <div className="flex items-center gap-2" data-tour="orders-view-toggle">
-                    <Button type="button" variant={viewMode === "list" ? "default" : "outline"} size="sm" onClick={() => setViewMode("list")} className="h-9 md:h-10">
-                      <LayoutList className="w-4 h-4 mr-2" />
-                      Lista
-                    </Button>
-                    <Button type="button" variant={viewMode === "kanban" ? "default" : "outline"} size="sm" onClick={() => setViewMode("kanban")} className="h-9 md:h-10">
-                      <Columns3 className="w-4 h-4 mr-2" />
-                      Kanban
-                    </Button>
+                    <div className="inline-flex rounded-lg border border-border bg-muted p-1">
+                      <Button
+                        type="button"
+                        variant={viewMode === "list" ? "default" : "ghost"}
+                        size="sm"
+                        aria-pressed={viewMode === "list"}
+                        onClick={() => setViewMode("list")}
+                        className="h-8"
+                      >
+                        <LayoutList className="w-4 h-4 mr-2" />
+                        Lista
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={viewMode === "kanban" ? "default" : "ghost"}
+                        size="sm"
+                        aria-pressed={viewMode === "kanban"}
+                        onClick={() => setViewMode("kanban")}
+                        className="h-8"
+                      >
+                        <Columns3 className="w-4 h-4 mr-2" />
+                        Griglia
+                      </Button>
+                    </div>
                   </div>
                 </div>
                 <div className="flex-1">
