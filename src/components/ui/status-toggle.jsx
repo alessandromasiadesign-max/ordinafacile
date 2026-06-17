@@ -10,8 +10,8 @@ export default function StatusToggle({ active, onToggle, label = "Stato", disabl
         <Badge 
           className={`${
             active 
-              ? "bg-green-100 text-green-800 border-green-300" 
-              : "bg-red-100 text-red-800 border-red-300"
+              ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-950/30 dark:text-green-100 dark:border-green-900/60" 
+              : "bg-red-100 text-red-800 border-red-300 dark:bg-red-950/30 dark:text-red-100 dark:border-red-900/60"
           } border font-semibold`}
         >
           {active ? "✓ ATTIVO" : "✗ DISATTIVO"}
@@ -22,8 +22,8 @@ export default function StatusToggle({ active, onToggle, label = "Stato", disabl
         type="button"
         onClick={onToggle}
         disabled={disabled}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
-          active ? "bg-green-500" : "bg-muted"
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+          active ? "bg-green-600" : "bg-slate-300 dark:bg-slate-700"
         } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
       >
         <motion.span

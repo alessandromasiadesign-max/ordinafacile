@@ -293,27 +293,39 @@ export default function Promotions() {
         {/* Tabs - New UI element for navigation */}
         <div className="flex gap-2 mb-4 md:mb-6 bg-background p-2 rounded-lg shadow-sm border border-border overflow-x-auto">
           <Button
-            variant={activeTab === 'mine' ? 'default' : 'ghost'}
+            variant="ghost"
             onClick={() => setActiveTab('mine')}
-            className={activeTab === 'mine' ? 'bg-red-600 hover:bg-red-700' : ''}
+            className={
+              activeTab === 'mine'
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : 'border border-border text-muted-foreground hover:bg-accent/60'
+            }
           >
             Le Tue Promo
           </Button>
           <Button
-            variant={activeTab === 'templates' ? 'default' : 'ghost'}
+            variant="ghost"
             onClick={() => setActiveTab('templates')}
-            className={activeTab === 'templates' ? 'bg-red-600 hover:bg-red-700' : ''}
+            className={
+              activeTab === 'templates'
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : 'border border-border text-muted-foreground hover:bg-accent/60'
+            }
           >
             Predefinite
           </Button>
           <Button
-            variant={activeTab === 'create' ? 'default' : 'ghost'}
+            variant="ghost"
             data-tour="promotions-create"
             onClick={() => {
               setActiveTab('create');
               setShowAddDialog(true);
             }}
-            className={activeTab === 'create' ? 'bg-red-600 hover:bg-red-700' : ''}
+            className={
+              activeTab === 'create'
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : 'border border-border text-muted-foreground hover:bg-accent/60'
+            }
           >
             <Plus className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
             Crea Nuova
@@ -322,7 +334,20 @@ export default function Promotions() {
 
         {/* Le Tue Promo content - conditionally rendered based on activeTab */}
         {activeTab === 'mine' && (
-          promotions.length === 0 ? (
+          isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="h-5 w-2/3 bg-muted rounded mb-3" />
+                    <div className="h-4 w-1/2 bg-muted rounded mb-6" />
+                    <div className="h-24 bg-muted rounded mb-4" />
+                    <div className="h-10 bg-muted rounded" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : promotions.length === 0 ? (
             <Card>
               <CardContent className="p-12 text-center">
                 <Tag className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -340,7 +365,10 @@ export default function Promotions() {
                     Usa Template
                   </Button>
                   <Button 
-                    onClick={() => setShowAddDialog(true)}
+                    onClick={() => {
+                      setActiveTab('create');
+                      setShowAddDialog(true);
+                    }}
                     className="bg-red-600 hover:bg-red-700"
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -353,32 +381,34 @@ export default function Promotions() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {promotions.map(promo => (
                 <Card key={promo.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="flex flex-row items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-xl mb-2">{promo.nome}</CardTitle>
+                  <CardHeader className="p-4 md:p-6 flex flex-row items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-lg md:text-xl mb-2 truncate">{promo.nome}</CardTitle>
                       <div className="flex flex-wrap gap-2">
-                        <Badge className={promo.attiva ? "bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-100" : "bg-slate-100 text-slate-800 dark:bg-slate-900/40 dark:text-slate-100"}>
+                        <Badge className={promo.attiva ? "bg-green-100 text-green-800 border border-green-300 dark:bg-green-950/30 dark:text-green-100 dark:border-green-900/60" : "bg-slate-100 text-slate-800 border border-slate-300 dark:bg-slate-900/40 dark:text-slate-100 dark:border-slate-700"}>
                           {promo.attiva ? "Attiva" : "Disattivata"}
                         </Badge>
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="border-border">
                           {promo.attivazione === 'codice' ? `Codice: ${promo.codice}` : 'Automatica'}
                         </Badge>
                         {promo.regole?.cumulabile && (
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-100 dark:border-blue-900/60">
                             Cumulabile
                           </Badge>
                         )}
                       </div>
                     </div>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
+                      aria-label="Modifica promozione"
+                      title="Modifica promozione"
                       onClick={() => setEditingPromotion(promo)}
                     >
                       <Pencil className="w-4 h-4" />
                     </Button>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
                     {promo.descrizione && (
                       <p className="text-muted-foreground mb-4">{promo.descrizione}</p>
                     )}
