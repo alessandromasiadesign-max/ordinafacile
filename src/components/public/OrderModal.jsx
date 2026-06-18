@@ -157,9 +157,10 @@ export default function OrderModal({ item, onClose, onAdd }) {
                         : (selectedModifiers[modifier.id] || []).includes(option.nome);
 
                       return (
-                        <div 
+                        <button
+                          type="button"
                           key={i} 
-                          className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                          className={`flex w-full items-center justify-between p-4 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                             isSelected 
                               ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
                               : 'border-border hover:bg-accent'
@@ -171,6 +172,7 @@ export default function OrderModal({ item, onClose, onAdd }) {
                               handleMultiSelect(modifier.id, option.nome, !isSelected);
                             }
                           }}
+                          aria-pressed={!!isSelected}
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-6 h-6 flex-shrink-0 flex items-center justify-center border-2 transition-all ${
@@ -189,7 +191,7 @@ export default function OrderModal({ item, onClose, onAdd }) {
                               +€{option.prezzo_extra.toFixed(2)}
                             </span>
                           )}
-                        </div>
+                        </button>
                       );
                     })}
                   </div>

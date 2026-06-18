@@ -733,13 +733,15 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                 </Select>
               </div>
 
-              <div 
-                className={`flex items-start space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
+              <button
+                type="button"
+                className={`flex w-full items-start space-x-3 p-3 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   acceptTerms 
                     ? 'border-red-500 bg-red-50' 
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
                 onClick={() => setAcceptTerms(prev => !prev)}
+                aria-pressed={!!acceptTerms}
               >
                 <div className={`w-5 h-5 flex-shrink-0 flex items-center justify-center border-2 rounded transition-all mt-0.5 ${
                   acceptTerms 
@@ -748,10 +750,10 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                 }`}>
                   {acceptTerms && <Check className="w-3 h-3 text-white" />}
                 </div>
-                <label className="text-sm cursor-pointer">
+                <span className="text-sm">
                   Accetto i termini e condizioni e la privacy policy
-                </label>
-              </div>
+                </span>
+              </button>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowCheckout(false)}>

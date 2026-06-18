@@ -37,14 +37,16 @@ export default function PromotionSelector({ selectedIds = [], onChange, restaura
   return (
     <div className="space-y-3">
       {promotions.map(promo => (
-        <div
+        <button
+          type="button"
           key={promo.id}
-          className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+          className={`w-full p-4 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
             selectedIds.includes(promo.id)
               ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
               : 'border-border hover:bg-accent'
           }`}
           onClick={() => togglePromotion(promo.id)}
+          aria-pressed={selectedIds.includes(promo.id)}
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -69,7 +71,7 @@ export default function PromotionSelector({ selectedIds = [], onChange, restaura
               )}
             </div>
           </div>
-        </div>
+        </button>
       ))}
     </div>
   );

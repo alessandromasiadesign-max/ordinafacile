@@ -190,34 +190,38 @@ export default function EditLocationDialog({ open, onClose }) {
             <div className="border-t pt-4">
               <Label className="text-lg font-semibold mb-3 block">Modalità Ordini</Label>
               <div className="flex gap-4">
-                <div 
-                  className={`flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                <button
+                  type="button"
+                  className={`flex-1 p-3 border-2 rounded-lg transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                     (formData.modalita_consegna || []).includes("consegna") 
                       ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
-                      : 'border-border hover:border-foreground/30'
+                      : 'border-border hover:bg-accent/60'
                   }`}
                   onClick={() => toggleModalita("consegna")}
+                  aria-pressed={(formData.modalita_consegna || []).includes("consegna")}
                 >
                   <Checkbox 
                     checked={(formData.modalita_consegna || []).includes("consegna")}
                     className="mr-2"
                   />
                   Consegna a Domicilio
-                </div>
-                <div 
-                  className={`flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                </button>
+                <button
+                  type="button"
+                  className={`flex-1 p-3 border-2 rounded-lg transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                     (formData.modalita_consegna || []).includes("asporto") 
                       ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
-                      : 'border-border hover:border-foreground/30'
+                      : 'border-border hover:bg-accent/60'
                   }`}
                   onClick={() => toggleModalita("asporto")}
+                  aria-pressed={(formData.modalita_consegna || []).includes("asporto")}
                 >
                   <Checkbox 
                     checked={(formData.modalita_consegna || []).includes("asporto")}
                     className="mr-2"
                   />
                   Asporto
-                </div>
+                </button>
               </div>
             </div>
 
