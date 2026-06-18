@@ -335,14 +335,16 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {giorniSettimana.map(giorno => (
-                    <div
+                    <button
+                      type="button"
                       key={giorno.value}
-                      className={`px-4 py-2 rounded-lg border-2 cursor-pointer transition-all ${
+                      className={`px-4 py-2 rounded-lg border-2 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                         formData.regole.giorni_settimana.includes(giorno.value)
-                          ? 'border-red-500 bg-red-50 text-red-700'
-                          : 'border-border hover:border-muted-foreground'
+                          ? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-100'
+                          : 'border-border hover:bg-accent/60'
                       }`}
                       onClick={() => toggleGiorno(giorno.value)}
+                      aria-pressed={formData.regole.giorni_settimana.includes(giorno.value)}
                     >
                       <div className="flex items-center gap-2">
                         <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
@@ -356,7 +358,7 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                         </div>
                         <span className="font-medium">{giorno.label}</span>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -397,16 +399,18 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
               )}
 
               <div className="space-y-3">
-                <div 
-                  className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                <button
+                  type="button"
+                  className={`flex w-full items-center space-x-3 p-3 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                     formData.regole.solo_primo_ordine 
-                      ? 'border-red-500 bg-red-50' 
-                      : 'border-border hover:border-muted-foreground'
+                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
+                      : 'border-border hover:bg-accent/60'
                   }`}
                   onClick={() => setFormData(prev => ({
                     ...prev,
                     regole: { ...prev.regole, solo_primo_ordine: !prev.regole.solo_primo_ordine }
                   }))}
+                  aria-pressed={!!formData.regole.solo_primo_ordine}
                 >
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                     formData.regole.solo_primo_ordine 
@@ -415,21 +419,23 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                   }`}>
                     {formData.regole.solo_primo_ordine && <Check className="w-3 h-3 text-white" />}
                   </div>
-                  <label className="text-sm cursor-pointer flex-1">
+                  <span className="text-sm flex-1">
                     Valido solo per il primo ordine del cliente
-                  </label>
-                </div>
+                  </span>
+                </button>
                 
-                <div 
-                  className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                <button
+                  type="button"
+                  className={`flex w-full items-center space-x-3 p-3 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                     formData.regole.cumulabile 
-                      ? 'border-red-500 bg-red-50' 
-                      : 'border-border hover:border-muted-foreground'
+                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
+                      : 'border-border hover:bg-accent/60'
                   }`}
                   onClick={() => setFormData(prev => ({
                     ...prev,
                     regole: { ...prev.regole, cumulabile: !prev.regole.cumulabile }
                   }))}
+                  aria-pressed={!!formData.regole.cumulabile}
                 >
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                     formData.regole.cumulabile 
@@ -438,10 +444,10 @@ export default function AddPromotionDialog({ open, onClose, restaurantId }) {
                   }`}>
                     {formData.regole.cumulabile && <Check className="w-3 h-3 text-white" />}
                   </div>
-                  <label className="text-sm cursor-pointer flex-1">
+                  <span className="text-sm flex-1">
                     Cumulabile con altre promozioni
-                  </label>
-                </div>
+                  </span>
+                </button>
               </div>
             </div>
           </div>

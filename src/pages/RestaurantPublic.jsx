@@ -877,18 +877,20 @@ export default function RestaurantPublic() {
             {showAllergeniFilter && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-2 border rounded-lg">
                 {ALLERGENI.map(allergene => (
-                  <div
+                  <button
+                    type="button"
                     key={allergene.value}
-                    className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-all ${
+                    className={`flex items-center gap-2 p-2 rounded border-2 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                       selectedAllergeni.includes(allergene.value)
-                        ? 'bg-red-50 dark:bg-red-950/30 border-2 border-red-500'
-                        : 'bg-muted border border-border hover:bg-accent'
+                        ? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-100'
+                        : 'border-border bg-muted hover:bg-accent/60'
                     }`}
                     onClick={() => toggleAllergene(allergene.value)}
+                    aria-pressed={selectedAllergeni.includes(allergene.value)}
                   >
                     <span>{allergene.icon}</span>
                     <span className="text-sm">{allergene.label}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
