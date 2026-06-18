@@ -200,7 +200,7 @@ export default function MenuManagement() {
     esaurito: i?.esaurito ?? false,
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
     queryKey: ['categories', restaurant?.id],
     queryFn: async () => {
       if (!restaurant) return [];
@@ -214,7 +214,7 @@ export default function MenuManagement() {
     initialData: [],
   });
 
-  const { data: menuItems = [] } = useQuery({
+  const { data: menuItems = [], isLoading: isMenuItemsLoading } = useQuery({
     queryKey: ['menuItems', restaurant?.id],
     queryFn: async () => {
       if (!restaurant) return [];
@@ -226,6 +226,8 @@ export default function MenuManagement() {
     enabled: !!restaurant,
     initialData: [],
   });
+
+  const isMenuLoading = !restaurant || isCategoriesLoading || isMenuItemsLoading;
 
   const trimmedSearch = String(searchQuery || "").trim();
 
@@ -831,7 +833,24 @@ export default function MenuManagement() {
             </Card>
           )}
 
-          {categories.length === 0 ? (
+          {isMenuLoading ? (
+            <div className="grid gap-4 md:grid-cols-2 items-start">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="h-5 w-2/3 bg-muted rounded mb-2" />
+                        <div className="h-4 w-1/3 bg-muted rounded" />
+                      </div>
+                      <div className="h-9 w-9 bg-muted rounded" />
+                    </div>
+                    <div className="mt-4 h-9 bg-muted rounded" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : categories.length === 0 ? (
             <Card>
               <CardContent className="p-8 md:p-12 text-center">
                 <UtensilsCrossed className="w-12 h-12 md:w-16 md:h-16 text-muted-foreground/50 mx-auto mb-4" />
@@ -845,6 +864,24 @@ export default function MenuManagement() {
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Crea Prima Categoria
+                </Button>
+              </CardContent>
+            </Card>
+          ) : trimmedSearch && filteredCategories.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 md:p-12 text-center">
+                <Search className="w-12 h-12 md:w-16 md:h-16 text-muted-foreground/50 mx-auto mb-4" />
+                <h2 className="text-xl md:text-2xl font-bold mb-2">Nessun risultato</h2>
+                <p className="text-sm md:text-base text-muted-foreground mb-6">
+                  Non ho trovato categorie o prodotti che corrispondono alla ricerca.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSearchQuery("")}
+                  className="w-full sm:w-auto"
+                >
+                  Svuota ricerca
                 </Button>
               </CardContent>
             </Card>

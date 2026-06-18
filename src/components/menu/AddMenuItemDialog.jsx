@@ -164,18 +164,20 @@ export default function AddMenuItemDialog({ open, onClose, category, restaurantI
               <Label>Allergeni Presenti</Label>
               <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg">
                 {ALLERGENI.map(allergene => (
-                  <div
+                  <button
+                    type="button"
                     key={allergene.value}
-                    className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-all ${
+                    className={`flex items-center gap-2 p-2 rounded border-2 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                       formData.allergeni.includes(allergene.value)
-                        ? 'bg-red-50 border-2 border-red-500'
-                        : 'bg-muted border-2 border-border hover:border-muted-foreground'
+                        ? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-100'
+                        : 'border-border bg-muted hover:bg-accent/60'
                     }`}
                     onClick={() => toggleAllergene(allergene.value)}
+                    aria-pressed={formData.allergeni.includes(allergene.value)}
                   >
                     <span className="text-lg">{allergene.icon}</span>
                     <span className="text-sm font-medium">{allergene.label}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">

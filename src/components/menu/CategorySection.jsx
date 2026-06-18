@@ -363,8 +363,8 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div className="flex items-center gap-4 flex-1">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex items-center gap-4 flex-1 min-w-0">
             {category.immagine_url && (
               <img 
                 src={category.immagine_url} 
@@ -372,14 +372,14 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                 className="w-16 h-16 object-cover rounded-lg"
               />
             )}
-            <div>
-              <CardTitle className="text-2xl">{category.nome}</CardTitle>
+            <div className="min-w-0">
+              <CardTitle className="text-xl md:text-2xl truncate">{category.nome}</CardTitle>
               {category.descrizione && (
                 <p className="text-sm text-muted-foreground mt-1">{category.descrizione}</p>
               )}
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 justify-end">
+          <div className="flex flex-wrap gap-2 justify-end sm:pt-1">
             {headerActions}
             {enableBulkActions && (
               <Button
@@ -446,6 +446,8 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
               variant="outline" 
               size="icon"
               onClick={() => setShowEditCategory(true)}
+              aria-label="Modifica categoria"
+              title="Modifica categoria"
             >
               <Pencil className="w-4 h-4" />
             </Button>
@@ -471,8 +473,16 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                   key={item.id} 
                   className={`hover:shadow-md transition-shadow cursor-pointer ${
                     item.esaurito ? 'opacity-60' : ''
-                  }`}
+                  } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background`}
                   onClick={() => setEditingItem(item)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setEditingItem(item);
+                    }
+                  }}
                 >
                   <CardContent className="p-4">
                     {enableBulkActions && (
@@ -497,6 +507,7 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                             duplicateItemMutation.mutate(item);
                           }}
                           disabled={duplicateItemMutation.isPending}
+                          aria-label="Duplica prodotto"
                           title="Duplica prodotto"
                         >
                           <CopyPlus className="w-4 h-4" />
@@ -526,8 +537,8 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                             </Badge>
                         </div>
                     )}
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-lg">{item.nome}</h3>
+                    <div className="flex justify-between items-start gap-2 mb-2">
+                      <h3 className="font-bold text-lg truncate min-w-0">{item.nome}</h3>
                       <div className="flex gap-1">
                         {item.esaurito && (
                           <Badge variant="destructive" className="text-xs">
@@ -557,6 +568,7 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                           onClick={(e) => handleToggleEsaurito(item, e)}
                           className={item.esaurito ? "bg-green-600 hover:bg-green-700" : ""}
                           disabled={toggleEsauritoMutation.isPending} // Disable button while mutation is in progress
+                          aria-label={item.esaurito ? "Rendi disponibile" : "Segna come esaurito"}
                         >
                           {toggleEsauritoMutation.isPending && toggleEsauritoMutation.variables?.id === item.id 
                             ? "Aggiornamento..." 
@@ -570,6 +582,8 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                             e.stopPropagation();
                             setEditingItem(item);
                           }}
+                          aria-label="Modifica prodotto"
+                          title="Modifica prodotto"
                         >
                           <Pencil className="w-4 h-4" />
                         </Button>
