@@ -1,4 +1,4 @@
-import { Core } from '@/api/integrations';
+ï»¿import { Core } from '@/api/integrations';
 import { MenuItem } from '@/api/entities';
 import React, { useState, useRef } from 'react';
 import {
@@ -343,7 +343,7 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Prezzo (€) *</Label>
+                  <Label>Prezzo (â‚¬) *</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -394,31 +394,33 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
                   <Label>Allergeni Presenti</Label>
                   <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg">
                     {ALLERGENI.map(allergene => (
-                      <div
+                      <button type="button"
                         key={allergene.value}
-                        className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-all ${
+                        className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                           (formData.allergeni || []).includes(allergene.value)
                             ? 'bg-red-50 dark:bg-red-950/30 border-2 border-red-500'
                             : 'bg-muted border-2 border-border hover:bg-accent'
                         }`}
                         onClick={() => toggleAllergene(allergene.value)}
+                        aria-pressed={(formData.allergeni || []).includes(allergene.value)}
                       >
                         <span className="text-lg">{allergene.icon}</span>
                         <span className="text-sm font-medium">{allergene.label}</span>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <div 
-                      className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                    <button type="button" 
+                      className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                         formData.disponibile 
                           ? 'border-green-500 bg-green-50 dark:bg-green-950/30' 
                           : 'border-border hover:bg-accent'
                       }`}
                       onClick={() => setFormData(prev => ({ ...prev, disponibile: !prev.disponibile }))}
+                      aria-pressed={!!formData.disponibile}
                     >
                       <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                         formData.disponibile 
@@ -428,24 +430,25 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
                         {formData.disponibile && <Check className="w-3 h-3 text-white" />}
                       </div>
                       <div className="flex-1">
-                        <label className="text-sm font-medium cursor-pointer">
+                        <span className="text-sm font-medium">
                           Prodotto attivo nel menu
-                        </label>
+                        </span>
                         <p className="text-xs text-muted-foreground">
                           Se disattivato, non appare nel menu
                         </p>
                       </div>
-                    </div>
+                    </button>
                   </div>
 
                   <div className="space-y-2">
-                    <div 
-                      className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                    <button type="button" 
+                      className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                         formData.esaurito 
                           ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
                           : 'border-border hover:bg-accent'
                       }`}
                       onClick={() => setFormData(prev => ({ ...prev, esaurito: !prev.esaurito }))}
+                      aria-pressed={!!formData.esaurito}
                     >
                       <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                         formData.esaurito 
@@ -455,14 +458,14 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
                         {formData.esaurito && <Check className="w-3 h-3 text-white" />}
                       </div>
                       <div className="flex-1">
-                        <label className="text-sm font-medium cursor-pointer">
+                        <span className="text-sm font-medium">
                           Prodotto esaurito
-                        </label>
+                        </span>
                         <p className="text-xs text-muted-foreground">
                           Temporaneamente non disponibile
                         </p>
                       </div>
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -522,7 +525,7 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
                           <div className="font-semibold">{m.nome}</div>
                           <div className="text-xs text-muted-foreground">
                             {m.tipo === 'singolo' ? 'Selezione singola' : 'Selezione multipla'}
-                            {m.obbligatorio ? ' • obbligatorio' : ''}
+                            {m.obbligatorio ? ' â€¢ obbligatorio' : ''}
                           </div>
                         </div>
                       </div>
@@ -542,14 +545,15 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
               </div>
             </div>
           </TabsContent>
-        </Tabs>
+        </Tabs>
+
 
         <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Eliminare prodotto?</AlertDialogTitle>
               <AlertDialogDescription>
-                Vuoi eliminare "{menuItem?.nome}"? L’operazione è definitiva.
+                Vuoi eliminare "{menuItem?.nome}"? Lâ€™operazione Ã¨ definitiva.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
