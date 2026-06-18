@@ -29,6 +29,7 @@ export default function Settings() {
   const [deliveryHoursUI, setDeliveryHoursUI] = useState({});
   const isOnboarding = new URLSearchParams(window.location.search).get('onboarding') === '1';
   const isOnboardingWizard = isOnboarding && !restaurant;
+  const [activeNavSection, setActiveNavSection] = useState(null);
   const [formData, setFormData] = useState({
     nome: "",
     descrizione: "",
@@ -471,6 +472,53 @@ export default function Settings() {
     { id: 'settings-payments', label: 'Pagamenti', show: showExtendedSections },
   ].filter((s) => !!s.show);
 
+  const navSectionIdsKey = navSections.map((s) => s.id).join('|');
+
+  useEffect(() => {
+    if (!navSections.length) return;
+
+    const ids = navSections.map((s) => s.id);
+    const elements = ids
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+
+    if (elements.length === 0) return;
+
+    const setInitialActive = () => {
+      const offset = 110;
+      const ordered = elements
+        .map((el) => ({ id: el.id, top: el.getBoundingClientRect().top }))
+        .sort((a, b) => a.top - b.top);
+
+      const current = ordered.filter((s) => s.top - offset <= 0).pop() || ordered[0];
+      if (current?.id) setActiveNavSection(current.id);
+    };
+
+    setInitialActive();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        const nextId = visible?.[0]?.target?.id;
+        if (nextId) setActiveNavSection(nextId);
+      },
+      {
+        root: null,
+        threshold: [0.15, 0.3, 0.6],
+        rootMargin: '-96px 0px -70% 0px',
+      }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [navSectionIdsKey]);
+
   const scrollToSection = (id) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -485,22 +533,33 @@ export default function Settings() {
           <p className="text-sm md:text-base text-muted-foreground mt-1">Configura i dettagli del tuo ristorante</p>
         </div>
 
-        <div className="mb-4 md:mb-6">
-          <div className="text-sm text-muted-foreground mb-2">Vai a sezione</div>
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-            {navSections.map((s) => (
-              <a
-                key={s.id}
-                href={`#${s.id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection(s.id);
-                }}
-                className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-sm text-foreground whitespace-nowrap hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              >
-                {s.label}
-              </a>
-            ))}
+        <div className="mb-4 md:mb-6 sticky top-2 z-20">
+          <div className="rounded-xl border border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-3 shadow-sm">
+            <div className="text-sm text-muted-foreground mb-2">Vai a sezione</div>
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+              {navSections.map((s) => {
+                const isActive = activeNavSection === s.id;
+                return (
+                  <a
+                    key={s.id}
+                    href={`#${s.id}`}
+                    aria-current={isActive ? 'true' : undefined}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveNavSection(s.id);
+                      scrollToSection(s.id);
+                    }}
+                    className={`inline-flex items-center rounded-full border px-3 py-1 text-sm whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                      isActive
+                        ? 'border-red-600 bg-red-600 text-white hover:bg-red-700'
+                        : 'border-border bg-background text-foreground hover:bg-accent/60'
+                    }`}
+                  >
+                    {s.label}
+                  </a>
+                );
+              })}
+            </div>
           </div>
         </div>
 
