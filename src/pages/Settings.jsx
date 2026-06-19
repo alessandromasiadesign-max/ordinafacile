@@ -1056,7 +1056,7 @@ export default function Settings() {
                               });
                             }}
                             aria-label={`Segna ${day} come chiuso`}
-                            className="data-[state=unchecked]:bg-slate-300 data-[state=checked]:bg-slate-900 dark:data-[state=unchecked]:bg-slate-700 dark:data-[state=checked]:bg-slate-200 [&>span]:bg-white"
+                            className="data-[state=unchecked]:bg-slate-300 data-[state=checked]:bg-slate-900 dark:data-[state=unchecked]:bg-slate-700 dark:data-[state=checked]:bg-slate-200 [&>span]:bg-background"
                           />
                           <span className="text-sm text-muted-foreground">Chiuso</span>
                         </div>
@@ -1201,7 +1201,7 @@ export default function Settings() {
                                 });
                               }}
                               aria-label={`Segna ${day} come non disponibile per la consegna`}
-                              className="data-[state=unchecked]:bg-slate-300 data-[state=checked]:bg-slate-900 dark:data-[state=unchecked]:bg-slate-700 dark:data-[state=checked]:bg-slate-200 [&>span]:bg-white"
+                              className="data-[state=unchecked]:bg-slate-300 data-[state=checked]:bg-slate-900 dark:data-[state=unchecked]:bg-slate-700 dark:data-[state=checked]:bg-slate-200 [&>span]:bg-background"
                             />
                             <span className="text-sm text-muted-foreground">Non disponibile</span>
                           </div>

@@ -478,36 +478,36 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
           </DialogHeader>
           <div className="space-y-4 py-6">
             <div className="text-center">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-20 h-20 bg-green-100 dark:bg-green-950/30 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="w-10 h-10 text-green-600" />
               </div>
-              <p className="text-3xl font-bold text-gray-900 mb-2">
+              <p className="text-3xl font-bold text-foreground mb-2">
                 #{completedOrder.numero_ordine}
               </p>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Il tuo numero d'ordine
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+            <div className="bg-muted/40 rounded-lg p-4 space-y-2">
               <div className="flex justify-between">
-                <span className="text-gray-600">Ristorante:</span>
+                <span className="text-muted-foreground">Ristorante:</span>
                 <span className="font-semibold">{restaurant.nome}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Tipo:</span>
+                <span className="text-muted-foreground">Tipo:</span>
                 <span className="font-semibold">
                   {completedOrder.tipo_consegna === 'consegna' ? 'Consegna' : 'Asporto'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Totale:</span>
+                <span className="text-muted-foreground">Totale:</span>
                 <span className="font-bold text-red-600 text-xl">
                   €{completedOrder.totale.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Pagamento:</span>
+                <span className="text-muted-foreground">Pagamento:</span>
                 <Badge className="bg-green-500">
                   {completedOrder.metodo_pagamento === 'contanti' ? 'Contanti alla consegna' : 
                    completedOrder.metodo_pagamento === 'paypal' ? 'PayPal' : 'Carta di Credito'}
@@ -528,7 +528,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
               Segui stato ordine in tempo reale
             </Button>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+            <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 rounded-lg p-4 text-sm text-blue-800 dark:text-blue-200">
               <strong>📱 Conferma inviata!</strong>
               <p className="mt-1">
                 {customerData.email && "Ti abbiamo inviato un'email con i dettagli dell'ordine. "}
@@ -537,9 +537,9 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
             </div>
 
             {whatsappDraft?.message && (
-              <div className="bg-gray-50 border rounded-lg p-4 text-sm">
+              <div className="bg-muted/40 border border-border rounded-lg p-4 text-sm">
                 <div className="font-semibold mb-2">Messaggio WhatsApp (facoltativo)</div>
-                <pre className="whitespace-pre-wrap text-xs text-gray-700">{whatsappDraft.message}</pre>
+                <pre className="whitespace-pre-wrap text-xs text-muted-foreground">{whatsappDraft.message}</pre>
                 <div className="grid grid-cols-2 gap-2 mt-3">
                   <Button
                     type="button"
@@ -570,7 +570,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
               </div>
             )}
 
-            <p className="text-center text-gray-600 text-sm">
+            <p className="text-center text-muted-foreground text-sm">
               Ti contatteremo a breve per confermare l'ordine!
             </p>
           </div>
@@ -673,7 +673,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                     </p>
                   )}
                   {deliveryZone && (
-                    <div className="mt-2 text-sm text-gray-700">
+                    <div className="mt-2 text-sm text-muted-foreground">
                       <p>Zona di consegna: <span className="font-semibold">{deliveryZone.nome}</span></p>
                       {deliveryZone.ordine_minimo > 0 && subtotal < deliveryZone.ordine_minimo && (
                         <p className="text-red-500">Ordine minimo per questa zona: €{deliveryZone.ordine_minimo.toFixed(2)}</p>
@@ -695,9 +695,9 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   onChange={(e) => setCustomerData(prev => ({ ...prev, note: e.target.value }))}
                   placeholder="Es: senza cipolla, cottura media, no lattosio, extra piccante..."
                   rows={4}
-                  className="border-2 border-red-200 focus:border-red-500 bg-red-50"
+                  className="border-2 border-red-200 focus:border-red-500 bg-red-50 dark:border-red-900/40 dark:bg-red-950/20"
                 />
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-muted-foreground">
                   Comunicaci qui tutte le tue preferenze e richieste speciali
                 </p>
               </div>
@@ -737,7 +737,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                 type="button"
                 className={`flex w-full items-start space-x-3 p-3 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   acceptTerms 
-                    ? 'border-red-500 bg-red-50' 
+                    ? 'border-red-500 bg-red-50 dark:bg-red-950/20' 
                     : 'border-border hover:bg-accent/60'
                 }`}
                 onClick={() => setAcceptTerms(prev => !prev)}
@@ -805,7 +805,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
                     onClick={() => onRemove(item.cart_id)}
                     aria-label="Rimuovi dal carrello"
                   >
@@ -908,7 +908,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   <span className="font-bold">-€{discount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-2xl font-bold pt-3 border-t bg-red-50 -mx-4 px-4 py-3 rounded-lg">
+              <div className="flex justify-between text-2xl font-bold pt-3 border-t bg-red-50 dark:bg-red-950/20 -mx-4 px-4 py-3 rounded-lg">
                 <span>Totale</span>
                 <span className="text-red-600">€{total.toFixed(2)}</span>
               </div>

@@ -25,7 +25,7 @@ export default function ThemeToggle({ compact = false }) {
           checked={resolvedTheme === "dark"}
           onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
           aria-label="Tema scuro"
-          className="data-[state=unchecked]:bg-slate-300 data-[state=checked]:bg-slate-900 dark:data-[state=unchecked]:bg-slate-700 dark:data-[state=checked]:bg-amber-400 [&>span]:bg-white dark:[&>span]:bg-white"
+          className="data-[state=unchecked]:bg-slate-300 data-[state=checked]:bg-slate-900 dark:data-[state=unchecked]:bg-slate-700 dark:data-[state=checked]:bg-amber-400 [&>span]:bg-background dark:[&>span]:bg-background"
         />
         <Moon
           className={`h-4 w-4 ${
