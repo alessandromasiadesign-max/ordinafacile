@@ -15,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Order, OrderItem, Promotion } from "@/api/entities";
 import { Core } from "@/api/integrations";
 import { createPageUrl } from "@/utils";
+import { Link } from "react-router-dom";
 import AddressValidator from "./AddressValidator";
 import {
   Select,
@@ -751,7 +752,22 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   {acceptTerms && <Check className="w-3 h-3 text-white" />}
                 </div>
                 <span className="text-sm">
-                  Accetto i termini e condizioni e la privacy policy
+                  Accetto i
+                  <Link
+                    to={createPageUrl("Terms")}
+                    className="ml-1 text-red-600 hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    termini e condizioni
+                  </Link>
+                  <span> e la </span>
+                  <Link
+                    to={createPageUrl("PrivacyClienti")}
+                    className="text-red-600 hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    privacy policy
+                  </Link>
                 </span>
               </button>
             </div>

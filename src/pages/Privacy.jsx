@@ -21,7 +21,7 @@ export default function Privacy() {
           <CardHeader>
             <div className="flex items-center gap-3 mb-2">
               <Shield className="w-8 h-8 text-red-600" />
-              <CardTitle className="text-3xl">Informativa sulla Privacy</CardTitle>
+              <CardTitle className="text-3xl">Informativa Privacy (Ristoratori)</CardTitle>
             </div>
             <p className="text-sm text-muted-foreground">
               Ultimo aggiornamento: {new Date().toLocaleDateString('it-IT')}
@@ -35,12 +35,23 @@ export default function Privacy() {
             <section>
               <h2 className="text-2xl font-bold mb-3">1. Titolare del Trattamento</h2>
               <p className="text-muted-foreground">
-                Il Titolare del trattamento dei dati è OrdinaFacile S.r.l., con sede legale in
-                Via Example, 123 - 00100 Roma (RM), P.IVA: XXXXXXXXXXX
+                Il Titolare del trattamento dei dati è GraphicsGarage di Masia Alessandro, con sede legale in
+                [Indirizzo], P.IVA: [P.IVA]
               </p>
               <p className="text-muted-foreground mt-2">
                 Email: privacy@ordinafacile.it<br />
                 PEC: ordinafacile@pec.it
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold mb-3">1-bis. Informativa Privacy per Clienti</h2>
+              <p className="text-muted-foreground">
+                Se sei un cliente finale e stai effettuando un ordine presso un ristorante, il Titolare del trattamento dei
+                dati dell'ordine è il ristorante presso cui stai ordinando. Puoi consultare l'informativa dedicata alla pagina
+                <Link to={createPageUrl("PrivacyClienti")} className="text-red-600 hover:underline ml-1">
+                  Privacy (Clienti)
+                </Link>.
               </p>
             </section>
 
@@ -54,7 +65,7 @@ export default function Privacy() {
                 <li><strong>Dati aziendali:</strong> ragione sociale, P.IVA, indirizzo sede</li>
                 <li><strong>Dati di pagamento:</strong> informazioni bancarie, transazioni</li>
                 <li><strong>Dati di navigazione:</strong> indirizzo IP, cookies, log di accesso</li>
-                <li><strong>Dati degli ordini:</strong> informazioni sui clienti e ordini gestiti</li>
+                <li><strong>Dati degli ordini:</strong> informazioni sugli ordini gestiti per conto del ristorante</li>
               </ul>
             </section>
 

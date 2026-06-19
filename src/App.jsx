@@ -63,6 +63,7 @@ const AuthenticatedApp = () => {
           {Pages.Login && <Route path="/Login" element={<Pages.Login />} />}
           {Pages.Register && <Route path="/Register" element={<Pages.Register />} />}
           {Pages.Privacy && <Route path="/Privacy" element={<Pages.Privacy />} />}
+          {Pages.PrivacyClienti && <Route path="/PrivacyClienti" element={<Pages.PrivacyClienti />} />}
           {Pages.Terms && <Route path="/Terms" element={<Pages.Terms />} />}
           {Pages.Cookies && <Route path="/Cookies" element={<Pages.Cookies />} />}
           {Pages.RestaurantPublic && <Route path="/RestaurantPublic" element={<Pages.RestaurantPublic />} />}
