@@ -761,7 +761,12 @@ function PlanDialog({ open, onClose, plan }) {
                   value={newFeature}
                   onChange={(e) => setNewFeature(e.target.value)}
                   placeholder="es: Menu Illimitato"
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addFeature();
+                    }
+                  }}
                 />
                 <Button type="button" onClick={addFeature}>
                   <Plus className="w-4 h-4" />

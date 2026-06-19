@@ -172,6 +172,7 @@ export default function AddEventDialog({ open, onClose, restaurantId }) {
                     size="icon"
                     className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={() => setFormData(prev => ({ ...prev, immagine_url: "" }))}
+                    aria-label="Rimuovi immagine evento"
                   >
                     <X className="w-4 h-4" />
                   </Button>

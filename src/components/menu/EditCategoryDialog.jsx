@@ -191,6 +191,7 @@ export default function EditCategoryDialog({ open, onClose, category }) {
                         size="icon"
                         className="absolute top-2 right-2"
                         onClick={() => setFormData(prev => ({ ...prev, immagine_url: "" }))}
+                        aria-label="Rimuovi immagine categoria"
                       >
                         <X className="w-4 h-4" />
                       </Button>

@@ -167,7 +167,12 @@ export default function AddressValidator({ restaurant, onAddressValidated }) {
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Inserisci il tuo indirizzo completo (via, numero civico)"
             className="bg-background"
-            onKeyPress={(e) => e.key === 'Enter' && validateAddress()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                validateAddress();
+              }
+            }}
           />
 
           <Button

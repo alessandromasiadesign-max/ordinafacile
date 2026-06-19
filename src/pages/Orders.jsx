@@ -488,8 +488,8 @@ export default function Orders() {
                         onClick={() => setViewMode("list")}
                         className={`h-8 shadow-none ${
                           viewMode === "list"
-                            ? "bg-white text-slate-900 hover:bg-white dark:bg-slate-800 dark:text-white dark:hover:bg-slate-800"
-                            : "text-slate-700 hover:text-slate-900 hover:bg-white/70 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60"
+                            ? "bg-background text-slate-900 hover:bg-background dark:bg-slate-800 dark:text-white dark:hover:bg-slate-800"
+                            : "text-slate-700 hover:text-slate-900 hover:bg-background/70 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60"
                         }`}
                       >
                         <LayoutList className="w-4 h-4 mr-2" />
@@ -503,8 +503,8 @@ export default function Orders() {
                         onClick={() => setViewMode("kanban")}
                         className={`h-8 shadow-none ${
                           viewMode === "kanban"
-                            ? "bg-white text-slate-900 hover:bg-white dark:bg-slate-800 dark:text-white dark:hover:bg-slate-800"
-                            : "text-slate-700 hover:text-slate-900 hover:bg-white/70 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60"
+                            ? "bg-background text-slate-900 hover:bg-background dark:bg-slate-800 dark:text-white dark:hover:bg-slate-800"
+                            : "text-slate-700 hover:text-slate-900 hover:bg-background/70 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60"
                         }`}
                       >
                         <Columns3 className="w-4 h-4 mr-2" />

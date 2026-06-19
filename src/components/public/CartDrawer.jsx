@@ -738,7 +738,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                 className={`flex w-full items-start space-x-3 p-3 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   acceptTerms 
                     ? 'border-red-500 bg-red-50' 
-                    : 'border-gray-200 hover:border-gray-300'
+                    : 'border-border hover:bg-accent/60'
                 }`}
                 onClick={() => setAcceptTerms(prev => !prev)}
                 aria-pressed={!!acceptTerms}
@@ -746,7 +746,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                 <div className={`w-5 h-5 flex-shrink-0 flex items-center justify-center border-2 rounded transition-all mt-0.5 ${
                   acceptTerms 
                     ? 'border-red-500 bg-red-500' 
-                    : 'border-gray-300'
+                    : 'border-border'
                 }`}>
                   {acceptTerms && <Check className="w-3 h-3 text-white" />}
                 </div>
@@ -782,19 +782,19 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
         
         <div className="space-y-4 py-4">
           {!restaurant ? (
-            <p className="text-center text-gray-500">Caricamento...</p>
+            <p className="text-center text-muted-foreground">Caricamento...</p>
           ) : safeCart.length === 0 ? (
-            <p className="text-center text-gray-500">Il carrello è vuoto.</p>
+            <p className="text-center text-muted-foreground">Il carrello è vuoto.</p>
           ) : (
             safeCart.map(item => (
-              <div key={item.cart_id} className="p-4 border-2 rounded-lg border-gray-200 hover:border-gray-300 transition-colors">
+              <div key={item.cart_id} className="p-4 border-2 rounded-lg border-border hover:bg-accent/40 transition-colors">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
-                    <h4 className="font-bold text-lg text-gray-900">{item.nome}</h4>
+                    <h4 className="font-bold text-lg">{item.nome}</h4>
                     {item.modificatori && item.modificatori.length > 0 && (
                       <div className="mt-2 space-y-1">
                         {item.modificatori.map((mod, i) => (
-                          <div key={i} className="text-sm text-gray-600 flex items-center gap-1">
+                          <div key={i} className="text-sm text-muted-foreground flex items-center gap-1">
                             <span className="text-red-600">•</span>
                             <span>{formatModifier(mod)}</span>
                           </div>
@@ -837,7 +837,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                     </Button>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-gray-500">€{item.prezzo_totale.toFixed(2)} cad.</div>
+                    <div className="text-sm text-muted-foreground">€{item.prezzo_totale.toFixed(2)} cad.</div>
                     <div className="text-xl font-bold text-red-600">
                       €{(item.prezzo_totale * item.quantita).toFixed(2)}
                     </div>
@@ -893,12 +893,12 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
           <>
             <div className="border-t pt-4 space-y-3">
               <div className="flex justify-between text-base">
-                <span className="text-gray-600">Subtotale</span>
+                <span className="text-muted-foreground">Subtotale</span>
                 <span className="font-semibold">€{subtotal.toFixed(2)}</span>
               </div>
               {deliveryCost > 0 && (
                 <div className="flex justify-between text-base">
-                  <span className="text-gray-600">Costo Consegna</span>
+                  <span className="text-muted-foreground">Costo Consegna</span>
                   <span className="font-semibold">€{deliveryCost.toFixed(2)}</span>
                 </div>
               )}

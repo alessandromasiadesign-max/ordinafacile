@@ -241,6 +241,7 @@ export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
                         size="icon"
                         className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => removeImage(index)}
+                        aria-label={`Rimuovi screenshot ${index + 1}`}
                       >
                         <X className="w-3 h-3" />
                       </Button>
