@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Cookie } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { Button } from "@/components/ui/button";
 
 export default function Cookies() {
   return (
@@ -27,6 +28,15 @@ export default function Cookies() {
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
+            <div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => window.dispatchEvent(new Event("of:cookie-preferences-open"))}
+              >
+                Gestisci preferenze cookie
+              </Button>
+            </div>
             <section>
               <h2 className="text-2xl font-bold mb-3">1. Cosa sono i Cookies</h2>
               <p className="text-muted-foreground">
@@ -69,7 +79,7 @@ export default function Cookies() {
                     <li>Dispositivi e browser utilizzati</li>
                   </ul>
                   <p className="text-xs text-green-700 mt-2">
-                    Durata: max 24 mesi | Provider: Google Analytics
+                    Attivati solo se abilitati e previo consenso
                   </p>
                 </div>
 
@@ -125,18 +135,6 @@ export default function Cookies() {
                       <td className="border border-border px-4 py-2">Gestione login</td>
                     </tr>
                     <tr>
-                      <td className="border border-border px-4 py-2">_ga</td>
-                      <td className="border border-border px-4 py-2">Analitico</td>
-                      <td className="border border-border px-4 py-2">2 anni</td>
-                      <td className="border border-border px-4 py-2">Google Analytics</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-border px-4 py-2">_gid</td>
-                      <td className="border border-border px-4 py-2">Analitico</td>
-                      <td className="border border-border px-4 py-2">24 ore</td>
-                      <td className="border border-border px-4 py-2">Google Analytics</td>
-                    </tr>
-                    <tr>
                       <td className="border border-border px-4 py-2">cookie_consent</td>
                       <td className="border border-border px-4 py-2">Tecnico</td>
                       <td className="border border-border px-4 py-2">12 mesi</td>
@@ -185,13 +183,6 @@ export default function Cookies() {
                 Per maggiori informazioni sui cookies di terze parti utilizzati:
               </p>
               <ul className="space-y-2 text-muted-foreground ml-4">
-                <li>
-                  <strong>Google Analytics:</strong>{" "}
-                  <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" 
-                     className="text-blue-600 hover:underline">
-                    policies.google.com/privacy
-                  </a>
-                </li>
                 <li>
                   <strong>Google Maps:</strong>{" "}
                   <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer"

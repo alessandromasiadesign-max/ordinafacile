@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import ThemeToggle from '@/components/layout/ThemeToggle';
+import CookieConsent from '@/components/layout/CookieConsent';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -56,6 +57,7 @@ const AuthenticatedApp = () => {
             <ThemeToggle compact />
           </div>
         )}
+        <CookieConsent />
         <Routes>
           <Route path="/" element={<PublicLanding />} />
           {Pages.Login && <Route path="/Login" element={<Pages.Login />} />}
@@ -74,83 +76,86 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <Routes>
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
-      {Pages.RestaurantPublic && <Route path="/RestaurantPublic" element={<Pages.RestaurantPublic />} />}
-      {Pages.RestaurantPublic && <Route path="/r/:restaurantId" element={<Pages.RestaurantPublic />} />}
-      {Pages.MasterDashboard && (
-        <Route
-          path="/MasterDashboard"
-          element={isAuthenticated && isAdmin ? (
-            <LayoutWrapper currentPageName="MasterDashboard">
-              <Pages.MasterDashboard />
-            </LayoutWrapper>
-          ) : (
-            <PageNotFound />
-          )}
-        />
-      )}
-      {Pages.SubscriptionSettings && (
-        <Route
-          path="/SubscriptionSettings"
-          element={isAuthenticated && isAdmin ? (
-            <LayoutWrapper currentPageName="SubscriptionSettings">
-              <Pages.SubscriptionSettings />
-            </LayoutWrapper>
-          ) : (
-            <PageNotFound />
-          )}
-        />
-      )}
-      {Pages.SupportRequests && (
-        <Route
-          path="/SupportRequests"
-          element={isAuthenticated && isAdmin ? (
-            <LayoutWrapper currentPageName="SupportRequests">
-              <Pages.SupportRequests />
-            </LayoutWrapper>
-          ) : (
-            <PageNotFound />
-          )}
-        />
-      )}
-      {Pages.DiscountCodes && (
-        <Route
-          path="/DiscountCodes"
-          element={isAuthenticated && isAdmin ? (
-            <LayoutWrapper currentPageName="DiscountCodes">
-              <Pages.DiscountCodes />
-            </LayoutWrapper>
-          ) : (
-            <PageNotFound />
-          )}
-        />
-      )}
-      {Object.entries(Pages)
-        .filter(([path]) => ![
-          'MasterDashboard',
-          'SubscriptionSettings',
-          'SupportRequests',
-          'DiscountCodes',
-          'RestaurantPublic',
-        ].includes(path))
-        .map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
-          }
-        />
-      ))}
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+    <>
+      <CookieConsent />
+      <Routes>
+        <Route path="/" element={
+          <LayoutWrapper currentPageName={mainPageKey}>
+            <MainPage />
+          </LayoutWrapper>
+        } />
+        {Pages.RestaurantPublic && <Route path="/RestaurantPublic" element={<Pages.RestaurantPublic />} />}
+        {Pages.RestaurantPublic && <Route path="/r/:restaurantId" element={<Pages.RestaurantPublic />} />}
+        {Pages.MasterDashboard && (
+          <Route
+            path="/MasterDashboard"
+            element={isAuthenticated && isAdmin ? (
+              <LayoutWrapper currentPageName="MasterDashboard">
+                <Pages.MasterDashboard />
+              </LayoutWrapper>
+            ) : (
+              <PageNotFound />
+            )}
+          />
+        )}
+        {Pages.SubscriptionSettings && (
+          <Route
+            path="/SubscriptionSettings"
+            element={isAuthenticated && isAdmin ? (
+              <LayoutWrapper currentPageName="SubscriptionSettings">
+                <Pages.SubscriptionSettings />
+              </LayoutWrapper>
+            ) : (
+              <PageNotFound />
+            )}
+          />
+        )}
+        {Pages.SupportRequests && (
+          <Route
+            path="/SupportRequests"
+            element={isAuthenticated && isAdmin ? (
+              <LayoutWrapper currentPageName="SupportRequests">
+                <Pages.SupportRequests />
+              </LayoutWrapper>
+            ) : (
+              <PageNotFound />
+            )}
+          />
+        )}
+        {Pages.DiscountCodes && (
+          <Route
+            path="/DiscountCodes"
+            element={isAuthenticated && isAdmin ? (
+              <LayoutWrapper currentPageName="DiscountCodes">
+                <Pages.DiscountCodes />
+              </LayoutWrapper>
+            ) : (
+              <PageNotFound />
+            )}
+          />
+        )}
+        {Object.entries(Pages)
+          .filter(([path]) => ![
+            'MasterDashboard',
+            'SubscriptionSettings',
+            'SupportRequests',
+            'DiscountCodes',
+            'RestaurantPublic',
+          ].includes(path))
+          .map(([path, Page]) => (
+          <Route
+            key={path}
+            path={`/${path}`}
+            element={
+              <LayoutWrapper currentPageName={path}>
+                <Page />
+              </LayoutWrapper>
+            }
+          />
+        ))}
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </>
   );
 };
 
