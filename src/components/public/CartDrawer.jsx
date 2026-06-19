@@ -807,6 +807,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                     variant="ghost"
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     onClick={() => onRemove(item.cart_id)}
+                    aria-label="Rimuovi dal carrello"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -820,6 +821,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                       className="h-8 w-8"
                       onClick={() => onUpdateQuantity(item.cart_id, item.quantita - 1)}
                       disabled={item.quantita <= 1}
+                      aria-label="Diminuisci quantità"
                     >
                       <Minus className="w-4 h-4" />
                     </Button>
@@ -829,6 +831,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                       variant="outline"
                       className="h-8 w-8"
                       onClick={() => onUpdateQuantity(item.cart_id, item.quantita + 1)}
+                      aria-label="Aumenta quantità"
                     >
                       <Plus className="w-4 h-4" />
                     </Button>

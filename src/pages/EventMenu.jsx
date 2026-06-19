@@ -454,6 +454,7 @@ export default function EventMenu() {
                               setCategoryToDelete(category);
                             }}
                             title="Elimina questa categoria"
+                            aria-label="Elimina categoria"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -466,6 +467,7 @@ export default function EventMenu() {
                               handleCopyCategory({ sourceCategory: category, targetEventId: null });
                             }}
                             title="Copia questa categoria nel menu standard"
+                            aria-label="Copia categoria nel menu standard"
                           >
                             <Copy className="w-4 h-4" />
                           </Button>
@@ -478,6 +480,7 @@ export default function EventMenu() {
                               handleCopyCategory({ sourceCategory: category, targetEventId: eventId });
                             }}
                             title="Duplica questa categoria in questo evento"
+                            aria-label="Duplica categoria in questo evento"
                           >
                             <CopyPlus className="w-4 h-4" />
                           </Button>

@@ -874,6 +874,7 @@ export default function Settings() {
                         size="icon"
                         className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => setFormData(prev => ({ ...prev, logo_url: "" }))}
+                        aria-label="Rimuovi logo ristorante"
                       >
                         <X className="w-4 h-4" />
                       </Button>
@@ -913,6 +914,7 @@ export default function Settings() {
                         size="icon"
                         className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => setFormData(prev => ({ ...prev, immagine_header_url: "" }))}
+                        aria-label="Rimuovi immagine intestazione"
                       >
                         <X className="w-4 h-4" />
                       </Button>
@@ -954,6 +956,7 @@ export default function Settings() {
                         size="icon"
                         className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => setFormData(prev => ({ ...prev, immagine_sfondo_url: "" }))}
+                        aria-label="Rimuovi immagine sfondo"
                       >
                         <X className="w-4 h-4" />
                       </Button>
@@ -1130,6 +1133,7 @@ export default function Settings() {
                                       return next;
                                     });
                                   }}
+                                  aria-label="Rimuovi fascia oraria"
                                 >
                                   <X className="w-4 h-4" />
                                 </Button>
@@ -1274,6 +1278,7 @@ export default function Settings() {
                                         return next;
                                       });
                                     }}
+                                    aria-label="Rimuovi fascia oraria"
                                   >
                                     <X className="w-4 h-4" />
                                   </Button>

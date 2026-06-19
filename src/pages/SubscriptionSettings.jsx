@@ -469,6 +469,7 @@ export default function SubscriptionSettings() {
                           size="icon"
                           variant="ghost"
                           onClick={() => setEditingPlan(plan)}
+                          aria-label="Modifica piano"
                         >
                           <Pencil className="w-4 h-4" />
                         </Button>
@@ -477,6 +478,7 @@ export default function SubscriptionSettings() {
                           variant="ghost"
                           onClick={() => setPlanToDelete(plan)}
                           disabled={deletePlanMutation.isPending}
+                          aria-label="Elimina piano"
                         >
                           <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>
@@ -777,6 +779,7 @@ function PlanDialog({ open, onClose, plan }) {
                         ...prev,
                         features: prev.features.filter((_, index) => index !== i)
                       }))}
+                      aria-label="Rimuovi funzionalità"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
