@@ -564,67 +564,78 @@ export default function Orders() {
                         const canCancel = status !== "annullato" && status !== "completato";
 
                         return (
-                          <Card key={order.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer" onClick={() => openOrderDetails(order)}>
-                            <CardContent className="p-3">
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                  <div className="font-bold text-sm truncate">#{order.numero_ordine}</div>
-                                  <div className="text-xs text-muted-foreground truncate">
-                                    {order.cliente_nome}{order.cliente_telefono ? ` • ${order.cliente_telefono}` : ""}
+                          <Card
+                            key={order.id}
+                            className="hover:shadow-lg transition-shadow duration-200"
+                          >
+                            <CardContent className="p-3 relative">
+                              <button
+                                type="button"
+                                className="absolute inset-0 z-0 rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                onClick={() => openOrderDetails(order)}
+                                aria-label={`Apri ordine ${order.numero_ordine}`}
+                              />
+                              <div className="relative z-10">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="font-bold text-sm truncate">#{order.numero_ordine}</div>
+                                    <div className="text-xs text-muted-foreground truncate">
+                                      {order.cliente_nome}{order.cliente_telefono ? ` • ${order.cliente_telefono}` : ""}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mt-1">{safeFormatDate(order.created_date)}</div>
                                   </div>
-                                  <div className="text-xs text-muted-foreground mt-1">{safeFormatDate(order.created_date)}</div>
+                                  <div className="text-right flex-shrink-0">
+                                    <div className="font-bold text-sm text-red-600">{Number(order.totale ?? 0).toFixed(2)}</div>
+                                    <div className="text-xs text-muted-foreground">{order.items_count ?? (order.items?.length || 0)} prod.</div>
+                                  </div>
                                 </div>
-                                <div className="text-right flex-shrink-0">
-                                  <div className="font-bold text-sm text-red-600">{Number(order.totale ?? 0).toFixed(2)}</div>
-                                  <div className="text-xs text-muted-foreground">{order.items_count ?? (order.items?.length || 0)} prod.</div>
+
+                                <div className="flex flex-wrap items-center gap-2 mt-3">
+                                  <Badge className={`${statusColors[order.stato]} border text-[11px]`}>{statusLabels[order.stato]}</Badge>
+                                  {order.tipo_consegna === "consegna" ? (
+                                    <Badge variant="outline" className="flex items-center gap-1 text-[11px]">
+                                      <Truck className="w-3 h-3" />
+                                      Consegna
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="flex items-center gap-1 text-[11px]">
+                                      <Package className="w-3 h-3" />
+                                      Asporto
+                                    </Badge>
+                                  )}
                                 </div>
-                              </div>
 
-                              <div className="flex flex-wrap items-center gap-2 mt-3">
-                                <Badge className={`${statusColors[order.stato]} border text-[11px]`}>{statusLabels[order.stato]}</Badge>
-                                {order.tipo_consegna === "consegna" ? (
-                                  <Badge variant="outline" className="flex items-center gap-1 text-[11px]">
-                                    <Truck className="w-3 h-3" />
-                                    Consegna
-                                  </Badge>
-                                ) : (
-                                  <Badge variant="outline" className="flex items-center gap-1 text-[11px]">
-                                    <Package className="w-3 h-3" />
-                                    Asporto
-                                  </Badge>
-                                )}
-                              </div>
-
-                              <div className="flex items-center gap-2 mt-3">
-                                {primary && (
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    className="h-9 md:h-10"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      quickAction(order, primary.next);
-                                    }}
-                                  >
-                                    {PrimaryIcon ? <PrimaryIcon className="w-4 h-4 mr-2" /> : null}
-                                    {primary.label}
-                                  </Button>
-                                )}
-                                {canCancel && (
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-9 md:h-10"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      quickAction(order, "annullato");
-                                    }}
-                                  >
-                                    <XCircle className="w-4 h-4 mr-2" />
-                                    Annulla
-                                  </Button>
-                                )}
+                                <div className="flex items-center gap-2 mt-3">
+                                  {primary && (
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      className="h-9 md:h-10"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        quickAction(order, primary.next);
+                                      }}
+                                    >
+                                      {PrimaryIcon ? <PrimaryIcon className="w-4 h-4 mr-2" /> : null}
+                                      {primary.label}
+                                    </Button>
+                                  )}
+                                  {canCancel && (
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-9 md:h-10"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        quickAction(order, "annullato");
+                                      }}
+                                    >
+                                      <XCircle className="w-4 h-4 mr-2" />
+                                      Annulla
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
                             </CardContent>
                           </Card>

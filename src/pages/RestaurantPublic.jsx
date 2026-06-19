@@ -1442,13 +1442,15 @@ export default function RestaurantPublic() {
       </div>
 
       {cartCount > 0 && !isRestaurantBlocked && (
-        <div 
-          className="fixed bottom-4 md:bottom-6 right-4 md:right-6 text-white px-4 md:px-6 py-3 md:py-4 rounded-full shadow-2xl cursor-pointer hover:scale-105 transition-transform z-50"
+        <button
+          type="button"
+          className="fixed bottom-4 md:bottom-6 right-4 md:right-6 text-white px-4 md:px-6 py-3 md:py-4 rounded-full shadow-2xl hover:scale-105 transition-transform z-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           style={{ backgroundColor: primaryColor }}
           onClick={() => {
             setCartOpenMode("cart");
             setShowCart(true);
           }}
+          aria-label="Apri carrello"
         >
           <div className="flex items-center gap-2 md:gap-3">
             <ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
@@ -1457,7 +1459,7 @@ export default function RestaurantPublic() {
               <div className="text-xs md:text-sm opacity-90">{cartCount} articoli</div>
             </div>
           </div>
-        </div>
+        </button>
       )}
 
       <OrderModal

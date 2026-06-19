@@ -471,122 +471,121 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                   return (
                 <Card 
                   key={item.id} 
-                  className={`hover:shadow-md transition-shadow cursor-pointer ${
+                  className={`hover:shadow-md transition-shadow ${
                     item.esaurito ? 'opacity-60' : ''
-                  } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background`}
-                  onClick={() => setEditingItem(item)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setEditingItem(item);
-                    }
-                  }}
+                  }`}
                 >
-                  <CardContent className="p-4">
-                    {enableBulkActions && (
-                      <div className="flex items-center justify-between mb-2">
-                        <Checkbox
-                          checked={selected}
-                          onCheckedChange={(value) => {
-                            const nextChecked = Boolean(value);
-                            setSelectedItemIds((prev) => {
-                              if (nextChecked) return Array.from(new Set([...prev, item.id]));
-                              return prev.filter((id) => id !== item.id);
-                            });
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (duplicateItemMutation.isPending) return;
-                            duplicateItemMutation.mutate(item);
-                          }}
-                          disabled={duplicateItemMutation.isPending}
-                          aria-label="Duplica prodotto"
-                          title="Duplica prodotto"
-                        >
-                          <CopyPlus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
-                    {item.immagine_url && (
-                      <div className="relative">
-                        <img 
-                          src={item.immagine_url}
-                          alt={item.nome}
-                          className="w-full h-32 object-cover rounded-lg mb-3"
-                        />
-                        {item.esaurito && (
-                          <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
-                            <Badge className="bg-red-600 text-white text-lg">
-                              ESAURITO
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {!item.immagine_url && item.esaurito && (
-                        <div className="w-full h-32 bg-muted rounded-lg mb-3 flex items-center justify-center relative">
-                            <Badge className="bg-red-600 text-white text-lg">
-                                ESAURITO
-                            </Badge>
+                  <CardContent className="p-4 relative">
+                    <button
+                      type="button"
+                      className="absolute inset-0 z-0 rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      onClick={() => setEditingItem(item)}
+                      aria-label={`Modifica prodotto ${item.nome}`}
+                    />
+                    <div className="relative z-10">
+                      {enableBulkActions && (
+                        <div className="flex items-center justify-between mb-2">
+                          <Checkbox
+                            checked={selected}
+                            onCheckedChange={(value) => {
+                              const nextChecked = Boolean(value);
+                              setSelectedItemIds((prev) => {
+                                if (nextChecked) return Array.from(new Set([...prev, item.id]));
+                                return prev.filter((id) => id !== item.id);
+                              });
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (duplicateItemMutation.isPending) return;
+                              duplicateItemMutation.mutate(item);
+                            }}
+                            disabled={duplicateItemMutation.isPending}
+                            aria-label="Duplica prodotto"
+                            title="Duplica prodotto"
+                          >
+                            <CopyPlus className="w-4 h-4" />
+                          </Button>
                         </div>
-                    )}
-                    <div className="flex justify-between items-start gap-2 mb-2">
-                      <h3 className="font-bold text-lg truncate min-w-0">{item.nome}</h3>
-                      <div className="flex gap-1">
-                        {item.esaurito && (
-                          <Badge variant="destructive" className="text-xs">
-                            Esaurito
-                          </Badge>
-                        )}
-                        {!item.disponibile && (
-                          <Badge variant="secondary" className="text-xs">
-                            Non disponibile
-                          </Badge>
-                        )}
+                      )}
+                      {item.immagine_url && (
+                        <div className="relative">
+                          <img 
+                            src={item.immagine_url}
+                            alt={item.nome}
+                            className="w-full h-32 object-cover rounded-lg mb-3"
+                          />
+                          {item.esaurito && (
+                            <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                              <Badge className="bg-red-600 text-white text-lg">
+                                ESAURITO
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {!item.immagine_url && item.esaurito && (
+                          <div className="w-full h-32 bg-muted rounded-lg mb-3 flex items-center justify-center relative">
+                              <Badge className="bg-red-600 text-white text-lg">
+                                  ESAURITO
+                              </Badge>
+                          </div>
+                      )}
+                      <div className="flex justify-between items-start gap-2 mb-2">
+                        <h3 className="font-bold text-lg truncate min-w-0">{item.nome}</h3>
+                        <div className="flex gap-1">
+                          {item.esaurito && (
+                            <Badge variant="destructive" className="text-xs">
+                              Esaurito
+                            </Badge>
+                          )}
+                          {!item.disponibile && (
+                            <Badge variant="secondary" className="text-xs">
+                              Non disponibile
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    {item.descrizione && (
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {item.descrizione}
-                      </p>
-                    )}
-                    <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-red-600">
-                        €{formatPrice(item?.prezzo)}
-                      </span>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant={item.esaurito ? "default" : "outline"}
-                          size="sm"
-                          onClick={(e) => handleToggleEsaurito(item, e)}
-                          className={item.esaurito ? "bg-green-600 hover:bg-green-700" : ""}
-                          disabled={toggleEsauritoMutation.isPending} // Disable button while mutation is in progress
-                          aria-label={item.esaurito ? "Rendi disponibile" : "Segna come esaurito"}
-                        >
-                          {toggleEsauritoMutation.isPending && toggleEsauritoMutation.variables?.id === item.id 
-                            ? "Aggiornamento..." 
-                            : (item.esaurito ? "Rendi Disponibile" : "Segna come Esaurito")
-                          }
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingItem(item);
-                          }}
-                          aria-label="Modifica prodotto"
-                          title="Modifica prodotto"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
+                      {item.descrizione && (
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                          {item.descrizione}
+                        </p>
+                      )}
+                      <div className="flex justify-between items-center">
+                        <span className="text-xl font-bold text-red-600">
+                          €{formatPrice(item?.prezzo)}
+                        </span>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant={item.esaurito ? "default" : "outline"}
+                            size="sm"
+                            onClick={(e) => handleToggleEsaurito(item, e)}
+                            className={item.esaurito ? "bg-green-600 hover:bg-green-700" : ""}
+                            disabled={toggleEsauritoMutation.isPending} // Disable button while mutation is in progress
+                            aria-label={item.esaurito ? "Rendi disponibile" : "Segna come esaurito"}
+                          >
+                            {toggleEsauritoMutation.isPending && toggleEsauritoMutation.variables?.id === item.id 
+                              ? "Aggiornamento..." 
+                              : (item.esaurito ? "Rendi Disponibile" : "Segna come Esaurito")
+                            }
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingItem(item);
+                            }}
+                            aria-label="Modifica prodotto"
+                            title="Modifica prodotto"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

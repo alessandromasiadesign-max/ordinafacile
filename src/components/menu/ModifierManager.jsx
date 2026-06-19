@@ -179,13 +179,15 @@ export default function ModifierManager({ menuItem, onClose }) {
             </div>
 
             <div className="space-y-2 flex items-end">
-              <div 
-                className={`flex items-center space-x-2 p-3 border-2 rounded-lg cursor-pointer transition-all w-full ${
+              <button
+                type="button"
+                className={`flex w-full items-center space-x-2 p-3 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   newModifier.obbligatorio 
                     ? 'border-red-500 bg-red-50' 
-                    : 'border-border hover:border-muted-foreground'
+                    : 'border-border hover:bg-accent/60'
                 }`}
                 onClick={() => setNewModifier(prev => ({ ...prev, obbligatorio: !prev.obbligatorio }))}
+                aria-pressed={!!newModifier.obbligatorio}
               >
                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                   newModifier.obbligatorio 
@@ -194,10 +196,8 @@ export default function ModifierManager({ menuItem, onClose }) {
                 }`}>
                   {newModifier.obbligatorio && <Check className="w-3 h-3 text-white" />}
                 </div>
-                <label className="text-sm cursor-pointer">
-                  Obbligatorio
-                </label>
-              </div>
+                <span className="text-sm">Obbligatorio</span>
+              </button>
             </div>
           </div>
 

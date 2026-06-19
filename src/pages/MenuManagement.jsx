@@ -906,13 +906,18 @@ export default function MenuManagement() {
 
                 return (
                   <Card key={category.id} className="hover:shadow-md transition-shadow">
-                    <div 
-                      className="p-4 md:p-6 cursor-pointer"
-                      onClick={() => {
-                        if (trimmedSearch) return;
-                        toggleCategory(category.id);
-                      }}
-                    >
+                    <div className="p-4 md:p-6 relative">
+                      <button
+                        type="button"
+                        className="absolute inset-0 z-0 rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        onClick={() => {
+                          if (trimmedSearch) return;
+                          toggleCategory(category.id);
+                        }}
+                        aria-expanded={trimmedSearch ? true : expandedCategories.has(category.id)}
+                        aria-label={`Espandi o comprimi categoria ${category.nome}`}
+                      />
+                      <div className="relative z-10">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
                           {category.immagine_url && (
@@ -1035,6 +1040,7 @@ export default function MenuManagement() {
                           <Trash2 className="w-3 h-3 mr-1" />
                           Rimuovi
                         </Button>
+                      </div>
                       </div>
                     </div>
 

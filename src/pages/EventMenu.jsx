@@ -428,57 +428,63 @@ export default function EventMenu() {
           <div className="space-y-6">
             {categories.map(category => (
               <div key={category.id}>
-                <div
-                  className="cursor-pointer"
-                  onClick={() => toggleCategory(category.id)}
-                >
-                  <CategorySection
-                    category={category}
-                    menuItems={(menuItems || []).filter((i) => i.category_id === category.id)}
-                    onAddItem={() => handleAddItem(category)}
-                    isExpanded={expandedCategories.has(category.id)}
-                    headerActions={(
-                      <>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          disabled={deleteCategoryMutation.isPending}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (deleteCategoryMutation.isPending) return;
-                            setCategoryToDelete(category);
-                          }}
-                          title="Elimina questa categoria"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          disabled={!!copyBusyCategoryId}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopyCategory({ sourceCategory: category, targetEventId: null });
-                          }}
-                          title="Copia questa categoria nel menu standard"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          disabled={!!copyBusyCategoryId}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopyCategory({ sourceCategory: category, targetEventId: eventId });
-                          }}
-                          title="Duplica questa categoria in questo evento"
-                        >
-                          <CopyPlus className="w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
+                <div className="relative">
+                  <button
+                    type="button"
+                    className="absolute inset-0 z-0 rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    onClick={() => toggleCategory(category.id)}
+                    aria-expanded={expandedCategories.has(category.id)}
+                    aria-label={`Espandi o comprimi categoria ${category.nome}`}
                   />
+                  <div className="relative z-10">
+                    <CategorySection
+                      category={category}
+                      menuItems={(menuItems || []).filter((i) => i.category_id === category.id)}
+                      onAddItem={() => handleAddItem(category)}
+                      isExpanded={expandedCategories.has(category.id)}
+                      headerActions={(
+                        <>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            disabled={deleteCategoryMutation.isPending}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (deleteCategoryMutation.isPending) return;
+                              setCategoryToDelete(category);
+                            }}
+                            title="Elimina questa categoria"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            disabled={!!copyBusyCategoryId}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyCategory({ sourceCategory: category, targetEventId: null });
+                            }}
+                            title="Copia questa categoria nel menu standard"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            disabled={!!copyBusyCategoryId}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyCategory({ sourceCategory: category, targetEventId: eventId });
+                            }}
+                            title="Duplica questa categoria in questo evento"
+                          >
+                            <CopyPlus className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
             ))}
