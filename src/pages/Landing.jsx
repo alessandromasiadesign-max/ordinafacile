@@ -215,7 +215,7 @@ function Counter({ target, suffix = "" }) {
   }, [inView, target]);
   
   return (
-    <span ref={count} className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-foreground to-orange-500 bg-clip-text text-transparent">
+    <span ref={ref} className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-foreground to-orange-500 bg-clip-text text-transparent">
       {count.toLocaleString('it-IT')}{suffix}
     </span>
   );
