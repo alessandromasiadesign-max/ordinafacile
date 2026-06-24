@@ -26,12 +26,12 @@ export default function Landing() {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-sm">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-amber-500 via-red-500 to-rose-600 flex items-center justify-center shadow-sm">
               <Store className="h-5 w-5 text-white" />
             </div>
             <div className="leading-tight">
               <div className="font-semibold">OrdinaFacile</div>
-              <div className="text-xs text-muted-foreground">SaaS per ristoranti</div>
+              <div className="text-xs text-muted-foreground">Per ristoranti che vogliono vendere meglio</div>
             </div>
           </Link>
 
@@ -68,7 +68,7 @@ export default function Landing() {
             <Button asChild variant="ghost" className="h-9">
               <Link to={createPageUrl("Login")}>Accedi</Link>
             </Button>
-            <Button asChild className="h-9 bg-red-600 hover:bg-red-700">
+            <Button asChild className="h-9 bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 hover:from-rose-700 hover:via-red-700 hover:to-amber-600">
               <Link to={createPageUrl("Register")}>
                 Inizia ora
                 <ChevronRight className="h-4 w-4 ml-1" />
@@ -80,7 +80,7 @@ export default function Landing() {
             <Button asChild variant="ghost" className="h-9 px-3">
               <Link to={createPageUrl("Login")}>Accedi</Link>
             </Button>
-            <Button asChild className="h-9 px-3 bg-red-600 hover:bg-red-700">
+            <Button asChild className="h-9 px-3 bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 hover:from-rose-700 hover:via-red-700 hover:to-amber-600">
               <Link to={createPageUrl("Register")}>Inizia</Link>
             </Button>
           </div>
@@ -92,15 +92,20 @@ export default function Landing() {
           <div className="max-w-6xl mx-auto px-4 pt-14 pb-12 md:pt-20 md:pb-16">
             <motion.div
               aria-hidden="true"
-              className="absolute -top-24 -left-20 h-72 w-72 rounded-full bg-red-500/20 blur-3xl"
+              className="absolute -top-24 -left-20 h-72 w-72 rounded-full bg-amber-400/25 blur-3xl"
               animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
               transition={{ duration: 14, repeat: Infinity, repeatType: "mirror" }}
             />
             <motion.div
               aria-hidden="true"
-              className="absolute top-10 -right-28 h-80 w-80 rounded-full bg-amber-400/20 blur-3xl"
+              className="absolute top-10 -right-28 h-80 w-80 rounded-full bg-rose-500/20 blur-3xl"
               animate={{ x: [0, -20, 0], y: [0, 25, 0] }}
               transition={{ duration: 16, repeat: Infinity, repeatType: "mirror" }}
+            />
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,hsl(var(--foreground))_1px,transparent_0)] [background-size:22px_22px]"
             />
 
             <div className="relative grid md:grid-cols-2 gap-10 items-center">
@@ -110,13 +115,13 @@ export default function Landing() {
                 transition={{ duration: 0.6 }}
               >
                 <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 backdrop-blur px-3 py-1 text-xs text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full bg-red-500" />
-                  Ordini più semplici. Gestione più veloce.
+                  <span className="h-2 w-2 rounded-full bg-rose-500" />
+                  Menu bello. Ordini veloci. Gestione chiara.
                 </div>
                 <h1 className="mt-4 text-4xl md:text-6xl font-bold tracking-tight">
-                  Porta il tuo ristorante
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-amber-500"> online</span>
-                  , senza complicazioni
+                  Il tuo ristorante,
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 via-red-600 to-amber-500"> online</span>
+                  . Con stile.
                 </h1>
                 <p className="mt-4 text-base md:text-lg text-muted-foreground">
                   OrdinaFacile è la piattaforma che ti aiuta a gestire menu, ordini, promozioni e operatività quotidiana.
@@ -124,7 +129,7 @@ export default function Landing() {
                 </p>
 
                 <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                  <Button asChild className="h-12 bg-red-600 hover:bg-red-700">
+                  <Button asChild className="h-12 bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 hover:from-rose-700 hover:via-red-700 hover:to-amber-600">
                     <Link to={createPageUrl("Register")}>
                       Crea il tuo ristorante
                       <ChevronRight className="h-4 w-4 ml-1" />
@@ -143,11 +148,11 @@ export default function Landing() {
                 <div className="mt-8 grid grid-cols-2 gap-3 text-sm">
                   <div className="rounded-xl border border-border/60 bg-background/50 backdrop-blur px-4 py-3">
                     <div className="font-medium">Menu digitale</div>
-                    <div className="text-muted-foreground">Categorie, modificatori, allergeni</div>
+                    <div className="text-muted-foreground">Categorie, foto, allergeni, varianti</div>
                   </div>
                   <div className="rounded-xl border border-border/60 bg-background/50 backdrop-blur px-4 py-3">
-                    <div className="font-medium">Gestione ordini</div>
-                    <div className="text-muted-foreground">Stati, stampa, storico</div>
+                    <div className="font-medium">Ordini operativi</div>
+                    <div className="text-muted-foreground">Conferme, stati, stampa, storico</div>
                   </div>
                 </div>
               </motion.div>
@@ -159,10 +164,20 @@ export default function Landing() {
                 className="relative"
               >
                 <div className="rounded-3xl border border-border/60 bg-background/50 backdrop-blur p-6 shadow-sm">
+                  <div className="mb-4 rounded-2xl overflow-hidden border border-border/60">
+                    <div className="relative aspect-[16/10] bg-gradient-to-br from-amber-200/60 via-rose-200/40 to-red-200/50 dark:from-amber-500/10 dark:via-rose-500/10 dark:to-red-500/10">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.65),transparent_55%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.55),transparent_55%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.08),transparent_55%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.06),transparent_55%)]" />
+                      <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-border/60 bg-background/70 backdrop-blur px-4 py-3">
+                        <div className="text-xs text-muted-foreground">Preview menu</div>
+                        <div className="text-sm font-medium">Un'esperienza ordinata, anche sul telefono</div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="rounded-2xl border border-border/60 bg-background p-4">
                       <div className="flex items-center gap-2">
-                        <QrCode className="h-4 w-4 text-red-600" />
+                        <QrCode className="h-4 w-4 text-rose-600" />
                         <div className="font-medium">QR Menu</div>
                       </div>
                       <div className="text-sm text-muted-foreground mt-2">Accesso immediato dal tavolo</div>
@@ -176,28 +191,28 @@ export default function Landing() {
                     </div>
                     <div className="rounded-2xl border border-border/60 bg-background p-4">
                       <div className="flex items-center gap-2">
-                        <LayoutDashboard className="h-4 w-4 text-sky-500" />
+                        <LayoutDashboard className="h-4 w-4 text-amber-600" />
                         <div className="font-medium">Dashboard</div>
                       </div>
                       <div className="text-sm text-muted-foreground mt-2">Ordini e performance</div>
                     </div>
                     <div className="rounded-2xl border border-border/60 bg-background p-4">
                       <div className="flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-emerald-500" />
+                        <Shield className="h-4 w-4 text-rose-600" />
                         <div className="font-medium">Affidabilità</div>
                       </div>
                       <div className="text-sm text-muted-foreground mt-2">Flussi stabili e sicuri</div>
                     </div>
                   </div>
 
-                  <div className="mt-5 rounded-2xl bg-gradient-to-r from-red-600 to-amber-500 p-[1px]">
+                  <div className="mt-5 rounded-2xl bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 p-[1px]">
                     <div className="rounded-2xl bg-background px-4 py-3">
                       <div className="flex items-center justify-between gap-4">
                         <div>
                           <div className="text-sm font-medium">Pronto a partire?</div>
                           <div className="text-xs text-muted-foreground">Attiva il tuo ristorante e configura il menu</div>
                         </div>
-                        <Button asChild size="sm" className="bg-red-600 hover:bg-red-700">
+                        <Button asChild size="sm" className="bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 hover:from-rose-700 hover:via-red-700 hover:to-amber-600">
                           <Link to={createPageUrl("Register")}>
                             Inizia
                             <ChevronRight className="h-4 w-4 ml-1" />
@@ -225,6 +240,38 @@ export default function Landing() {
                 Progettata per ristoratori: menu, ordini, promozioni, multi-sede ed eventi. Zero fronzoli, massima operatività.
               </p>
             </motion.div>
+
+            <div className="mt-8 rounded-3xl border border-border/60 bg-gradient-to-br from-amber-100/60 via-rose-50/60 to-background dark:from-amber-500/10 dark:via-rose-500/10 dark:to-background p-6 md:p-8">
+              <div className="grid md:grid-cols-2 gap-6 items-center">
+                <div>
+                  <div className="text-xs text-muted-foreground">Esperienza cliente</div>
+                  <div className="mt-2 text-2xl md:text-3xl font-bold">
+                    Un menu che fa venire voglia di ordinare
+                  </div>
+                  <div className="mt-3 text-sm text-muted-foreground">
+                    Layout pulito, immagini, varianti e note: l'esperienza resta piacevole anche nelle serate più intense.
+                    Tu gestisci tutto dal pannello.
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-background/70 backdrop-blur p-5">
+                  <div className="text-sm font-medium">Risultato</div>
+                  <div className="mt-2 grid grid-cols-3 gap-3 text-xs">
+                    <div className="rounded-xl border border-border/60 bg-background px-3 py-3">
+                      <div className="font-semibold">+Ordini</div>
+                      <div className="text-muted-foreground mt-1">più fluidi</div>
+                    </div>
+                    <div className="rounded-xl border border-border/60 bg-background px-3 py-3">
+                      <div className="font-semibold">+Controllo</div>
+                      <div className="text-muted-foreground mt-1">in cucina</div>
+                    </div>
+                    <div className="rounded-xl border border-border/60 bg-background px-3 py-3">
+                      <div className="font-semibold">+Stile</div>
+                      <div className="text-muted-foreground mt-1">sul brand</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
@@ -268,7 +315,7 @@ export default function Landing() {
                   className="rounded-2xl border border-border/60 bg-background/50 backdrop-blur p-5"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-red-500 to-amber-500 flex items-center justify-center">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-rose-600 via-red-600 to-amber-500 flex items-center justify-center">
                       <item.icon className="h-5 w-5 text-white" />
                     </div>
                     <div className="font-semibold">{item.title}</div>
