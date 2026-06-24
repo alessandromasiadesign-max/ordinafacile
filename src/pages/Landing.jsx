@@ -784,17 +784,17 @@ export default function Landing() {
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 { 
-                  name: "Marco Rossi", 
+                  name: "Marco", 
                   place: "Pizzeria Da Marco, Roma",
                   text: "Finalmente ho tolto il caos dal WhatsApp. I clienti sono felici, io sono sereno. Il menu digitale è bellissimo e i clienti lo adorano."
                 },
                 { 
-                  name: "Giulia Bianchi", 
+                  name: "Giulia", 
                   place: "Sushi Zen, Milano",
                   text: "Ho provato Deliveroo, JustEat... troppe commissioni. Con OrdinaFacile guadagno il doppio sullo stesso ordine. Non torno indietro."
                 },
                 { 
-                  name: "Antonio Verde", 
+                  name: "Antonio", 
                   place: "Burger House, Napoli",
                   text: "In 5 minuti avevo già il mio menu online. La dashboard mi dice quali piatti vendono di più. Una vera manna dal cielo."
                 },
