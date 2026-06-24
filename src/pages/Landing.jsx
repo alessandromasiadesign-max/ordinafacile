@@ -187,6 +187,11 @@ export default function Landing() {
                               alt={item.name}
                               className="h-full w-full object-cover"
                               loading="lazy"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.parentElement.className = 'aspect-video w-full bg-gradient-to-br from-amber-100 to-rose-100 dark:from-amber-900/30 dark:to-rose-900/30 flex items-center justify-center';
+                                e.target.parentElement.innerHTML = `<span class="text-xs text-muted-foreground">${item.name}</span>`;
+                              }}
                             />
                           </div>
                           <div className="p-3">
