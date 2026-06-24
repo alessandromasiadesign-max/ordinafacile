@@ -689,25 +689,25 @@ export default function Landing() {
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 { 
-                  title: "Starter", 
-                  desc: "Per chi inizia", 
-                  price: "€0",
-                  items: ["Fino a 20 piatti", "Link personalizzato", "QR Code"],
-                  excluded: ["Dashboard avanzata", "Brand personalizzato"]
+                  title: "Basic", 
+                  desc: "Per piccoli locali", 
+                  price: "€29",
+                  items: ["Menu digitale", "Ordini base", "QR Code", "Dashboard essenziale", "Supporto email"],
+                  excluded: ["Promozioni", "Brand personalizzato", "Notifiche push"]
                 },
                 { 
-                  title: "Pro", 
-                  desc: "Per chi cresce", 
-                  price: "€29",
+                  title: "Plus", 
+                  desc: "Per locali in crescita", 
+                  price: "€49",
                   popular: true,
-                  items: ["Piatti illimitati", "Dashboard avanzata", "Brand personalizzato", "Notifiche ordini", "Supporto prioritario"],
+                  items: ["Tutto Basic", "Promozioni e codici sconto", "Brand personalizzato", "Notifiche ordini", "Supporto prioritario", "Statistiche avanzate"],
                   excluded: []
                 },
                 { 
-                  title: "Business", 
-                  desc: "Per le catene", 
+                  title: "Premium", 
+                  desc: "Per catene e multi-sede", 
                   price: "€79",
-                  items: ["Tutto del piano Pro", "Multi-sede", "API & integrazioni", "Account manager dedicato", "SLA garantito"],
+                  items: ["Tutto Plus", "Multi-sede", "Eventi e menu speciali", "API & integrazioni", "Account manager dedicato", "SLA garantito"],
                   excluded: []
                 },
               ].map((plan, i) => (
@@ -752,7 +752,7 @@ export default function Landing() {
                     }
                   >
                     <Link to={createPageUrl("Register")}>
-                      {plan.popular ? "Prova 14 giorni gratis" : "Inizia gratis"}
+                      {plan.popular ? "Scegli Plus" : "Scegli " + plan.title}
                     </Link>
                   </Button>
                 </motion.div>
