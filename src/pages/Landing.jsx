@@ -165,32 +165,42 @@ export default function Landing() {
                 className="relative"
               >
                 <div className="rounded-3xl border border-border/60 bg-background/50 backdrop-blur p-6 shadow-sm">
-                  <div className="mb-4 rounded-2xl overflow-hidden border border-border/60 bg-gradient-to-br from-amber-50/80 via-rose-50/60 to-background dark:from-amber-500/8 dark:via-rose-500/8 dark:to-background p-4">
+                  <div className="mb-4 rounded-2xl overflow-hidden border border-border/60 bg-background p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="text-xs text-muted-foreground">Preview menu</div>
-                      <div className="text-xs text-muted-foreground">Ristorante Demo</div>
+                      <div className="text-xs font-medium text-foreground">Preview menu</div>
+                      <div className="text-xs font-medium text-foreground">Ristorante Demo</div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       {[
-                        { name: "Carbonara", price: "€12", cat: "Primi" },
-                        { name: "Amatriciana", price: "€11", cat: "Primi" },
-                        { name: "Cacio e Pepe", price: "€10", cat: "Primi" },
-                        { name: "Tiramisù", price: "€6", cat: "Dolci" },
+                        { name: "Carbonara", price: "€12", cat: "Primi", img: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&q=80" },
+                        { name: "Amatriciana", price: "€11", cat: "Primi", img: "https://images.unsplash.com/photo-1574868462085-4254c4d5c5c4?w=400&q=80" },
+                        { name: "Cacio e Pepe", price: "€10", cat: "Primi", img: "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=400&q=80" },
+                        { name: "Tiramisù", price: "€6", cat: "Dolci", img: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80" },
                       ].map((item) => (
                         <div
                           key={item.name}
-                          className="rounded-xl border border-border/60 bg-background/70 backdrop-blur p-3"
+                          className="rounded-xl border border-border/60 bg-background overflow-hidden"
                         >
-                          <div className="flex items-center gap-2 mb-1">
-                            <UtensilsCrossed className="h-3 w-3 text-rose-600" />
-                            <div className="text-xs text-muted-foreground">{item.cat}</div>
+                          <div className="aspect-video w-full bg-muted/30">
+                            <img
+                              src={item.img}
+                              alt={item.name}
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                            />
                           </div>
-                          <div className="text-sm font-medium">{item.name}</div>
-                          <div className="text-xs text-muted-foreground mt-1">{item.price}</div>
+                          <div className="p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <UtensilsCrossed className="h-3 w-3 text-rose-600" />
+                              <div className="text-xs font-medium text-foreground">{item.cat}</div>
+                            </div>
+                            <div className="text-sm font-semibold text-foreground">{item.name}</div>
+                            <div className="text-xs font-medium text-foreground mt-1">{item.price}</div>
+                          </div>
                         </div>
                       ))}
                     </div>
-                    <div className="mt-3 text-xs text-muted-foreground text-center">
+                    <div className="mt-3 text-xs font-medium text-foreground text-center">
                       Un'esperienza ordinata, anche sul telefono
                     </div>
                   </div>
