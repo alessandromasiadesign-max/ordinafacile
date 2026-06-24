@@ -9,6 +9,7 @@ import {
   Shield,
   Store,
   Zap,
+  UtensilsCrossed,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -164,13 +165,33 @@ export default function Landing() {
                 className="relative"
               >
                 <div className="rounded-3xl border border-border/60 bg-background/50 backdrop-blur p-6 shadow-sm">
-                  <div className="mb-4 rounded-2xl overflow-hidden border border-border/60">
-                    <div className="relative aspect-[16/10] bg-gradient-to-br from-amber-200/60 via-rose-200/40 to-red-200/50 dark:from-amber-500/10 dark:via-rose-500/10 dark:to-red-500/10">
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.65),transparent_55%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.55),transparent_55%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.08),transparent_55%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.06),transparent_55%)]" />
-                      <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-border/60 bg-background/70 backdrop-blur px-4 py-3">
-                        <div className="text-xs text-muted-foreground">Preview menu</div>
-                        <div className="text-sm font-medium">Un'esperienza ordinata, anche sul telefono</div>
-                      </div>
+                  <div className="mb-4 rounded-2xl overflow-hidden border border-border/60 bg-gradient-to-br from-amber-50/80 via-rose-50/60 to-background dark:from-amber-500/8 dark:via-rose-500/8 dark:to-background p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-xs text-muted-foreground">Preview menu</div>
+                      <div className="text-xs text-muted-foreground">Ristorante Demo</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { name: "Carbonara", price: "€12", cat: "Primi" },
+                        { name: "Amatriciana", price: "€11", cat: "Primi" },
+                        { name: "Cacio e Pepe", price: "€10", cat: "Primi" },
+                        { name: "Tiramisù", price: "€6", cat: "Dolci" },
+                      ].map((item) => (
+                        <div
+                          key={item.name}
+                          className="rounded-xl border border-border/60 bg-background/70 backdrop-blur p-3"
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <UtensilsCrossed className="h-3 w-3 text-rose-600" />
+                            <div className="text-xs text-muted-foreground">{item.cat}</div>
+                          </div>
+                          <div className="text-sm font-medium">{item.name}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{item.price}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 text-xs text-muted-foreground text-center">
+                      Un'esperienza ordinata, anche sul telefono
                     </div>
                   </div>
 
