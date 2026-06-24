@@ -1,550 +1,945 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPageUrl } from "@/utils";
 import {
-  BadgeCheck,
   ChevronRight,
-  Headset,
   LayoutDashboard,
-  QrCode,
   Shield,
   Store,
+  Smartphone,
+  Star,
   Zap,
   UtensilsCrossed,
+  ArrowRight,
+  Sparkles,
+  PlayCircle,
+  Menu as MenuIcon,
+  X,
+  Check,
+  Tag,
+  Heart,
+  Rocket,
+  Instagram,
+  Facebook,
+  Linkedin,
+  Youtube,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
+// Particle Canvas Component
+function ParticleCanvas() {
+  const canvasRef = useRef(null);
+  
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    let mouse = { x: -9999, y: -9999 };
+    let particles = [];
+    const PARTICLE_COUNT_BASE = 80;
+    const CONNECTION_DIST = 140;
+    const MOUSE_RADIUS = 180;
+    
+    const colors = [
+      'rgba(249,115,22,',  // orange-500
+      'rgba(251,146,60,',  // orange-400
+      'rgba(234,88,12,',   // orange-600
+      'rgba(255,255,255,',  // white
+    ];
+    
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    
+    function createParticles() {
+      particles = [];
+      const count = Math.min(PARTICLE_COUNT_BASE, Math.floor((W * H) / 12000));
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: (Math.random() - 0.5) * 0.6,
+          radius: Math.random() * 1.8 + 0.5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: Math.random() * 0.5 + 0.2,
+          pulseSpeed: Math.random() * 0.02 + 0.005,
+          pulseOffset: Math.random() * Math.PI * 2,
+        });
+      }
+    }
+    
+    let time = 0;
+    
+    function draw() {
+      time += 0.016;
+      ctx.clearRect(0, 0, W, H);
+      
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        
+        const dx = p.x - mouse.x;
+        const dy = p.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < MOUSE_RADIUS && dist > 0) {
+          const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS;
+          const angle = Math.atan2(dy, dx);
+          p.vx += Math.cos(angle) * force * 0.8;
+          p.vy += Math.sin(angle) * force * 0.8;
+        }
+        
+        p.vx *= 0.98;
+        p.vy *= 0.98;
+        
+        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        if (speed < 0.15) {
+          p.vx += (Math.random() - 0.5) * 0.1;
+          p.vy += (Math.random() - 0.5) * 0.1;
+        }
+        
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        if (p.x < -10) p.x = W + 10;
+        if (p.x > W + 10) p.x = -10;
+        if (p.y < -10) p.y = H + 10;
+        if (p.y > H + 10) p.y = -10;
+        
+        const pulse = Math.sin(time * p.pulseSpeed * 60 + p.pulseOffset) * 0.15 + 0.85;
+        const finalAlpha = p.alpha * pulse;
+        
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color + finalAlpha + ')';
+        ctx.fill();
+      }
+      
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i];
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < CONNECTION_DIST) {
+            const opacity = (1 - dist / CONNECTION_DIST) * 0.15;
+            
+            const midX = (a.x + b.x) / 2;
+            const midY = (a.y + b.y) / 2;
+            const mouseDist = Math.sqrt((midX - mouse.x) ** 2 + (midY - mouse.y) ** 2);
+            const mouseBoost = mouseDist < MOUSE_RADIUS ? (1 - mouseDist / MOUSE_RADIUS) * 0.25 : 0;
+            
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(249,115,22,${opacity + mouseBoost})`;
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+          }
+        }
+      }
+      
+      if (mouse.x > 0 && mouse.y > 0) {
+        const grad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, MOUSE_RADIUS);
+        grad.addColorStop(0, 'rgba(249,115,22,0.06)');
+        grad.addColorStop(1, 'rgba(249,115,22,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(mouse.x - MOUSE_RADIUS, mouse.y - MOUSE_RADIUS, MOUSE_RADIUS * 2, MOUSE_RADIUS * 2);
+      }
+      
+      requestAnimationFrame(draw);
+    }
+    
+    const handleMouseMove = (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    };
+    
+    const handleMouseLeave = () => {
+      mouse.x = -9999;
+      mouse.y = -9999;
+    };
+    
+    resize();
+    createParticles();
+    draw();
+    
+    window.addEventListener('resize', () => {
+      resize();
+      createParticles();
+    });
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseleave', handleMouseLeave);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
+  
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 z-0 pointer-events-none"
+      style={{ background: 'transparent' }}
+    />
+  );
+}
+
+// Counter Animation Component
+function Counter({ target, suffix = "" }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, threshold: 0.5 });
+  
+  useEffect(() => {
+    if (inView) {
+      let current = 0;
+      const increment = target / 60;
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+        setCount(Math.floor(current));
+      }, 25);
+      return () => clearInterval(timer);
+    }
+  }, [inView, target]);
+  
+  return (
+    <span ref={count} className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-foreground to-orange-500 bg-clip-text text-transparent">
+      {count.toLocaleString('it-IT')}{suffix}
+    </span>
+  );
+}
+
+// Phone Mockup Component
+function PhoneMockup() {
+  return (
+    <div className="phone-mockup w-[280px] sm:w-[300px] mx-auto" style={{
+      background: 'linear-gradient(145deg, #1a1a1a, #0f0f0f)',
+      border: '2px solid rgba(255,255,255,0.08)',
+      borderRadius: '2.5rem',
+      padding: '12px',
+      boxShadow: '0 0 0 1px rgba(255,255,255,0.03), 0 25px 80px -12px rgba(0,0,0,0.8), 0 0 80px -10px rgba(249,115,22,0.08)',
+      animation: 'phoneFloat 6s ease-in-out infinite'
+    }}>
+      <style>{`
+        @keyframes phoneFloat {
+          0%,100%{transform:translateY(0) rotateY(-5deg) rotateX(2deg);}
+          50%{transform:translateY(-15px) rotateY(-5deg) rotateX(2deg);}
+        }
+      `}</style>
+      <div className="phone-screen rounded-2xl overflow-hidden bg-background" style={{ borderRadius: '2rem' }}>
+        <div className="phone-notch w-[120px] h-[28px] bg-muted mx-auto rounded-b-xl relative z-10"></div>
+        <div className="bg-gradient-to-b from-orange-500 to-orange-700 p-4 pt-2 pb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-white/70 text-xs">Ciao Marco 👋</p>
+              <p className="text-white font-bold text-sm">Pizzeria Da Luigi</p>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              <Store className="w-4 h-4 text-white" />
+            </div>
+          </div>
+          <div className="bg-white/10 rounded-xl px-3 py-2.5 flex items-center gap-2">
+            <span className="text-white/40 text-xs">Cerca nel menu...</span>
+          </div>
+        </div>
+        <div className="px-4 py-3 flex gap-2 overflow-hidden">
+          <div className="px-3 py-1.5 bg-orange-500 rounded-full text-white text-[10px] font-semibold whitespace-nowrap">🍕 Pizze</div>
+          <div className="px-3 py-1.5 bg-muted rounded-full text-muted-foreground text-[10px] font-medium whitespace-nowrap">🥗 Insalate</div>
+          <div className="px-3 py-1.5 bg-muted rounded-full text-muted-foreground text-[10px] font-medium whitespace-nowrap">🍝 Pasta</div>
+        </div>
+        <div className="px-4 space-y-3 pb-4">
+          {[
+            { name: "Margherita", desc: "Pomodoro, mozzarella, basilico", price: "€6,50" },
+            { name: "Diavola", desc: "Salame piccante, mozzarella", price: "€8,00" },
+            { name: "Quattro Formaggi", desc: "Mozzarella, gorgonzola, parmigiano", price: "€9,50" },
+          ].map((item, i) => (
+            <div key={item.name} className="bg-muted/30 rounded-xl p-3 flex gap-3 items-center">
+              <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 flex items-center justify-center flex-shrink-0">
+                <UtensilsCrossed className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-foreground text-xs font-semibold">{item.name}</p>
+                <p className="text-muted-foreground text-[10px] mt-0.5">{item.desc}</p>
+                <p className="text-orange-600 dark:text-orange-400 text-xs font-bold mt-1">{item.price}</p>
+              </div>
+              <div className={`w-7 h-7 rounded-lg ${i < 2 ? 'bg-orange-500' : 'bg-orange-500/30'} flex items-center justify-center flex-shrink-0`}>
+                <ChevronRight className={`w-4 h-4 ${i < 2 ? 'text-white' : 'text-orange-400'}`} />
+              </div>
+            </div>
+          ))}
+          <div className="bg-orange-500 rounded-xl p-3 flex items-center justify-between mt-2">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold text-white">2</div>
+              <span className="text-white text-xs font-semibold">Carrello</span>
+            </div>
+            <span className="text-white text-sm font-bold">€14,50</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Landing() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
   const scrollToId = (id) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "start" });
+    setMobileMenuOpen(false);
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-amber-500 via-red-500 to-rose-600 flex items-center justify-center shadow-sm">
-              <Store className="h-5 w-5 text-white" />
-            </div>
-            <div className="leading-tight">
-              <div className="font-semibold">OrdinaFacile</div>
-              <div className="text-xs text-muted-foreground">Per ristoranti che vogliono vendere meglio</div>
-            </div>
-          </Link>
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <ParticleCanvas />
+      
+      {/* Grain overlay */}
+      <div className="fixed inset-0 z-1 pointer-events-none opacity-[0.025]" style={{
+        backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+        backgroundSize: '128px'
+      }} />
 
-          <nav className="hidden md:flex items-center gap-1">
-            <button
-              type="button"
-              className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-              onClick={() => scrollToId("features")}
-            >
-              Funzionalità
-            </button>
-            <button
-              type="button"
-              className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-              onClick={() => scrollToId("how")}
-            >
+      {/* Navigation */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-background/85 backdrop-blur border-b border-border/5' : ''}`}>
+        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/40 transition-shadow">
+              <Store className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-bold tracking-tight">Ordina<span className="text-orange-400">Facile</span></span>
+          </Link>
+          
+          <div className="hidden md:flex items-center gap-8">
+            <button type="button" className="text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => scrollToId("how")}>
               Come funziona
             </button>
-            <button
-              type="button"
-              className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-              onClick={() => scrollToId("plans")}
-            >
-              Piani
+            <button type="button" className="text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => scrollToId("features")}>
+              Vantaggi
             </button>
-            <button
-              type="button"
-              className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-              onClick={() => scrollToId("faq")}
-            >
-              FAQ
+            <button type="button" className="text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => scrollToId("plans")}>
+              Prezzi
             </button>
-            <div className="w-px h-6 bg-border/60 mx-2" />
-            <Button asChild variant="ghost" className="h-9">
-              <Link to={createPageUrl("Login")}>Accedi</Link>
-            </Button>
-            <Button asChild className="h-9 bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 hover:from-rose-700 hover:via-red-700 hover:to-amber-600">
+            <button type="button" className="text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => scrollToId("testimonials")}>
+              Recensioni
+            </button>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <Button asChild className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25 hover:-translate-y-0.5">
               <Link to={createPageUrl("Register")}>
-                Inizia ora
-                <ChevronRight className="h-4 w-4 ml-1" />
+                Inizia ora <ArrowRight className="w-4 h-4" />
               </Link>
             </Button>
-          </nav>
-
-          <div className="md:hidden flex items-center gap-2">
-            <Button asChild variant="ghost" className="h-9 px-3">
-              <Link to={createPageUrl("Login")}>Accedi</Link>
-            </Button>
-            <Button asChild className="h-9 px-3 bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 hover:from-rose-700 hover:via-red-700 hover:to-amber-600">
-              <Link to={createPageUrl("Register")}>Inizia</Link>
-            </Button>
+            <button onClick={() => setMobileMenuOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl border border-border hover:border-border/20 transition-colors">
+              <MenuIcon className="w-5 h-5" />
+            </button>
           </div>
         </div>
-      </header>
+      </nav>
 
-      <main>
-        <section className="relative overflow-hidden">
-          <div className="max-w-6xl mx-auto px-4 pt-14 pb-12 md:pt-20 md:pb-16">
-            <motion.div
-              aria-hidden="true"
-              className="absolute -top-24 -left-20 h-72 w-72 rounded-full bg-amber-400/25 blur-3xl"
-              animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-              transition={{ duration: 14, repeat: Infinity, repeatType: "mirror" }}
-            />
-            <motion.div
-              aria-hidden="true"
-              className="absolute top-10 -right-28 h-80 w-80 rounded-full bg-rose-500/20 blur-3xl"
-              animate={{ x: [0, -20, 0], y: [0, 25, 0] }}
-              transition={{ duration: 16, repeat: Infinity, repeatType: "mirror" }}
-            />
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <>
+          <div className="fixed inset-0 z-[55] bg-black/50 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+          <div className="mobile-menu fixed inset-y-0 right-0 w-72 z-[60] bg-background/95 backdrop-blur-xl border-l border-border/5 p-8 flex flex-col gap-6">
+            <button onClick={() => setMobileMenuOpen(false)} className="self-end w-10 h-10 flex items-center justify-center rounded-xl border border-border hover:border-border/20 transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+            <div className="flex flex-col gap-4 mt-4">
+              <button type="button" className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2" onClick={() => scrollToId("how")}>
+                Come funziona
+              </button>
+              <button type="button" className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2" onClick={() => scrollToId("features")}>
+                Vantaggi
+              </button>
+              <button type="button" className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2" onClick={() => scrollToId("plans")}>
+                Prezzi
+              </button>
+              <button type="button" className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2" onClick={() => scrollToId("testimonials")}>
+                Recensioni
+              </button>
+            </div>
+            <Button asChild className="mt-auto flex items-center justify-center gap-2 px-5 py-3 bg-orange-500 text-white font-semibold rounded-xl">
+              <Link to={createPageUrl("Register")}>
+                Inizia ora <ArrowRight className="w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
+        </>
+      )}
 
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,hsl(var(--foreground))_1px,transparent_0)] [background-size:22px_22px]"
-            />
-
-            <div className="relative grid md:grid-cols-2 gap-10 items-center">
-              <motion.div
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 backdrop-blur px-3 py-1 text-xs text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full bg-rose-500" />
-                  Menu bello. Ordini veloci. Gestione chiara.
-                </div>
-                <h1 className="mt-4 text-4xl md:text-6xl font-bold tracking-tight">
-                  Il tuo ristorante,
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 via-red-600 to-amber-500"> online</span>
-                  . Con stile.
-                </h1>
-                <p className="mt-4 text-base md:text-lg text-muted-foreground">
-                  OrdinaFacile è la piattaforma che ti aiuta a gestire menu, ordini, promozioni e operatività quotidiana.
-                  Pensata per essere veloce, bella e concreta.
-                </p>
-
-                <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                  <Button asChild className="h-12 bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 hover:from-rose-700 hover:via-red-700 hover:to-amber-600">
-                    <Link to={createPageUrl("Register")}>
-                      Crea il tuo ristorante
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-12"
-                    onClick={() => scrollToId("features")}
-                  >
-                    Scopri le funzionalità
-                  </Button>
-                </div>
-
-                <div className="mt-8 grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-xl border border-border/60 bg-background/50 backdrop-blur px-4 py-3">
-                    <div className="font-medium">Menu digitale</div>
-                    <div className="text-muted-foreground">Categorie, foto, allergeni, varianti</div>
-                  </div>
-                  <div className="rounded-xl border border-border/60 bg-background/50 backdrop-blur px-4 py-3">
-                    <div className="font-medium">Ordini operativi</div>
-                    <div className="text-muted-foreground">Conferme, stati, stampa, storico</div>
-                  </div>
-                </div>
+      <main className="relative z-10">
+        {/* Hero Section */}
+        <section className="min-h-screen flex items-center pt-24 pb-16 px-6">
+          <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+            <div className="space-y-8">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-orange-500/10 border border-orange-500/20 text-orange-500">
+                  <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+                  Novità 2025
+                </span>
               </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
+              
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }} 
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="relative"
+                className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[0.95] tracking-tight"
               >
-                <div className="rounded-3xl border border-border/60 bg-background/50 backdrop-blur p-6 shadow-sm">
-                  <div className="mb-4 rounded-2xl overflow-hidden border border-border/60 bg-background p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="text-xs font-medium text-foreground">Preview menu</div>
-                      <div className="text-xs font-medium text-foreground">Ristorante Demo</div>
+                Il tuo menu<br />
+                <span className="bg-gradient-to-r from-foreground via-orange-500 to-orange-600 bg-clip-text text-transparent bg-[length:200%_200%] animate-[shimmer_4s_ease-in-out_infinite_alternate]">
+                  online in
+                </span><br />
+                <span className="bg-gradient-to-r from-foreground via-orange-500 to-orange-600 bg-clip-text text-transparent bg-[length:200%_200%] animate-[shimmer_4s_ease-in-out_infinite_alternate]">
+                  5 minuti.
+                </span>
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-lg sm:text-xl text-muted-foreground max-w-lg leading-relaxed font-light"
+              >
+                Stop ai confusionari gruppi WhatsApp. Un link, un menu digitale, ordini organizzati. Il food delivery che <span className="text-foreground font-medium">non ti stressa</span>.
+              </motion.p>
+              
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="flex flex-col sm:flex-row gap-4"
+              >
+                <Button asChild className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-2xl transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/30 hover:-translate-y-1 text-base relative">
+                  <Link to={createPageUrl("Register")}>
+                    Prova gratis <Sparkles className="w-5 h-5" />
+                  </Link>
+                </Button>
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={() => scrollToId("how")}
+                  className="inline-flex items-center justify-center gap-2.5 px-8 py-4 border border-border hover:border-border/20 text-foreground font-medium rounded-2xl transition-all duration-300 hover:bg-muted/5 text-base"
+                >
+                  <PlayCircle className="w-5 h-5 text-orange-500" /> Come funziona
+                </Button>
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="flex items-center gap-4 pt-2"
+              >
+                <div className="flex -space-x-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="w-9 h-9 rounded-full border-2 border-background bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 flex items-center justify-center">
+                      <Store className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { name: "Carbonara", price: "€12", cat: "Primi", img: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&q=80" },
-                        { name: "Amatriciana", price: "€11", cat: "Primi", img: "https://images.unsplash.com/photo-1574868462085-4254c4d5c5c4?w=400&q=80" },
-                        { name: "Cacio e Pepe", price: "€10", cat: "Primi", img: "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=400&q=80" },
-                        { name: "Tiramisù", price: "€6", cat: "Dolci", img: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80" },
-                      ].map((item) => (
-                        <div
-                          key={item.name}
-                          className="rounded-xl border border-border/60 bg-background overflow-hidden"
-                        >
-                          <div className="aspect-video w-full bg-muted/30">
-                            <img
-                              src={item.img}
-                              alt={item.name}
-                              className="h-full w-full object-cover"
-                              loading="lazy"
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                                e.target.parentElement.className = 'aspect-video w-full bg-gradient-to-br from-amber-100 to-rose-100 dark:from-amber-900/30 dark:to-rose-900/30 flex items-center justify-center';
-                                e.target.parentElement.innerHTML = `<span class="text-xs text-muted-foreground">${item.name}</span>`;
-                              }}
-                            />
-                          </div>
-                          <div className="p-3">
-                            <div className="flex items-center gap-2 mb-1">
-                              <UtensilsCrossed className="h-3 w-3 text-rose-600" />
-                              <div className="text-xs font-medium text-foreground">{item.cat}</div>
-                            </div>
-                            <div className="text-sm font-semibold text-foreground">{item.name}</div>
-                            <div className="text-xs font-medium text-foreground mt-1">{item.price}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-3 text-xs font-medium text-foreground text-center">
-                      Un'esperienza ordinata, anche sul telefono
-                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-orange-400 text-orange-400" />
+                    ))}
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="rounded-2xl border border-border/60 bg-background p-4">
-                      <div className="flex items-center gap-2">
-                        <QrCode className="h-4 w-4 text-rose-600" />
-                        <div className="font-medium">QR Menu</div>
-                      </div>
-                      <div className="text-sm text-muted-foreground mt-2">Accesso immediato dal tavolo</div>
-                    </div>
-                    <div className="rounded-2xl border border-border/60 bg-background p-4">
-                      <div className="flex items-center gap-2">
-                        <Zap className="h-4 w-4 text-amber-500" />
-                        <div className="font-medium">Velocità</div>
-                      </div>
-                      <div className="text-sm text-muted-foreground mt-2">Interfaccia rapida e chiara</div>
-                    </div>
-                    <div className="rounded-2xl border border-border/60 bg-background p-4">
-                      <div className="flex items-center gap-2">
-                        <LayoutDashboard className="h-4 w-4 text-amber-600" />
-                        <div className="font-medium">Dashboard</div>
-                      </div>
-                      <div className="text-sm text-muted-foreground mt-2">Ordini e performance</div>
-                    </div>
-                    <div className="rounded-2xl border border-border/60 bg-background p-4">
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-rose-600" />
-                        <div className="font-medium">Affidabilità</div>
-                      </div>
-                      <div className="text-sm text-muted-foreground mt-2">Flussi stabili e sicuri</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 rounded-2xl bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 p-[1px]">
-                    <div className="rounded-2xl bg-background px-4 py-3">
-                      <div className="flex items-center justify-between gap-4">
-                        <div>
-                          <div className="text-sm font-medium">Pronto a partire?</div>
-                          <div className="text-xs text-muted-foreground">Attiva il tuo ristorante e configura il menu</div>
-                        </div>
-                        <Button asChild size="sm" className="bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 hover:from-rose-700 hover:via-red-700 hover:to-amber-600">
-                          <Link to={createPageUrl("Register")}>
-                            Inizia
-                            <ChevronRight className="h-4 w-4 ml-1" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">+2.400 ristoratori soddisfatti</p>
                 </div>
               </motion.div>
+            </div>
+
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }} 
+              animate={{ opacity: 1, x: 0 }} 
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="flex justify-center lg:justify-end"
+              style={{ perspective: '1000px' }}
+            >
+              <PhoneMockup />
+            </motion.div>
+          </div>
+          
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Scorri</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground rotate-90" />
+          </div>
+        </section>
+
+        {/* Marquee Section */}
+        <section className="py-12 border-y border-border/5 overflow-hidden">
+          <div className="flex items-center gap-12 mb-6 px-6">
+            <div className="w-12 h-px bg-border/10"></div>
+            <span className="text-xs uppercase tracking-widest text-muted-foreground font-semibold whitespace-nowrap">Scelto da oltre 2.400 attività in Italia</span>
+            <div className="flex-1 h-px bg-border/10"></div>
+          </div>
+          <div className="overflow-hidden">
+            <div className="flex animate-[marquee_30s_linear_infinite] w-max">
+              {['🍕 Pizzeria Da Luigi', '🍣 Sushi Zen', '🍔 Burger House', '🥙 Kebab Palace', '🍝 Trattoria Roma', '🥘 Ristorante Sole', '🌮 Tacos Madre', '🍦 Gelatoria Dolce'].map((item, i) => (
+                <span key={`${item}-${i}`} className="text-muted-foreground text-2xl font-bold tracking-tight whitespace-nowrap px-8">
+                  {item}
+                </span>
+              ))}
+              {['🍕 Pizzeria Da Luigi', '🍣 Sushi Zen', '🍔 Burger House', '🥙 Kebab Palace', '🍝 Trattoria Roma', '🥘 Ristorante Sole', '🌮 Tacos Madre', '🍦 Gelatoria Dolce'].map((item, i) => (
+                <span key={`${item}-dup-${i}`} className="text-muted-foreground text-2xl font-bold tracking-tight whitespace-nowrap px-8">
+                  {item}
+                </span>
+              ))}
             </div>
           </div>
         </section>
 
-        <section id="features" className="border-t border-border/60">
-          <div className="max-w-6xl mx-auto px-4 py-14 md:py-16">
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h2 className="text-3xl md:text-4xl font-bold">Tutto ciò che serve, in un'unica piattaforma</h2>
-              <p className="mt-3 text-muted-foreground max-w-2xl">
-                Progettata per ristoratori: menu, ordini, promozioni, multi-sede ed eventi. Zero fronzoli, massima operatività.
-              </p>
-            </motion.div>
-
-            <div className="mt-8 rounded-3xl border border-border/60 bg-gradient-to-br from-amber-100/60 via-rose-50/60 to-background dark:from-amber-500/10 dark:via-rose-500/10 dark:to-background p-6 md:p-8">
-              <div className="grid md:grid-cols-2 gap-6 items-center">
-                <div>
-                  <div className="text-xs text-muted-foreground">Esperienza cliente</div>
-                  <div className="mt-2 text-2xl md:text-3xl font-bold">
-                    Un menu che fa venire voglia di ordinare
-                  </div>
-                  <div className="mt-3 text-sm text-muted-foreground">
-                    Layout pulito, immagini, varianti e note: l'esperienza resta piacevole anche nelle serate più intense.
-                    Tu gestisci tutto dal pannello.
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-border/60 bg-background/70 backdrop-blur p-5">
-                  <div className="text-sm font-medium">Risultato</div>
-                  <div className="mt-2 grid grid-cols-3 gap-3 text-xs">
-                    <div className="rounded-xl border border-border/60 bg-background px-3 py-3">
-                      <div className="font-semibold">+Ordini</div>
-                      <div className="text-muted-foreground mt-1">più fluidi</div>
-                    </div>
-                    <div className="rounded-xl border border-border/60 bg-background px-3 py-3">
-                      <div className="font-semibold">+Controllo</div>
-                      <div className="text-muted-foreground mt-1">in cucina</div>
-                    </div>
-                    <div className="rounded-xl border border-border/60 bg-background px-3 py-3">
-                      <div className="font-semibold">+Stile</div>
-                      <div className="text-muted-foreground mt-1">sul brand</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {/* How It Works */}
+        <section id="how" className="py-24 sm:py-32 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center max-w-2xl mx-auto mb-20">
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-orange-500/10 border border-orange-500/20 text-orange-500 mb-6">
+                  <Zap className="w-3 h-3" /> Semplicissimo
+                </span>
+              </motion.div>
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }} 
+                whileInView={{ opacity: 1, y: 0 }} 
+                viewport={{ once: true }} 
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-6"
+              >
+                3 passi e sei <span className="text-orange-500">online</span>
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }} 
+                whileInView={{ opacity: 1, y: 0 }} 
+                viewport={{ once: true }} 
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-muted-foreground text-lg font-light leading-relaxed"
+              >
+                Niente corsi, niente tecnici. Se sai usare WhatsApp, sai usare OrdinaFacile.
+              </motion.p>
             </div>
-
-            <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            
+            <div className="grid md:grid-cols-3 gap-8 relative">
+              <div className="hidden md:block absolute top-[3.5rem] left-[calc(16.67%+1.75rem)] right-[calc(16.67%+1.75rem)] h-px bg-gradient-to-r from-orange-500/30 via-orange-500/15 to-orange-500/30"></div>
+              
               {[
-                {
-                  icon: QrCode,
-                  title: "Menu digitale & QR",
-                  desc: "Categorie, prodotti, foto, allergeni e modificatori. Perfetto per tavoli e delivery.",
-                },
-                {
-                  icon: LayoutDashboard,
-                  title: "Gestione ordini",
-                  desc: "Vista operativa, stati ordine, stampa e storico: tutto sotto controllo.",
-                },
-                {
-                  icon: Zap,
-                  title: "Velocità e semplicità",
-                  desc: "Interfaccia pensata per lavorare veloce, anche nei momenti di punta.",
-                },
-                {
-                  icon: BadgeCheck,
-                  title: "Promo e campagne",
-                  desc: "Codici sconto e promozioni per aumentare conversione e scontrino medio.",
-                },
-                {
-                  icon: Store,
-                  title: "Multi-sede ed eventi",
-                  desc: "Gestisci sedi e menu evento in modo ordinato e coerente.",
-                },
-                {
-                  icon: Headset,
-                  title: "Supporto",
-                  desc: "Assistenza e strumenti per risolvere velocemente dubbi o problemi tecnici.",
-                },
-              ].map((item) => (
+                { n: "1", title: "Crea il menu", desc: "Inserisci i tuoi piatti con foto, descrizioni e prezzi. Il nostro editor è drag & drop." },
+                { n: "2", title: "Condividi il link", desc: "Un unico link da condividere ovunque: QR code, Instagram, WhatsApp, sito web." },
+                { n: "3", title: "Ricevi ordini", desc: "Gli ordini arrivano organizzati in tempo reale. Niente più confusione." },
+              ].map((step, i) => (
                 <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 10 }}
+                  key={step.n}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                  transition={{ duration: 0.35 }}
-                  className="rounded-2xl border border-border/60 bg-background/50 backdrop-blur p-5"
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className="relative rounded-2xl p-8 text-center bg-background/50 backdrop-blur border border-border/60 hover:border-orange-500/25 transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-orange-500/10"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-rose-600 via-red-600 to-amber-500 flex items-center justify-center">
-                      <item.icon className="h-5 w-5 text-white" />
-                    </div>
-                    <div className="font-semibold">{item.title}</div>
+                  <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-6 relative z-10">
+                    <span className="text-2xl font-extrabold text-orange-500">{step.n}</span>
                   </div>
-                  <div className="mt-3 text-sm text-muted-foreground">{item.desc}</div>
+                  <h3 className="text-xl font-bold mb-3">{step.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
                 </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="how" className="border-t border-border/60">
-          <div className="max-w-6xl mx-auto px-4 py-14 md:py-16">
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h2 className="text-3xl md:text-4xl font-bold">Come funziona</h2>
-              <p className="mt-3 text-muted-foreground max-w-2xl">
-                Parti in poco tempo: crea il ristorante, configura il menu e gestisci gli ordini con un pannello chiaro.
-              </p>
-            </motion.div>
-
-            <div className="mt-10 grid md:grid-cols-3 gap-4">
-              {[
-                {
-                  n: "01",
-                  title: "Attiva il ristorante",
-                  desc: "Registrati e inserisci i dati essenziali della tua attività.",
-                },
-                {
-                  n: "02",
-                  title: "Costruisci il menu",
-                  desc: "Categorie, prodotti, varianti e modificatori (anche obbligatori).",
-                },
-                {
-                  n: "03",
-                  title: "Gestisci gli ordini",
-                  desc: "Ricevi e organizza gli ordini con stati, stampa e storico.",
-                },
-              ].map((step) => (
-                <div
-                  key={step.n}
-                  className="rounded-2xl border border-border/60 bg-background/50 backdrop-blur p-6"
-                >
-                  <div className="text-xs text-muted-foreground">{step.n}</div>
-                  <div className="mt-2 text-lg font-semibold">{step.title}</div>
-                  <div className="mt-2 text-sm text-muted-foreground">{step.desc}</div>
+        {/* Features / Benefits */}
+        <section id="features" className="py-24 sm:py-32 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <motion.div 
+                initial={{ opacity: 0, x: -30 }} 
+                whileInView={{ opacity: 1, x: 0 }} 
+                viewport={{ once: true }} 
+                transition={{ duration: 0.6 }}
+                className="grid grid-cols-2 gap-4"
+              >
+                <div className="food-img-wrapper col-span-2 h-64 rounded-2xl overflow-hidden bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 flex items-center justify-center">
+                  <Store className="w-16 h-16 text-orange-600 dark:text-orange-400" />
                 </div>
-              ))}
-            </div>
-
-            <div className="mt-10 flex flex-col sm:flex-row gap-3">
-              <Button asChild className="h-12 bg-red-600 hover:bg-red-700">
-                <Link to={createPageUrl("Register")}>
-                  Inizia ora
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="h-12">
-                <Link to={createPageUrl("Login")}>Ho già un account</Link>
-              </Button>
+                <div className="food-img-wrapper h-48 rounded-2xl overflow-hidden bg-gradient-to-br from-rose-100 to-rose-200 dark:from-rose-900/30 dark:to-rose-800/30 flex items-center justify-center">
+                  <UtensilsCrossed className="w-12 h-12 text-rose-600 dark:text-rose-400" />
+                </div>
+                <div className="food-img-wrapper h-48 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30 flex items-center justify-center">
+                  <Zap className="w-12 h-12 text-amber-600 dark:text-amber-400" />
+                </div>
+              </motion.div>
+              
+              <div className="space-y-8">
+                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-orange-500/10 border border-orange-500/20 text-orange-500">
+                    <Shield className="w-3 h-3" /> Perché OrdinaFacile
+                  </span>
+                </motion.div>
+                <motion.h2 
+                  initial={{ opacity: 0, y: 20 }} 
+                  whileInView={{ opacity: 1, y: 0 }} 
+                  viewport={{ once: true }} 
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  className="text-4xl sm:text-5xl font-extrabold tracking-tight"
+                >
+                  Tutto quello che ti serve,<br /><span className="text-orange-500">niente di superfluo</span>
+                </motion.h2>
+                
+                <div className="space-y-6 pt-2">
+                  {[
+                    { icon: Smartphone, title: "100% mobile", desc: "I tuoi clienti ordinano dal telefono, senza scaricare nulla. Funziona su ogni browser." },
+                    { icon: Zap, title: "Zero commissioni", desc: "A differenza delle app delivery, tu tieni il 100% di quello che guadagni. Sempre." },
+                    { icon: Store, title: "Brand personalizzato", desc: "Colori, logo e stile del tuo locale. Il menu è sempre 'tuo', mai generico." },
+                    { icon: LayoutDashboard, title: "Dashboard intelligente", desc: "Statistiche in tempo reale: piatti più ordinati, orari di picco, fatturato." },
+                  ].map((item, i) => (
+                    <motion.div
+                      key={item.title}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
+                      className="flex gap-4 group"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/15 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/20 transition-colors">
+                        <item.icon className="w-5 h-5 text-orange-500" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-foreground mb-1">{item.title}</h4>
+                        <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <section id="plans" className="border-t border-border/60">
-          <div className="max-w-6xl mx-auto px-4 py-14 md:py-16">
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h2 className="text-3xl md:text-4xl font-bold">Piani flessibili</h2>
-              <p className="mt-3 text-muted-foreground max-w-2xl">
-                Scegli il piano più adatto al tuo locale. Puoi iniziare semplice e crescere quando vuoi.
-              </p>
-            </motion.div>
+        {/* Stats */}
+        <section className="py-20 px-6 border-y border-border/5">
+          <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { target: 2400, suffix: "", label: "Attività attive" },
+              { target: 150, suffix: "K", label: "Milioni di ordini" },
+              { target: 98, suffix: "%", label: "Soddisfatti" },
+              { target: 5, suffix: "", label: "Minuti per attivarsi" },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="text-center"
+              >
+                <Counter target={stat.target} suffix={stat.suffix} />
+                <p className="text-muted-foreground text-sm mt-2">{stat.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
 
-            <div className="mt-10 grid md:grid-cols-3 gap-4">
+        {/* Pricing */}
+        <section id="plans" className="py-24 sm:py-32 px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-orange-500/10 border border-orange-500/20 text-orange-500 mb-6">
+                  <Tag className="w-3 h-3" /> Prezzi trasparenti
+                </span>
+              </motion.div>
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }} 
+                whileInView={{ opacity: 1, y: 0 }} 
+                viewport={{ once: true }} 
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-6"
+              >
+                Scegli il tuo <span className="text-orange-500">piano</span>
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }} 
+                whileInView={{ opacity: 1, y: 0 }} 
+                viewport={{ once: true }} 
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-muted-foreground text-lg font-light"
+              >
+                Nessun costo nascosto, nessuna sorpresa. Cancelli quando vuoi.
+              </motion.p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-6">
               {[
-                {
-                  title: "Free",
-                  desc: "Per iniziare e testare il flusso.",
-                  items: ["Menu digitale", "Ordini base"],
+                { 
+                  title: "Starter", 
+                  desc: "Per chi inizia", 
+                  price: "€0",
+                  items: ["Fino a 20 piatti", "Link personalizzato", "QR Code"],
+                  excluded: ["Dashboard avanzata", "Brand personalizzato"]
                 },
-                {
-                  title: "Basic",
-                  desc: "Per locali che vogliono controllo e operatività.",
-                  items: ["Promo", "Stati ordine", "Storico"],
+                { 
+                  title: "Pro", 
+                  desc: "Per chi cresce", 
+                  price: "€29",
+                  popular: true,
+                  items: ["Piatti illimitati", "Dashboard avanzata", "Brand personalizzato", "Notifiche ordini", "Supporto prioritario"],
+                  excluded: []
                 },
-                {
-                  title: "Premium",
-                  desc: "Per chi vuole il massimo (multi-sede, eventi, ecc.).",
-                  items: ["Multi-sede", "Eventi", "Strumenti avanzati"],
+                { 
+                  title: "Business", 
+                  desc: "Per le catene", 
+                  price: "€79",
+                  items: ["Tutto del piano Pro", "Multi-sede", "API & integrazioni", "Account manager dedicato", "SLA garantito"],
+                  excluded: []
                 },
-              ].map((p) => (
-                <div
-                  key={p.title}
-                  className="rounded-2xl border border-border/60 bg-background/50 backdrop-blur p-6"
+              ].map((plan, i) => (
+                <motion.div
+                  key={plan.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className={`rounded-2xl p-8 flex flex-col relative ${plan.popular ? 'bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/30' : 'bg-background/50 backdrop-blur border border-border/60'}`}
                 >
-                  <div className="text-lg font-semibold">{p.title}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">{p.desc}</div>
-                  <div className="mt-4 space-y-2">
-                    {p.items.map((x) => (
-                      <div key={x} className="flex items-center gap-2 text-sm">
-                        <span className="h-5 w-5 rounded-full bg-red-600/10 flex items-center justify-center">
-                          <span className="h-2 w-2 rounded-full bg-red-600" />
-                        </span>
-                        <span>{x}</span>
-                      </div>
+                  {plan.popular && (
+                    <div className="absolute top-4 right-4 px-3 py-1 bg-orange-500 rounded-full text-[10px] font-bold uppercase tracking-wider text-white">
+                      Più scelto
+                    </div>
+                  )}
+                  <h3 className="text-lg font-bold mb-1">{plan.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-6">{plan.desc}</p>
+                  <div className="mb-8">
+                    <span className="text-5xl font-extrabold">{plan.price}</span>
+                    <span className="text-muted-foreground text-sm">/mese</span>
+                  </div>
+                  <ul className="space-y-3 mb-8 flex-1">
+                    {plan.items.map((item) => (
+                      <li key={item} className="flex items-center gap-3 text-sm text-foreground">
+                        <Check className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                    {plan.excluded.map((item) => (
+                      <li key={item} className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <X className="w-4 h-4 text-muted-foreground/50 flex-shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button 
+                    asChild 
+                    className={plan.popular 
+                      ? "block text-center py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all hover:shadow-lg hover:shadow-orange-500/25" 
+                      : "block text-center py-3.5 rounded-xl border border-border hover:border-border/20 text-foreground font-semibold text-sm transition-all hover:bg-muted/5"
+                    }
+                  >
+                    <Link to={createPageUrl("Register")}>
+                      {plan.popular ? "Prova 14 giorni gratis" : "Inizia gratis"}
+                    </Link>
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section id="testimonials" className="py-24 sm:py-32 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-orange-500/10 border border-orange-500/20 text-orange-500 mb-6">
+                  <Heart className="w-3 h-3" /> Recensioni vere
+                </span>
+              </motion.div>
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }} 
+                whileInView={{ opacity: 1, y: 0 }} 
+                viewport={{ once: true }} 
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="text-4xl sm:text-5xl font-extrabold tracking-tight"
+              >
+                Cosa dicono i <span className="text-orange-500">nostri clienti</span>
+              </motion.h2>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { 
+                  name: "Marco Rossi", 
+                  place: "Pizzeria Da Marco, Roma",
+                  text: "Finalmente ho tolto il caos dal WhatsApp. I clienti sono felici, io sono sereno. Il menu digitale è bellissimo e i clienti lo adorano."
+                },
+                { 
+                  name: "Giulia Bianchi", 
+                  place: "Sushi Zen, Milano",
+                  text: "Ho provato Deliveroo, JustEat... troppe commissioni. Con OrdinaFacile guadagno il doppio sullo stesso ordine. Non torno indietro."
+                },
+                { 
+                  name: "Antonio Verde", 
+                  place: "Burger House, Napoli",
+                  text: "In 5 minuti avevo già il mio menu online. La dashboard mi dice quali piatti vendono di più. Una vera manna dal cielo."
+                },
+              ].map((review, i) => (
+                <motion.div
+                  key={review.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className="rounded-2xl p-8 bg-gradient-to-br from-background/80 to-background/40 backdrop-blur border border-border/5 hover:border-orange-500/20 transition-all duration-400 hover:scale-[1.02]"
+                >
+                  <div className="flex gap-1 mb-4">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star key={star} className="w-4 h-4 fill-orange-500 text-orange-500" />
                     ))}
                   </div>
-                </div>
+                  <p className="text-foreground text-sm leading-relaxed mb-6">"{review.text}"</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 flex items-center justify-center">
+                      <Store className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{review.name}</p>
+                      <p className="text-xs text-muted-foreground">{review.place}</p>
+                    </div>
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="faq" className="border-t border-border/60">
-          <div className="max-w-6xl mx-auto px-4 py-14 md:py-16">
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
+        {/* CTA */}
+        <section className="py-24 sm:py-32 px-6">
+          <div className="max-w-4xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative rounded-3xl overflow-hidden"
             >
-              <h2 className="text-3xl md:text-4xl font-bold">FAQ</h2>
-              <p className="mt-3 text-muted-foreground max-w-2xl">
-                Risposte rapide alle domande più comuni.
-              </p>
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-600 via-orange-700 to-orange-900"></div>
+              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }}></div>
+              <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-white/10 blur-3xl"></div>
+              <div className="absolute -bottom-20 -left-20 w-60 h-60 rounded-full bg-black/20 blur-3xl"></div>
+              
+              <div className="relative px-8 sm:px-16 py-16 sm:py-20 text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 rounded-full text-xs font-semibold text-white/80 uppercase tracking-wide mb-8 backdrop-blur-sm">
+                  <Rocket className="w-3 h-3" /> Inizia oggi
+                </div>
+                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight mb-6 text-white leading-tight">
+                  Pronto a dire addio<br />al caos degli ordini?
+                </h2>
+                <p className="text-white/70 text-lg max-w-xl mx-auto mb-10 font-light">
+                  Crea il tuo menu digitale in 5 minuti. Gratis, senza carta di credito, senza impegno.
+                </p>
+                <Button asChild className="px-8 py-4 bg-white text-orange-700 font-bold rounded-xl text-sm hover:bg-white/90 transition-all hover:shadow-2xl hover:shadow-black/20 whitespace-nowrap">
+                  <Link to={createPageUrl("Register")}>
+                    Prova gratis →
+                  </Link>
+                </Button>
+                <p className="text-white/40 text-xs mt-6">Niente spam. Cancella quando vuoi.</p>
+              </div>
             </motion.div>
-
-            <div className="mt-8 grid md:grid-cols-2 gap-4">
-              {[
-                {
-                  q: "OrdinaFacile è adatto anche a locali piccoli?",
-                  a: "Sì. L'idea è partire semplice e scalare quando serve, senza complicazioni.",
-                },
-                {
-                  q: "Chi incassa gli ordini?",
-                  a: "Gli incassi degli ordini sono del ristorante. La piattaforma è un servizio SaaS per la gestione.",
-                },
-                {
-                  q: "Posso gestire consegna e asporto?",
-                  a: "Sì, puoi configurare modalità di consegna/asporto e gestire i dettagli dell'ordine.",
-                },
-                {
-                  q: "C'è una sezione legale (Privacy/Cookies/Termini)?",
-                  a: "Sì, trovi tutto nel footer e nelle pagine dedicate.",
-                },
-              ].map((f) => (
-                <details
-                  key={f.q}
-                  className="rounded-2xl border border-border/60 bg-background/50 backdrop-blur p-5"
-                >
-                  <summary className="cursor-pointer font-medium">{f.q}</summary>
-                  <div className="mt-2 text-sm text-muted-foreground">{f.a}</div>
-                </details>
-              ))}
-            </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-border/60">
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <div className="font-semibold">OrdinaFacile</div>
-              <div className="text-sm text-muted-foreground">Piattaforma SaaS per ristoranti</div>
-              <div className="text-xs text-muted-foreground mt-2">© {new Date().getFullYear()} OrdinaFacile</div>
+      {/* Footer */}
+      <footer className="border-t border-border/5 py-16 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+            <div className="sm:col-span-2 lg:col-span-1">
+              <Link to="/" className="flex items-center gap-2.5 mb-4">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center">
+                  <Store className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-lg font-bold tracking-tight">Ordina<span className="text-orange-400">Facile</span></span>
+              </Link>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
+                Il sistema di ordinazione digitale più semplice d'Italia. Per ristoranti, pizzerie, sushi bar e molto altro.
+              </p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-              <Link to={createPageUrl("Terms")} className="text-muted-foreground hover:text-foreground">
-                Termini
-              </Link>
-              <Link to={createPageUrl("Privacy")} className="text-muted-foreground hover:text-foreground">
-                Privacy (Ristoratori)
-              </Link>
-              <Link to={createPageUrl("Cookies")} className="text-muted-foreground hover:text-foreground">
-                Cookie Policy
-              </Link>
-              <Link to={createPageUrl("PrivacyClienti")} className="text-muted-foreground hover:text-foreground">
-                Privacy (Clienti)
-              </Link>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-4">Prodotto</h4>
+              <ul className="space-y-3">
+                <li><button type="button" onClick={() => scrollToId("how")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Come funziona</button></li>
+                <li><button type="button" onClick={() => scrollToId("plans")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Prezzi</button></li>
+                <li><Link to={createPageUrl("Login")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Accedi</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-4">Supporto</h4>
+              <ul className="space-y-3">
+                <li><Link to={createPageUrl("Login")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contattaci</Link></li>
+                <li><button type="button" onClick={() => scrollToId("testimonials")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Recensioni</button></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-4">Legale</h4>
+              <ul className="space-y-3">
+                <li><Link to={createPageUrl("Privacy")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link></li>
+                <li><Link to={createPageUrl("Terms")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Termini di servizio</Link></li>
+                <li><Link to={createPageUrl("Cookies")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</Link></li>
+                <li><Link to={createPageUrl("PrivacyClienti")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Clienti</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-border/5">
+            <p className="text-muted-foreground text-xs">© {new Date().getFullYear()} OrdinaFacile. Tutti i diritti riservati.</p>
+            <div className="flex items-center gap-4">
+              <a href="#" className="w-9 h-9 rounded-lg border border-border/5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border/20 transition-all">
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a href="#" className="w-9 h-9 rounded-lg border border-border/5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border/20 transition-all">
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a href="#" className="w-9 h-9 rounded-lg border border-border/5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border/20 transition-all">
+                <Linkedin className="w-4 h-4" />
+              </a>
+              <a href="#" className="w-9 h-9 rounded-lg border border-border/5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border/20 transition-all">
+                <Youtube className="w-4 h-4" />
+              </a>
             </div>
           </div>
         </div>
       </footer>
+
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes shimmer {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 100% 50%; }
+        }
+        .food-img-wrapper {
+          position: relative;
+          overflow: hidden;
+          border-radius: 1rem;
+        }
+      `}</style>
     </div>
   );
 }
