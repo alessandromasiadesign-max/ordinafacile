@@ -215,7 +215,7 @@ export default function Cookies() {
                 Per domande o richieste relative all'uso dei cookies:
               </p>
               <ul className="list-none space-y-1 text-red-800 ml-4 mt-2">
-                <li>Email: privacy@ordinafacile.it</li>
+                <li>Email: privacy@ordinafacile.food</li>
                 <li>Tel: +39 XXX XXX XXXX</li>
               </ul>
             </section>

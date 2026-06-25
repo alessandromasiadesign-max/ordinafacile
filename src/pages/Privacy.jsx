@@ -39,8 +39,8 @@ export default function Privacy() {
                 [Indirizzo], P.IVA: [P.IVA]
               </p>
               <p className="text-muted-foreground mt-2">
-                Email: privacy@ordinafacile.it<br />
-                PEC: ordinafacile@pec.it
+                Email: privacy@ordinafacile.food<br />
+                PEC: ordinafacile@pec.food
               </p>
             </section>
 
@@ -157,7 +157,7 @@ export default function Privacy() {
                 <li><strong>Revoca consenso:</strong> revocare il consenso in qualsiasi momento</li>
               </ul>
               <p className="text-muted-foreground mt-3">
-                Per esercitare i tuoi diritti, invia una richiesta a: privacy@ordinafacile.it
+                Per esercitare i tuoi diritti, invia una richiesta a: privacy@ordinafacile.food
               </p>
             </section>
 
@@ -211,8 +211,8 @@ export default function Privacy() {
                 Per qualsiasi domanda o richiesta relativa al trattamento dei tuoi dati personali:
               </p>
               <ul className="list-none space-y-1 text-red-800 ml-4 mt-2">
-                <li>Email: privacy@ordinafacile.it</li>
-                <li>PEC: ordinafacile@pec.it</li>
+                <li>Email: privacy@ordinafacile.food</li>
+                <li>PEC: ordinafacile@pec.food</li>
                 <li>Tel: +39 XXX XXX XXXX</li>
               </ul>
             </section>

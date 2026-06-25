@@ -64,7 +64,7 @@ export default function TechnicalSupportDialog({ open, onClose, restaurant }) {
       // Invia email all'admin
       try {
         const settings = await PlatformSettings.list();
-        const emailAssistenza = settings[0]?.email_assistenza || "supporto@ordinafacile.it";
+        const emailAssistenza = settings[0]?.email_assistenza || "supporto@ordinafacile.food";
         
         await Core.SendEmail({
           to: emailAssistenza,

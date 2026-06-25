@@ -534,7 +534,7 @@ export default function Landing() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="text-muted-foreground text-lg font-light leading-relaxed"
               >
-                Niente corsi, niente tecnici. Se sai usare WhatsApp, sai usare OrdinaFacile.
+                Niente corsi, niente tecnici. Se sai usare WhatsApp, sai usare OrdinaFacile.food.
               </motion.p>
             </div>
             
@@ -590,7 +590,7 @@ export default function Landing() {
               <div className="space-y-8">
                 <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
                   <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-orange-500/10 border border-orange-500/20 text-orange-500">
-                    <Shield className="w-3 h-3" /> Perché OrdinaFacile
+                    <Shield className="w-3 h-3" /> Perché OrdinaFacile.food
                   </span>
                 </motion.div>
                 <motion.h2 
@@ -791,7 +791,7 @@ export default function Landing() {
                 { 
                   name: "Giulia", 
                   place: "Sushi Zen, Milano",
-                  text: "Ho provato Deliveroo, JustEat... troppe commissioni. Con OrdinaFacile guadagno il doppio sullo stesso ordine. Non torno indietro."
+                  text: "Ho provato Deliveroo, JustEat... troppe commissioni. Con OrdinaFacile.food guadagno il doppio sullo stesso ordine. Non torno indietro."
                 },
                 { 
                   name: "Antonio", 
@@ -906,7 +906,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-border/5">
-            <p className="text-muted-foreground text-xs">© {new Date().getFullYear()} OrdinaFacile. Tutti i diritti riservati.</p>
+            <p className="text-muted-foreground text-xs">© {new Date().getFullYear()} OrdinaFacile.food. Tutti i diritti riservati.</p>
             <div className="flex items-center gap-4">
               <a href="#" className="w-9 h-9 rounded-lg border border-border/5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border/20 transition-all">
                 <Instagram className="w-4 h-4" />

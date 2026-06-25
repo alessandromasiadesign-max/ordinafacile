@@ -1,6 +1,6 @@
 {
-  "name": "OrdinaFacile",
-  "short_name": "OrdinaFacile",
+  "name": "OrdinaFacile.food",
+  "short_name": "OrdinaFacile.food",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b1220",

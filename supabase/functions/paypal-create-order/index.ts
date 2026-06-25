@@ -252,7 +252,7 @@ Deno.serve(async (req) => {
         },
       ],
       application_context: {
-        brand_name: 'OrdinaFacile',
+        brand_name: 'OrdinaFacile.food',
         landing_page: 'LOGIN',
         user_action: 'PAY_NOW',
       },

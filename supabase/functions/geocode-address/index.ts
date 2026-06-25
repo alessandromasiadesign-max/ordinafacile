@@ -90,7 +90,7 @@ async function nominatimSearch(params: Record<string, string>) {
   const res = await fetch(url, {
     headers: {
       // Nominatim policy requires a valid User-Agent identifying the application.
-      'User-Agent': 'OrdinaFacile/1.0 (geocode-address)',
+      'User-Agent': 'OrdinaFacile.food/1.0 (geocode-address)',
       'Accept': 'application/json',
     },
   });

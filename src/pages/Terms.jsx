@@ -27,7 +27,7 @@ export default function Terms() {
             <section>
               <h2 className="text-2xl font-bold mb-3">1. Accettazione dei Termini</h2>
               <p className="text-muted-foreground">
-                Utilizzando la piattaforma OrdinaFacile, accetti integralmente i presenti Termini e Condizioni.
+                Utilizzando la piattaforma OrdinaFacile.food, accetti integralmente i presenti Termini e Condizioni.
                 Se non accetti questi termini, ti preghiamo di non utilizzare i nostri servizi.
               </p>
 
@@ -36,7 +36,7 @@ export default function Terms() {
             <section>
               <h2 className="text-2xl font-bold mb-3">2. Descrizione del Servizio</h2>
               <p className="text-muted-foreground mb-2">
-                OrdinaFacile è una piattaforma che permette ai ristoratori di:
+                OrdinaFacile.food è una piattaforma che permette ai ristoratori di:
               </p>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
                 <li>Gestire menu digitali e ordini online</li>
@@ -81,7 +81,7 @@ export default function Terms() {
               <h2 className="text-2xl font-bold mb-3">5. Proprietà Intellettuale</h2>
               <p className="text-muted-foreground">
                 Tutti i contenuti della piattaforma, inclusi design, loghi, codice e documentazione,
-                sono proprietà di OrdinaFacile e protetti da copyright. È vietata qualsiasi
+                sono proprietà di OrdinaFacile.food e protetti da copyright. È vietata qualsiasi
                 riproduzione senza autorizzazione scritta.
               </p>
 
@@ -90,7 +90,7 @@ export default function Terms() {
             <section>
               <h2 className="text-2xl font-bold mb-3">6. Limitazione di Responsabilità</h2>
               <p className="text-muted-foreground">
-                OrdinaFacile fornisce la piattaforma "così com'è" e non garantisce l'assenza di
+                OrdinaFacile.food fornisce la piattaforma "così com'è" e non garantisce l'assenza di
                 interruzioni o errori. Non siamo responsabili per danni indiretti, perdite di profitto
                 o danni conseguenti all'utilizzo del servizio.
               </p>
@@ -136,7 +136,7 @@ export default function Terms() {
                 Per qualsiasi domanda riguardo questi Termini, puoi contattarci a:
               </p>
               <ul className="list-none space-y-1 text-muted-foreground ml-4 mt-2">
-                <li>📧 Email: supporto@ordinafacile.it</li>
+                <li>📧 Email: supporto@ordinafacile.food</li>
                 <li>📞 Telefono: +39 XXX XXX XXXX</li>
                 <li>📍 Indirizzo: Via Example, 123 - 00100 Roma (RM)</li>
               </ul>

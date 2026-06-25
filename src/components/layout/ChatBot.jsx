@@ -28,7 +28,7 @@ export default function ChatBot({ restaurant }) {
     if (!t) return false;
 
     const platformKeywords = [
-      'ordinafacile',
+      'ordinafacilefood',
       'dashboard',
       'ordini',
       'ordine',
@@ -222,7 +222,7 @@ export default function ChatBot({ restaurant }) {
             if (!convCountError && (convUserCount ?? 0) <= 1) {
               const restaurantName = String(restaurant?.nome ?? '').trim();
               const onboardingPrompt = [
-                "Sei Chef Virtuale, assistente per ristoratori che usano OrdinaFacile.",
+                "Sei Chef Virtuale, assistente per ristoratori che usano OrdinaFacile.food.",
                 "L'utente ha scritto un saluto generico.",
                 "Rispondi con un benvenuto breve e poi fai 1 domanda per capire cosa serve.",
                 "Proponi 5 opzioni numerate, tutte relative alla piattaforma: (1) Menu (2) Ordini (3) Promozioni (4) Impostazioni (5) Stampa.",
@@ -242,7 +242,7 @@ export default function ChatBot({ restaurant }) {
               const onboardingMsg =
                 (typeof llmResponse === 'string' && llmResponse.trim() && !looksLikeError)
                   ? llmResponse
-                  : "Ciao! Posso aiutarti su OrdinaFacile. Su cosa ti serve una mano? (Menu, Ordini, Promozioni, Impostazioni, Stampa)";
+                  : "Ciao! Posso aiutarti su OrdinaFacile.food. Su cosa ti serve una mano? (Menu, Ordini, Promozioni, Impostazioni, Stampa)";
 
               await ChatMessage.create({
                 user_id: user.id,
@@ -258,7 +258,7 @@ export default function ChatBot({ restaurant }) {
           }
         }
 
-        const msg = "Io posso aiutarti solo con domande sulla piattaforma OrdinaFacile (menu, ordini, promozioni, impostazioni, stampa, abbonamenti, ecc.).\n\nDimmi in che sezione sei e cosa stai cercando di fare.";
+        const msg = "Io posso aiutarti solo con domande sulla piattaforma OrdinaFacile.food (menu, ordini, promozioni, impostazioni, stampa, abbonamenti, ecc.).\n\nDimmi in che sezione sei e cosa stai cercando di fare.";
         await ChatMessage.create({
           user_id: user.id,
           restaurant_id: restaurant?.id,
@@ -338,7 +338,7 @@ export default function ChatBot({ restaurant }) {
       const restaurantCity = String(restaurant?.citta ?? '').trim();
 
       const shortPrompt = [
-        "Sei Chef Virtuale, assistente per ristoratori che usano OrdinaFacile.",
+        "Sei Chef Virtuale, assistente per ristoratori che usano OrdinaFacile.food.",
         "Parla in italiano, tono pratico e amichevole.",
         "Dai istruzioni passo-passo e indica sempre la sezione dell'app (Dashboard, Ordini, Storico, Menu, Sedi, Eventi, Promozioni, Impostazioni, Stampa, Abbonamenti).",
         "Se mancano informazioni, fai 1-2 domande mirate prima di suggerire soluzioni.",
@@ -480,7 +480,7 @@ export default function ChatBot({ restaurant }) {
                     <div className="text-4xl md:text-5xl mb-3 md:mb-4">AI</div>
                     <p className="text-sm md:text-base text-muted-foreground mb-2">Ciao! Sono lo Chef Virtuale!</p>
                     <p className="text-xs md:text-sm text-muted-foreground">
-                      Chiedimi qualsiasi cosa su come usare OrdinaFacile!
+                      Chiedimi qualsiasi cosa su come usare OrdinaFacile.food!
                     </p>
                   </div>
                 )}

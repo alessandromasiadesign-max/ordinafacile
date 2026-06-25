@@ -34,10 +34,10 @@ export default function PrivacyClienti() {
               <h2 className="text-2xl font-bold mb-3">1. Chi è il Titolare del Trattamento</h2>
               <p className="text-muted-foreground">
                 Quando effettui un ordine, il Titolare del trattamento dei tuoi dati personali è il ristorante presso cui stai
-                ordinando (di seguito, "Ristorante"). Il Ristorante utilizza la piattaforma OrdinaFacile per gestire gli ordini.
+                ordinando (di seguito, "Ristorante"). Il Ristorante utilizza la piattaforma OrdinaFacile.food per gestire gli ordini.
               </p>
               <p className="text-muted-foreground mt-2">
-                OrdinaFacile ("Piattaforma") tratta i dati per conto del Ristorante, come fornitore tecnico.
+                OrdinaFacile.food ("Piattaforma") tratta i dati per conto del Ristorante, come fornitore tecnico.
               </p>
             </section>
 
