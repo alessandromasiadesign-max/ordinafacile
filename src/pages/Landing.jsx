@@ -442,28 +442,6 @@ export default function Landing() {
                 </Button>
               </motion.div>
               
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="flex items-center gap-4 pt-2"
-              >
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-9 h-9 rounded-full border-2 border-background bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 flex items-center justify-center">
-                      <Store className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-orange-400 text-orange-400" />
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">+2.400 ristoratori soddisfatti</p>
-                </div>
-              </motion.div>
             </div>
 
             <motion.div 
