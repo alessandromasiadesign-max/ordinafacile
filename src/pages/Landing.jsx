@@ -6,17 +6,14 @@ import {
   Shield,
   Store,
   Smartphone,
-  Star,
   Zap,
   UtensilsCrossed,
   ArrowRight,
-  Sparkles,
   PlayCircle,
   Menu as MenuIcon,
   X,
   Check,
   Tag,
-  Heart,
   Rocket,
   Instagram,
   Facebook,
@@ -432,7 +429,7 @@ export default function Landing() {
               >
                 <Button asChild className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-2xl transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/30 hover:-translate-y-1 text-base relative">
                   <Link to={createPageUrl("Register")}>
-                    Prova gratis <Sparkles className="w-5 h-5" />
+                    Inizia ora <ArrowRight className="w-5 h-5" />
                   </Link>
                 </Button>
                 <Button 
@@ -754,73 +751,6 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Testimonials */}
-        <section id="testimonials" className="py-24 sm:py-32 px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-orange-500/10 border border-orange-500/20 text-orange-500 mb-6">
-                  <Heart className="w-3 h-3" /> Recensioni vere
-                </span>
-              </motion.div>
-              <motion.h2 
-                initial={{ opacity: 0, y: 20 }} 
-                whileInView={{ opacity: 1, y: 0 }} 
-                viewport={{ once: true }} 
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="text-4xl sm:text-5xl font-extrabold tracking-tight"
-              >
-                Cosa dicono i <span className="text-orange-500">nostri clienti</span>
-              </motion.h2>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              {[
-                { 
-                  name: "Marco", 
-                  place: "Pizzeria Da Marco, Torino",
-                  text: "Finalmente ho tolto il caos dal WhatsApp. I clienti sono felici, io sono sereno. Il menu digitale è bellissimo e i clienti lo adorano."
-                },
-                { 
-                  name: "Giulia", 
-                  place: "Sushi Zen, Cuneo",
-                  text: "Ho provato Deliveroo, JustEat... troppe commissioni. Con OrdinaFacile.food guadagno il doppio sullo stesso ordine. Non torno indietro."
-                },
-                { 
-                  name: "Antonio", 
-                  place: "Burger House, Alessandria",
-                  text: "In 5 minuti avevo già il mio menu online. La dashboard mi dice quali piatti vendono di più. Una vera manna dal cielo."
-                },
-              ].map((review, i) => (
-                <motion.div
-                  key={review.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className="rounded-2xl p-8 bg-gradient-to-br from-background/80 to-background/40 backdrop-blur border border-border/5 hover:border-orange-500/20 transition-all duration-400 hover:scale-[1.02]"
-                >
-                  <div className="flex gap-1 mb-4">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star key={star} className="w-4 h-4 fill-orange-500 text-orange-500" />
-                    ))}
-                  </div>
-                  <p className="text-foreground text-sm leading-relaxed mb-6">"{review.text}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 flex items-center justify-center">
-                      <Store className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">{review.name}</p>
-                      <p className="text-xs text-muted-foreground">{review.place}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* CTA */}
         <section className="py-24 sm:py-32 px-6">
           <div className="max-w-4xl mx-auto">
@@ -844,14 +774,13 @@ export default function Landing() {
                   Pronto a dire addio<br />al caos degli ordini?
                 </h2>
                 <p className="text-white/70 text-lg max-w-xl mx-auto mb-10 font-light">
-                  Crea il tuo menu digitale in 5 minuti. Gratis, senza carta di credito, senza impegno.
+                  Crea il tuo menu digitale in 5 minuti. Inizia oggi stesso.
                 </p>
                 <Button asChild className="px-8 py-4 bg-white text-orange-700 font-bold rounded-xl text-sm hover:bg-white/90 transition-all hover:shadow-2xl hover:shadow-black/20 whitespace-nowrap">
                   <Link to={createPageUrl("Register")}>
-                    Prova gratis →
+                    Inizia ora →
                   </Link>
                 </Button>
-                <p className="text-white/40 text-xs mt-6">Niente spam. Cancella quando vuoi.</p>
               </div>
             </motion.div>
           </div>
