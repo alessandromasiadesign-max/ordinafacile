@@ -534,7 +534,7 @@ export default function Landing() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="text-muted-foreground text-lg font-light leading-relaxed"
               >
-                Niente corsi, niente tecnici. Se sai usare WhatsApp, sai usare OrdinaFacile.food.
+                Niente corsi, niente tecnici. Creare il tuo menu digitale è semplicissimo.
               </motion.p>
             </div>
             
