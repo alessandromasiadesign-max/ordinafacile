@@ -778,17 +778,17 @@ export default function Landing() {
               {[
                 { 
                   name: "Marco", 
-                  place: "Pizzeria Da Marco, Roma",
+                  place: "Pizzeria Da Marco, Torino",
                   text: "Finalmente ho tolto il caos dal WhatsApp. I clienti sono felici, io sono sereno. Il menu digitale è bellissimo e i clienti lo adorano."
                 },
                 { 
                   name: "Giulia", 
-                  place: "Sushi Zen, Milano",
+                  place: "Sushi Zen, Cuneo",
                   text: "Ho provato Deliveroo, JustEat... troppe commissioni. Con OrdinaFacile.food guadagno il doppio sullo stesso ordine. Non torno indietro."
                 },
                 { 
                   name: "Antonio", 
-                  place: "Burger House, Napoli",
+                  place: "Burger House, Alessandria",
                   text: "In 5 minuti avevo già il mio menu online. La dashboard mi dice quali piatti vendono di più. Una vera manna dal cielo."
                 },
               ].map((review, i) => (
