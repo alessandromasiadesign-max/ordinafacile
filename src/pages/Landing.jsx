@@ -574,17 +574,10 @@ export default function Landing() {
                 whileInView={{ opacity: 1, x: 0 }} 
                 viewport={{ once: true }} 
                 transition={{ duration: 0.6 }}
-                className="grid grid-cols-2 gap-4"
+                className="relative"
+                style={{ perspective: '1000px' }}
               >
-                <div className="food-img-wrapper col-span-2 h-64 rounded-2xl overflow-hidden bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 flex items-center justify-center">
-                  <Store className="w-16 h-16 text-orange-600 dark:text-orange-400" />
-                </div>
-                <div className="food-img-wrapper h-48 rounded-2xl overflow-hidden bg-gradient-to-br from-rose-100 to-rose-200 dark:from-rose-900/30 dark:to-rose-800/30 flex items-center justify-center">
-                  <UtensilsCrossed className="w-12 h-12 text-rose-600 dark:text-rose-400" />
-                </div>
-                <div className="food-img-wrapper h-48 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30 flex items-center justify-center">
-                  <Zap className="w-12 h-12 text-amber-600 dark:text-amber-400" />
-                </div>
+                <PhoneMockup />
               </motion.div>
               
               <div className="space-y-8">
