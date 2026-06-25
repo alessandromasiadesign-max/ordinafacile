@@ -630,10 +630,10 @@ export default function Landing() {
         <section className="py-20 px-6 border-y border-border/5">
           <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { target: 2400, suffix: "", label: "Attività attive" },
-              { target: 150, suffix: "K", label: "Milioni di ordini" },
-              { target: 98, suffix: "%", label: "Soddisfatti" },
+              { target: 100, suffix: "+", label: "Ristoratori" },
               { target: 5, suffix: "", label: "Minuti per attivarsi" },
+              { target: 0, suffix: "%", label: "Commissioni" },
+              { target: 24, suffix: "/7", label: "Supporto" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
