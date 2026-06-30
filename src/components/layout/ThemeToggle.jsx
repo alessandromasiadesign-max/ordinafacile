@@ -1,6 +1,5 @@
 import React from "react";
 import { Moon, Sun } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTheme } from "@/lib/ThemeContext";
 
@@ -8,33 +7,30 @@ export default function ThemeToggle({ compact = false }) {
   const { theme, resolvedTheme, setTheme } = useTheme();
 
   if (compact) {
+    const toggle = () => {
+      setTheme(resolvedTheme === "dark" ? "light" : "dark");
+    };
+
     return (
-      <div
-        className="flex items-center gap-2 rounded-full border border-slate-200/80 bg-slate-100/80 backdrop-blur px-2 py-1 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/60"
-        aria-label="Interruttore tema"
-        title={resolvedTheme === "dark" ? "Tema scuro: attivo" : "Tema scuro: disattivo"}
+      <button
+        type="button"
+        onClick={toggle}
+        className="flex items-center gap-2 rounded-full border border-border/60 bg-background/80 backdrop-blur px-2.5 py-1.5 shadow-sm hover:bg-accent transition-colors"
+        aria-label={resolvedTheme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"}
+        title={resolvedTheme === "dark" ? "Tema scuro: attivo" : "Tema chiaro: attivo"}
       >
-        <Sun
-          className={`h-4 w-4 ${
-            resolvedTheme === "dark"
-              ? "text-slate-600 dark:text-slate-500"
-              : "text-slate-900 dark:text-slate-100"
-          }`}
-        />
-        <Switch
-          checked={resolvedTheme === "dark"}
-          onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-          aria-label="Tema scuro"
-          className="data-[state=unchecked]:bg-slate-300 data-[state=checked]:bg-slate-900 dark:data-[state=unchecked]:bg-slate-700 dark:data-[state=checked]:bg-amber-400 [&>span]:bg-background dark:[&>span]:bg-background"
-        />
-        <Moon
-          className={`h-4 w-4 ${
-            resolvedTheme === "dark"
-              ? "text-slate-900 dark:text-amber-300"
-              : "text-slate-600 dark:text-slate-500"
-          }`}
-        />
-      </div>
+        {resolvedTheme === "dark" ? (
+          <>
+            <Moon className="h-4 w-4 text-amber-300" />
+            <span className="text-xs font-medium text-foreground">Scuro</span>
+          </>
+        ) : (
+          <>
+            <Sun className="h-4 w-4 text-orange-500" />
+            <span className="text-xs font-medium text-foreground">Chiaro</span>
+          </>
+        )}
+      </button>
     );
   }
 
