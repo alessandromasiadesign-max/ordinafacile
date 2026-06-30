@@ -715,11 +715,11 @@ export default function Landing() {
                   <Button 
                     asChild 
                     className={plan.popular 
-                      ? "block text-center py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all hover:shadow-lg hover:shadow-orange-500/25" 
-                      : "block text-center py-3.5 rounded-xl border border-border hover:border-border/20 text-foreground font-semibold text-sm transition-all hover:bg-muted/5"
+                      ? "block w-full text-center py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all hover:shadow-lg hover:shadow-orange-500/25" 
+                      : "block w-full text-center py-3.5 rounded-xl border border-orange-500/40 bg-orange-500/5 hover:bg-orange-500/10 hover:border-orange-500/60 text-foreground font-semibold text-sm transition-all"
                     }
                   >
-                    <Link to={createPageUrl("Register")}>
+                    <Link to={createPageUrl("Register")} className="w-full flex items-center justify-center">
                       {plan.popular ? "Scegli Plus" : "Scegli " + plan.title}
                     </Link>
                   </Button>
