@@ -473,7 +473,18 @@ export default function Layout({ children }) {
                   <p className="text-xs text-red-600 font-semibold">Admin Master</p>
                 )}
               </div>
-              <ThemeToggle compact />
+              <div className="flex items-center gap-1.5">
+                <ThemeToggle compact />
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center justify-center w-8 h-8 rounded-full border border-border/60 bg-background/80 backdrop-blur text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors"
+                  aria-label="Esci dall'account"
+                  title="Esci"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <button
               onClick={handleLogout}
