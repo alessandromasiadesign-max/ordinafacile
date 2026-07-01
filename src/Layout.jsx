@@ -459,33 +459,33 @@ export default function Layout({ children }) {
 
           <SidebarFooter className="border-t border-border p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center border border-border">
+              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center border border-border flex-shrink-0">
                 <span className="text-muted-foreground font-medium text-sm">
                   {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || "U"}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">
+                <p className="font-medium text-sm truncate" title={user?.user_metadata?.full_name || user?.email || "Utente"}>
                   {user?.user_metadata?.full_name || user?.email || "Utente"}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                <p className="text-xs text-muted-foreground truncate" title={user?.email}>{user?.email}</p>
                 {isMasterAccount && (
                   <p className="text-xs text-red-600 font-semibold">Admin Master</p>
                 )}
               </div>
-              <div className="flex items-center gap-1.5">
-                <ThemeToggle compact />
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex items-center justify-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 hover:text-red-800 transition-colors"
-                  aria-label="Esci dall'account"
-                  title="Esci"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  Esci
-                </button>
-              </div>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <ThemeToggle compact />
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center justify-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 hover:text-red-800 transition-colors"
+                aria-label="Esci dall'account"
+                title="Esci"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Esci
+              </button>
             </div>
           </SidebarFooter>
         </Sidebar>
