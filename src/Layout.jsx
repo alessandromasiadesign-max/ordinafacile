@@ -478,21 +478,15 @@ export default function Layout({ children }) {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex items-center justify-center w-8 h-8 rounded-full border border-border/60 bg-background/80 backdrop-blur text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors"
+                  className="flex items-center justify-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 hover:text-red-800 transition-colors"
                   aria-label="Esci dall'account"
                   title="Esci"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
+                  Esci
                 </button>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-sm text-red-600 hover:text-red-800 w-full px-2 py-1"
-            >
-              <LogOut className="w-4 h-4" />
-              Esci
-            </button>
           </SidebarFooter>
         </Sidebar>
 
