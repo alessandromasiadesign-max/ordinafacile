@@ -108,6 +108,32 @@ export default function PaymentSettings({ paymentSettings = {}, onChange }) {
           )}
         </div>
 
+        {/* Bancomat / POS */}
+        <button
+          type="button"
+          className={`flex w-full items-center gap-3 rounded-lg border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+            paymentSettings.bancomat_enabled
+              ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/30'
+              : 'border-border hover:bg-accent/60'
+          }`}
+          onClick={() => togglePaymentMethod('bancomat')}
+        >
+          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+            paymentSettings.bancomat_enabled 
+              ? 'border-orange-500 bg-orange-500' 
+              : 'border-border'
+          }`}>
+            {paymentSettings.bancomat_enabled && <Check className="w-4 h-4 text-white" />}
+          </div>
+          <div className="flex-1">
+            <div className="font-semibold flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Bancomat / POS
+            </div>
+            <div className="text-sm text-muted-foreground">Pagamento con bancomat o carta al momento della consegna</div>
+          </div>
+        </button>
+
         {/* Contanti */}
         <button
           type="button"

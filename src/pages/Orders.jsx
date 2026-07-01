@@ -70,6 +70,7 @@ export default function Orders() {
   const [restaurant, setRestaurant] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("tutti");
+  const [deliveryTypeFilter, setDeliveryTypeFilter] = useState("tutti");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderToCancel, setOrderToCancel] = useState(null);
   const [viewMode, setViewMode] = useState(() => {
@@ -447,11 +448,13 @@ export default function Orders() {
     const matchesSearch = 
       String(order.numero_ordine ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       String(order.cliente_nome ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      String(order.cliente_telefono ?? '').includes(searchQuery);
+      String(order.cliente_telefono ?? '').includes(searchQuery) ||
+      String(order.table_name ?? '').toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus = statusFilter === "tutti" || order.stato === statusFilter;
+    const matchesDeliveryType = deliveryTypeFilter === "tutti" || order.tipo_consegna === deliveryTypeFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesDeliveryType;
   });
 
   const kanbanOrdersByColumn = React.useMemo(() => {
@@ -528,22 +531,37 @@ export default function Orders() {
                     />
                   </div>
                 </div>
-                <div className="w-full md:w-48">
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger data-tour="orders-filter" className="text-sm md:text-base">
-                      <SelectValue placeholder="Filtra per stato" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tutti">Tutti gli stati</SelectItem>
-                      <SelectItem value="nuovo">Nuovo</SelectItem>
-                      <SelectItem value="confermato">Confermato</SelectItem>
-                      <SelectItem value="in_preparazione">In Preparazione</SelectItem>
-                      <SelectItem value="pronto">Pronto</SelectItem>
-                      <SelectItem value="in_consegna">In Consegna</SelectItem>
-                      <SelectItem value="completato">Completato</SelectItem>
-                      <SelectItem value="annullato">Annullato</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                  <div className="w-full md:w-48">
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger data-tour="orders-filter" className="text-sm md:text-base">
+                        <SelectValue placeholder="Filtra per stato" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tutti">Tutti gli stati</SelectItem>
+                        <SelectItem value="nuovo">Nuovo</SelectItem>
+                        <SelectItem value="confermato">Confermato</SelectItem>
+                        <SelectItem value="in_preparazione">In Preparazione</SelectItem>
+                        <SelectItem value="pronto">Pronto</SelectItem>
+                        <SelectItem value="in_consegna">In Consegna</SelectItem>
+                        <SelectItem value="completato">Completato</SelectItem>
+                        <SelectItem value="annullato">Annullato</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="w-full md:w-48">
+                    <Select value={deliveryTypeFilter} onValueChange={setDeliveryTypeFilter}>
+                      <SelectTrigger data-tour="orders-delivery-filter" className="text-sm md:text-base">
+                        <SelectValue placeholder="Filtra per tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tutti">Tutti i tipi</SelectItem>
+                        <SelectItem value="asporto">Asporto</SelectItem>
+                        <SelectItem value="consegna">Consegna</SelectItem>
+                        <SelectItem value="tavolo">Servizio al Tavolo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </CardContent>

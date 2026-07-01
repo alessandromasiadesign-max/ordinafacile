@@ -91,11 +91,13 @@ export default function RestaurantPublic() {
   const restaurantId = params?.restaurantId ?? urlParams.get('id');
   const eventId = urlParams.get('event'); // Added eventId
   const tableId = urlParams.get('table');
+  const [tableEventId, setTableEventId] = useState(null);
+  const effectiveEventId = useMemo(() => eventId || tableEventId || null, [eventId, tableEventId]);
 
   const favoritesStorageKey = useMemo(() => {
     if (!restaurantId) return null;
-    return `favorites_${restaurantId}_${eventId || "std"}_${tableId || "notable"}`;
-  }, [restaurantId, eventId, tableId]);
+    return `favorites_${restaurantId}_${effectiveEventId || "std"}_${tableId || "notable"}`;
+  }, [restaurantId, effectiveEventId, tableId]);
   
   const [restaurant, setRestaurant] = useState(null);
   const [event, setEvent] = useState(null); // Added event state
@@ -249,10 +251,10 @@ export default function RestaurantPublic() {
   }, [isSearchFocused]);
 
   const { data: categories = [] } = useQuery({
-    queryKey: ['categories', restaurantId, eventId], // Added eventId to queryKey
+    queryKey: ['categories', restaurantId, effectiveEventId], // Added eventId to queryKey
     queryFn: async () => {
       const rows = await Category.filter(
-        { restaurant_id: restaurantId, is_active: true, event_id: eventId || null },
+        { restaurant_id: restaurantId, is_active: true, event_id: effectiveEventId || null },
         "sort_order"
       );
 
@@ -270,7 +272,7 @@ export default function RestaurantPublic() {
   });
 
   const { data: menuItems = [] } = useQuery({
-    queryKey: ['menuItems', restaurantId, eventId], // Added eventId to queryKey
+    queryKey: ['menuItems', restaurantId, effectiveEventId], // Added eventId to queryKey
     queryFn: async () => {
       const rows = await MenuItem.filter(
         { restaurant_id: restaurantId, is_available: true }
@@ -306,7 +308,7 @@ export default function RestaurantPublic() {
     } else {
       setLoading(false);
     }
-  }, [restaurantId, eventId]); // Added eventId to dependencies
+  }, [restaurantId, eventId, tableId]); // Added eventId to dependencies
 
   const loadRestaurant = async () => {
     setLoading(true);
@@ -334,6 +336,7 @@ export default function RestaurantPublic() {
         const tables = await Table.filter({ id: tableId, restaurant_id: restaurantId });
         if (tables.length > 0) {
           setTable(tables[0]);
+          setTableEventId(tables[0]?.event_id || null);
         }
       }
     } catch (error) {
@@ -714,6 +717,14 @@ export default function RestaurantPublic() {
         <div className="max-w-6xl mx-auto px-4 mt-4">
           <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-900 dark:text-amber-100">
             Il tavolo <strong>{table.name}</strong> è temporaneamente disattivato. Contatta il personale per ordinare.
+          </div>
+        </div>
+      )}
+
+      {tableId && table && table.all_you_can_eat === true && !loading && (
+        <div className="max-w-6xl mx-auto px-4 mt-4">
+          <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-900 dark:text-amber-100">
+            🍣 <strong>All you can eat</strong> — Ordina senza pagare online. Pagherai alla cassa a fine servizio.
           </div>
         </div>
       )}
@@ -1537,7 +1548,8 @@ export default function RestaurantPublic() {
           if (cartStorageKey) localStorage.removeItem(cartStorageKey);
         }}
         table={table || (tableId ? { id: tableId, name: null, is_active: true } : null)}
-        eventId={eventId}
+        eventId={effectiveEventId}
+        allYouCanEat={table?.all_you_can_eat === true}
         startInCheckout={cartOpenMode === "checkout"}
       />
     </div>

@@ -1,4 +1,4 @@
-import { Restaurant, Table } from '@/api/entities';
+import { Restaurant, Table, Event } from '@/api/entities';
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from '@/api/supabaseClient';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +16,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +42,8 @@ import {
   Printer,
   ExternalLink,
   Table as TableIcon,
+  Utensils,
+  Check,
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -46,7 +55,7 @@ export default function Tables() {
   const [qrTable, setQrTable] = useState(null);
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [isGeneratingQr, setIsGeneratingQr] = useState(false);
-  const [formData, setFormData] = useState({ name: "", description: "", is_active: true });
+  const [formData, setFormData] = useState({ name: "", description: "", is_active: true, event_id: "", all_you_can_eat: false });
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const printRef = useRef(null);
@@ -56,6 +65,16 @@ export default function Tables() {
     queryFn: async () => {
       if (!restaurant) return [];
       return Table.filter({ restaurant_id: restaurant.id }, 'name');
+    },
+    enabled: !!restaurant,
+    initialData: [],
+  });
+
+  const { data: events = [] } = useQuery({
+    queryKey: ['events', restaurant?.id],
+    queryFn: async () => {
+      if (!restaurant) return [];
+      return Event.filter({ restaurant_id: restaurant.id }, '-created_at');
     },
     enabled: !!restaurant,
     initialData: [],
@@ -119,7 +138,7 @@ export default function Tables() {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", description: "", is_active: true });
+    setFormData({ name: "", description: "", is_active: true, event_id: "", all_you_can_eat: false });
     setEditingTable(null);
   };
 
@@ -134,6 +153,8 @@ export default function Tables() {
       name: table.name || "",
       description: table.description || "",
       is_active: table.is_active !== false,
+      event_id: table.event_id || "",
+      all_you_can_eat: table.all_you_can_eat === true,
     });
     setShowDialog(true);
   };
@@ -146,6 +167,8 @@ export default function Tables() {
       name: formData.name.trim(),
       description: formData.description.trim(),
       is_active: formData.is_active,
+      event_id: formData.event_id || null,
+      all_you_can_eat: formData.all_you_can_eat,
     };
     if (editingTable) {
       updateMutation.mutate({ id: editingTable.id, payload });
@@ -155,7 +178,16 @@ export default function Tables() {
   };
 
   const getTableUrl = (table) => {
-    return `${window.location.origin}/r/${restaurant.id}?table=${table.id}`;
+    const params = new URLSearchParams();
+    params.set('table', table.id);
+    if (table.event_id) params.set('event', table.event_id);
+    return `${window.location.origin}/r/${restaurant.id}?${params.toString()}`;
+  };
+
+  const eventNameById = (id) => {
+    if (!id) return null;
+    const ev = events.find((e) => e.id === id);
+    return ev?.nome || ev?.name || 'Menu evento';
   };
 
   const generateQr = async (table) => {
@@ -273,9 +305,30 @@ export default function Tables() {
                         <p className="text-xs text-muted-foreground truncate">{table.description}</p>
                       )}
                     </div>
-                    <Badge variant={table.is_active === false ? "secondary" : "default"} className={table.is_active === false ? "" : "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400"}>
-                      {table.is_active === false ? "Disattivato" : "Attivo"}
-                    </Badge>
+                    <div className="flex flex-col gap-1 items-end">
+                      <Badge variant={table.is_active === false ? "secondary" : "default"} className={table.is_active === false ? "" : "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400"}>
+                        {table.is_active === false ? "Disattivato" : "Attivo"}
+                      </Badge>
+                      {table.all_you_can_eat === true && (
+                        <Badge variant="outline" className="text-[10px] bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-100 dark:border-amber-900/40">
+                          All you can eat
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-muted-foreground mb-2">
+                    {table.event_id ? (
+                      <span className="inline-flex items-center gap-1">
+                        <Utensils className="w-3 h-3" />
+                        Menu: {eventNameById(table.event_id)}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1">
+                        <Utensils className="w-3 h-3" />
+                        Menu: standard
+                      </span>
+                    )}
                   </div>
 
                   <div className="text-xs text-muted-foreground mb-4 break-all">
@@ -350,6 +403,23 @@ export default function Tables() {
                   placeholder="Es. Vicino alla finestra, Sala interna..."
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="table-menu">Menu associato</Label>
+                <Select
+                  value={formData.event_id || "__standard__"}
+                  onValueChange={(value) => setFormData({ ...formData, event_id: value === "__standard__" ? "" : value })}
+                >
+                  <SelectTrigger id="table-menu">
+                    <SelectValue placeholder="Seleziona menu" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__standard__">Menu Ristorante (standard)</SelectItem>
+                    {events.map((ev) => (
+                      <SelectItem key={ev.id} value={ev.id}>{ev.nome || ev.name || 'Evento'}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="table-active" className="cursor-pointer">Tavolo attivo</Label>
                 <Switch
@@ -358,6 +428,27 @@ export default function Tables() {
                   onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                 />
               </div>
+              <button
+                type="button"
+                className={`flex w-full items-center gap-3 p-3 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                  formData.all_you_can_eat
+                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30'
+                    : 'border-border hover:bg-accent/60'
+                }`}
+                onClick={() => setFormData(prev => ({ ...prev, all_you_can_eat: !prev.all_you_can_eat }))}
+              >
+                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                  formData.all_you_can_eat
+                    ? 'border-amber-500 bg-amber-500'
+                    : 'border-border'
+                }`}>
+                  {formData.all_you_can_eat && <Check className="w-3 h-3 text-white" />}
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-sm">All you can eat</div>
+                  <div className="text-xs text-muted-foreground">Il cliente ordina senza pagare online e paga alla cassa</div>
+                </div>
+              </button>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
