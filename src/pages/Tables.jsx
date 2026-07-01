@@ -55,7 +55,7 @@ export default function Tables() {
   const [qrTable, setQrTable] = useState(null);
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [isGeneratingQr, setIsGeneratingQr] = useState(false);
-  const [formData, setFormData] = useState({ name: "", description: "", is_active: true, event_id: "", all_you_can_eat: false });
+  const [formData, setFormData] = useState({ name: "", description: "", is_active: true, event_id: "", pay_at_counter: false });
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const printRef = useRef(null);
@@ -138,7 +138,7 @@ export default function Tables() {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", description: "", is_active: true, event_id: "", all_you_can_eat: false });
+    setFormData({ name: "", description: "", is_active: true, event_id: "", pay_at_counter: false });
     setEditingTable(null);
   };
 
@@ -154,7 +154,7 @@ export default function Tables() {
       description: table.description || "",
       is_active: table.is_active !== false,
       event_id: table.event_id || "",
-      all_you_can_eat: table.all_you_can_eat === true,
+      pay_at_counter: table.pay_at_counter === true,
     });
     setShowDialog(true);
   };
@@ -168,7 +168,7 @@ export default function Tables() {
       description: formData.description.trim(),
       is_active: formData.is_active,
       event_id: formData.event_id || null,
-      all_you_can_eat: formData.all_you_can_eat,
+      pay_at_counter: formData.pay_at_counter,
     };
     if (editingTable) {
       updateMutation.mutate({ id: editingTable.id, payload });
@@ -309,9 +309,9 @@ export default function Tables() {
                       <Badge variant={table.is_active === false ? "secondary" : "default"} className={table.is_active === false ? "" : "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400"}>
                         {table.is_active === false ? "Disattivato" : "Attivo"}
                       </Badge>
-                      {table.all_you_can_eat === true && (
+                      {table.pay_at_counter === true && (
                         <Badge variant="outline" className="text-[10px] bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-100 dark:border-amber-900/40">
-                          All you can eat
+                          Paga alla cassa
                         </Badge>
                       )}
                     </div>
@@ -431,21 +431,21 @@ export default function Tables() {
               <button
                 type="button"
                 className={`flex w-full items-center gap-3 p-3 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                  formData.all_you_can_eat
+                  formData.pay_at_counter
                     ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30'
                     : 'border-border hover:bg-accent/60'
                 }`}
-                onClick={() => setFormData(prev => ({ ...prev, all_you_can_eat: !prev.all_you_can_eat }))}
+                onClick={() => setFormData(prev => ({ ...prev, pay_at_counter: !prev.pay_at_counter }))}
               >
                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                  formData.all_you_can_eat
+                  formData.pay_at_counter
                     ? 'border-amber-500 bg-amber-500'
                     : 'border-border'
                 }`}>
-                  {formData.all_you_can_eat && <Check className="w-3 h-3 text-white" />}
+                  {formData.pay_at_counter && <Check className="w-3 h-3 text-white" />}
                 </div>
                 <div className="flex-1">
-                  <div className="font-semibold text-sm">All you can eat</div>
+                  <div className="font-semibold text-sm">Paga alla cassa</div>
                   <div className="text-xs text-muted-foreground">Il cliente ordina senza pagare online e paga alla cassa</div>
                 </div>
               </button>

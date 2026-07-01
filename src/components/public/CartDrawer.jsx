@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge"; // Assuming this exists in shadcn/ui
 
-export default function CartDrawer({ open, onClose, cart, restaurant, deliveryType, onUpdateQuantity, onRemove, onClearCart, startInCheckout = false, table = null, allYouCanEat = false }) {
+export default function CartDrawer({ open, onClose, cart, restaurant, deliveryType, onUpdateQuantity, onRemove, onClearCart, startInCheckout = false, table = null, payAtCounter = false }) {
   const safeCart = Array.isArray(cart) ? cart : [];
   const [showCheckout, setShowCheckout] = useState(false);
   const startInCheckoutAppliedRef = useRef(false);
@@ -47,10 +47,10 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
   const [orderCompleted, setOrderCompleted] = useState(false);    // New state for showing completion screen
 
   useEffect(() => {
-    if (allYouCanEat) {
+    if (payAtCounter) {
       setPaymentMethod("contanti");
     }
-  }, [allYouCanEat]);
+  }, [payAtCounter]);
   const [completedOrder, setCompletedOrder] = useState(null);     // New state to store completed order details
   const [whatsappDraft, setWhatsappDraft] = useState(null);
 
@@ -151,7 +151,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
             <p><strong>Tipo:</strong> ${orderWithItems.tipo_consegna === 'tavolo' ? `Ordine al tavolo${orderWithItems.table_name ? ` ${orderWithItems.table_name}` : ''}` : orderWithItems.tipo_consegna === 'consegna' ? 'Consegna' : 'Asporto'}</p>
             ${orderWithItems.tipo_consegna === 'consegna' ? `<p><strong>Indirizzo:</strong> ${orderWithItems.cliente_indirizzo}</p>` : ''}
             ${orderWithItems.tipo_consegna === 'tavolo' && orderWithItems.table_name ? `<p><strong>Tavolo:</strong> ${orderWithItems.table_name}</p>` : ''}
-            <p><strong>Metodo Pagamento:</strong> ${orderWithItems.all_you_can_eat ? 'Paga alla cassa' : orderWithItems.metodo_pagamento === 'contanti' ? (orderWithItems.tipo_consegna === 'tavolo' ? 'Contanti al tavolo' : 'Contanti alla consegna') : orderWithItems.metodo_pagamento === 'paypal' ? 'PayPal' : orderWithItems.metodo_pagamento === 'bancomat' ? 'Bancomat / POS' : 'Carta di Credito'}</p>
+            <p><strong>Metodo Pagamento:</strong> ${orderWithItems.pay_at_counter ? 'Paga alla cassa' : orderWithItems.metodo_pagamento === 'contanti' ? (orderWithItems.tipo_consegna === 'tavolo' ? 'Contanti al tavolo' : 'Contanti alla consegna') : orderWithItems.metodo_pagamento === 'paypal' ? 'PayPal' : orderWithItems.metodo_pagamento === 'bancomat' ? 'Bancomat / POS' : 'Carta di Credito'}</p>
             <br>
             <h3>Prodotti:</h3>
             <ul>
@@ -177,7 +177,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
           `Tipo: ${orderWithItems.tipo_consegna === 'tavolo' ? `Ordine al tavolo${orderWithItems.table_name ? ` ${orderWithItems.table_name}` : ''}` : orderWithItems.tipo_consegna === 'consegna' ? 'Consegna' : 'Asporto'}`,
           orderWithItems.tipo_consegna === 'consegna' ? `Indirizzo: ${orderWithItems.cliente_indirizzo}` : null,
           orderWithItems.tipo_consegna === 'tavolo' && orderWithItems.table_name ? `Tavolo: ${orderWithItems.table_name}` : null,
-          `Pagamento: ${orderWithItems.all_you_can_eat ? 'Paga alla cassa' : orderWithItems.metodo_pagamento === 'contanti' ? (orderWithItems.tipo_consegna === 'tavolo' ? 'Contanti al tavolo' : 'Contanti alla consegna') : orderWithItems.metodo_pagamento === 'paypal' ? 'PayPal' : orderWithItems.metodo_pagamento === 'bancomat' ? 'Bancomat / POS' : 'Carta di Credito'} `,
+          `Pagamento: ${orderWithItems.pay_at_counter ? 'Paga alla cassa' : orderWithItems.metodo_pagamento === 'contanti' ? (orderWithItems.tipo_consegna === 'tavolo' ? 'Contanti al tavolo' : 'Contanti alla consegna') : orderWithItems.metodo_pagamento === 'paypal' ? 'PayPal' : orderWithItems.metodo_pagamento === 'bancomat' ? 'Bancomat / POS' : 'Carta di Credito'} `,
           ``,
           `Segui lo stato dell'ordine: ${trackOrderUrl}`,
           ``,
@@ -431,8 +431,8 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
     }
 
     const orderNumber = `ORD-${Date.now()}`;
-    const computedPaymentMethod = allYouCanEat ? "contanti" : paymentMethod;
-    const computedPaymentStatus = allYouCanEat ? "pending" : (computedPaymentMethod === "contanti" ? "pending" : "paid");
+    const computedPaymentMethod = payAtCounter ? "contanti" : paymentMethod;
+    const computedPaymentStatus = payAtCounter ? "pending" : (computedPaymentMethod === "contanti" ? "pending" : "paid");
     const orderData = {
       restaurant_id: restaurant.id,
       numero_ordine: orderNumber,
@@ -447,7 +447,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
       metodo_pagamento: computedPaymentMethod, // Add payment method
       pagamento_stato: computedPaymentStatus, // Set payment status (legacy/IT)
       payment_status: computedPaymentStatus, // Set payment status (EN)
-      all_you_can_eat: allYouCanEat,
+      pay_at_counter: payAtCounter,
       items: safeCart.map(item => ({
         menu_item_id: item.id,
         nome: item.nome,
@@ -521,8 +521,8 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Pagamento:</span>
-                <Badge className={completedOrder.all_you_can_eat ? "bg-amber-500" : "bg-green-500"}>
-                  {completedOrder.all_you_can_eat ? 'Paga alla cassa' :
+                <Badge className={completedOrder.pay_at_counter ? "bg-amber-500" : "bg-green-500"}>
+                  {completedOrder.pay_at_counter ? 'Paga alla cassa' :
                    completedOrder.metodo_pagamento === 'contanti' ? 'Contanti alla consegna' : 
                    completedOrder.metodo_pagamento === 'paypal' ? 'PayPal' :
                    completedOrder.metodo_pagamento === 'bancomat' ? 'Bancomat / POS' : 'Carta di Credito'}
@@ -735,9 +735,9 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
               </div>
 
               {/* Metodo di Pagamento */}
-              {allYouCanEat ? (
+              {payAtCounter ? (
                 <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-900 dark:text-amber-100">
-                  🍣 <strong>All you can eat</strong>
+                  💰 <strong>Paga alla cassa</strong>
                   <p className="mt-1">Non è richiesto il pagamento online. Pagherai alla cassa a fine servizio.</p>
                 </div>
               ) : (
@@ -823,7 +823,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                 className="bg-red-600 hover:bg-red-700" 
                 disabled={disableCheckoutButton}
               >
-                {createOrderMutation.isPending ? "Invio..." : allYouCanEat ? `Invia Ordine al Tavolo - €${total.toFixed(2)}` : `Conferma Ordine - €${total.toFixed(2)}`}
+                {createOrderMutation.isPending ? "Invio..." : payAtCounter ? `Invia Ordine al Tavolo - €${total.toFixed(2)}` : `Conferma Ordine - €${total.toFixed(2)}`}
               </Button>
             </DialogFooter>
           </form>

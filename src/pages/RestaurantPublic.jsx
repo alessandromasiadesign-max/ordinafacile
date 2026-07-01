@@ -721,10 +721,10 @@ export default function RestaurantPublic() {
         </div>
       )}
 
-      {tableId && table && table.all_you_can_eat === true && !loading && (
+      {tableId && table && table.pay_at_counter === true && !loading && (
         <div className="max-w-6xl mx-auto px-4 mt-4">
           <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-900 dark:text-amber-100">
-            🍣 <strong>All you can eat</strong> — Ordina senza pagare online. Pagherai alla cassa a fine servizio.
+            💰 <strong>Paga alla cassa</strong> — Ordina senza pagare online. Pagherai a fine servizio.
           </div>
         </div>
       )}
@@ -1549,7 +1549,7 @@ export default function RestaurantPublic() {
         }}
         table={table || (tableId ? { id: tableId, name: null, is_active: true } : null)}
         eventId={effectiveEventId}
-        allYouCanEat={table?.all_you_can_eat === true}
+        payAtCounter={table?.pay_at_counter === true}
         startInCheckout={cartOpenMode === "checkout"}
       />
     </div>
