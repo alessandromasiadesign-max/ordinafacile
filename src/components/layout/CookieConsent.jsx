@@ -126,7 +126,7 @@ export default function CookieConsent() {
       )}
 
       {canShowFloatingButton && (
-        <div className="fixed bottom-4 right-4 z-20">
+        <div className="fixed bottom-20 right-4 z-20">
           <Button
             type="button"
             variant="outline"
