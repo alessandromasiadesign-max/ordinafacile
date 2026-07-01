@@ -20,7 +20,8 @@ import {
   CheckCircle2,
   ChefHat,
   Flag,
-  XCircle
+  XCircle,
+  Table as TableIcon,
 } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -117,6 +118,8 @@ export default function Orders() {
       note: o?.note ?? o?.customer_notes,
       tipo_consegna: tipoConsegnaIt,
       stato: statoIt,
+      table_id: o?.table_id ?? null,
+      table_name: o?.table_name ?? null,
       totale: Number(o?.totale ?? o?.total ?? 0),
       created_date: o?.created_date ?? o?.created_at,
     };
@@ -592,7 +595,12 @@ export default function Orders() {
 
                                 <div className="flex flex-wrap items-center gap-2 mt-3">
                                   <Badge className={`${statusColors[order.stato]} border text-[11px]`}>{statusLabels[order.stato]}</Badge>
-                                  {order.tipo_consegna === "consegna" ? (
+                                  {order.tipo_consegna === "tavolo" ? (
+                                    <Badge variant="outline" className="flex items-center gap-1 text-[11px] bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-100 dark:border-orange-900/40">
+                                      <TableIcon className="w-3 h-3" />
+                                      Tavolo {order.table_name}
+                                    </Badge>
+                                  ) : order.tipo_consegna === "consegna" ? (
                                     <Badge variant="outline" className="flex items-center gap-1 text-[11px]">
                                       <Truck className="w-3 h-3" />
                                       Consegna
@@ -677,7 +685,12 @@ export default function Orders() {
                           <Badge className={`${statusColors[order.stato]} border text-xs md:text-sm`}>
                             {statusLabels[order.stato]}
                           </Badge>
-                          {order.tipo_consegna === "consegna" ? (
+                          {order.tipo_consegna === "tavolo" ? (
+                            <Badge variant="outline" className="flex items-center gap-1 text-xs md:text-sm bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-100 dark:border-orange-900/40">
+                              <TableIcon className="w-3 h-3" />
+                              Tavolo {order.table_name}
+                            </Badge>
+                          ) : order.tipo_consegna === "consegna" ? (
                             <Badge variant="outline" className="flex items-center gap-1 text-xs md:text-sm">
                               <Truck className="w-3 h-3" />
                               Consegna
@@ -692,7 +705,11 @@ export default function Orders() {
                         
                         <div className="grid gap-2 text-xs md:text-sm text-muted-foreground">
                           <div className="flex items-center gap-2">
-                            <Phone className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                            {order.tipo_consegna === "tavolo" ? (
+                              <TableIcon className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                            ) : (
+                              <Phone className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                            )}
                             <span className="font-medium truncate">{order.cliente_nome}</span>
                             <span className="text-muted-foreground/60">•</span>
                             <span className="truncate">{order.cliente_telefono}</span>

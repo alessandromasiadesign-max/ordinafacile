@@ -147,6 +147,7 @@ function makeEntity(tableName) {
 // ENTITÀ
 // ============================================================
 export const Restaurant                = makeEntity('restaurants');
+export const Table                     = makeEntity('restaurant_tables');
 export const Order                     = makeEntity('orders');
 export const OrderItem                 = makeEntity('order_items');
 export const MenuItem                  = makeEntity('menu_items');

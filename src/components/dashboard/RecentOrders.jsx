@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-import { Package, Truck, Clock } from "lucide-react";
+import { Package, Truck, Clock, Table as TableIcon } from "lucide-react";
 
 const statusColors = {
   nuovo: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-100",
@@ -44,7 +44,12 @@ export default function RecentOrders({ orders, isLoading }) {
                     <Badge className={statusColors[order.stato]}>
                       {statusLabels[order.stato]}
                     </Badge>
-                    {order.tipo_consegna === "consegna" ? (
+                    {order.tipo_consegna === "tavolo" ? (
+                      <Badge variant="outline" className="flex items-center gap-1 bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-100 dark:border-orange-900/40">
+                        <TableIcon className="w-3 h-3" />
+                        Tavolo {order.table_name}
+                      </Badge>
+                    ) : order.tipo_consegna === "consegna" ? (
                       <Badge variant="outline" className="flex items-center gap-1">
                         <Truck className="w-3 h-3" />
                         Consegna

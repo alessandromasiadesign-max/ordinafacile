@@ -193,6 +193,8 @@ export default function Dashboard() {
       status,
       tipo_consegna,
       delivery_type,
+      table_id: o?.table_id ?? null,
+      table_name: o?.table_name ?? null,
       totale: total,
       total,
       created_date: created,
@@ -436,6 +438,12 @@ export default function Dashboard() {
                     <span className="text-muted-foreground">Asporto</span>
                     <span className="font-bold text-purple-600">
                       {visibleOrders.filter(o => o.delivery_type === "pickup").length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm md:text-base">
+                    <span className="text-muted-foreground">Al Tavolo</span>
+                    <span className="font-bold text-orange-600">
+                      {visibleOrders.filter(o => o.delivery_type === "table").length}
                     </span>
                   </div>
                 </CardContent>

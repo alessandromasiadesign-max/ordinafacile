@@ -49,6 +49,8 @@ export default function OrderHistory() {
       cliente_telefono: o?.cliente_telefono ?? o?.customer_phone,
       tipo_consegna: tipoConsegnaIt,
       stato: statoIt,
+      table_id: o?.table_id ?? null,
+      table_name: o?.table_name ?? null,
       totale: Number(o?.totale ?? o?.total ?? 0),
       created_date: o?.created_date ?? o?.created_at,
     };
@@ -427,7 +429,13 @@ export default function OrderHistory() {
                           <div className="text-xs text-muted-foreground">{order.cliente_telefono}</div>
                         </td>
                         <td className="py-3 px-4 text-sm">
-                          {order.tipo_consegna === "consegna" ? "Consegna" : "Asporto"}
+                          {order.tipo_consegna === "tavolo" ? (
+                            <span className="text-orange-600 font-medium">Tavolo {order.table_name}</span>
+                          ) : order.tipo_consegna === "consegna" ? (
+                            "Consegna"
+                          ) : (
+                            "Asporto"
+                          )}
                         </td>
                         <td className="py-3 px-4 text-sm">
                           <Badge className={statusColors[order.stato] || "bg-muted text-foreground"}>

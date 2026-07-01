@@ -40,6 +40,8 @@ export default function PrintOrders() {
       cliente_indirizzo: o?.cliente_indirizzo ?? o?.customer_address ?? "",
       note: o?.note ?? o?.customer_notes,
       tipo_consegna: tipoConsegnaIt,
+      table_id: o?.table_id ?? null,
+      table_name: o?.table_name ?? null,
       totale: Number(o?.totale ?? o?.total ?? 0),
       created_date: o?.created_date ?? o?.created_at,
       items: Array.isArray(o?.items) ? o.items : [],
@@ -219,8 +221,9 @@ export default function PrintOrders() {
           <div class="section">
             <div><strong>Cliente:</strong> ${order.cliente_nome}</div>
             <div><strong>Tel:</strong> ${order.cliente_telefono}</div>
-            <div><strong>Tipo:</strong> ${order.tipo_consegna === "consegna" ? "CONSEGNA" : "ASPORTO"}</div>
+            <div><strong>Tipo:</strong> ${order.tipo_consegna === "tavolo" ? `TAVOLO ${order.table_name}` : order.tipo_consegna === "consegna" ? "CONSEGNA" : "ASPORTO"}</div>
             ${order.tipo_consegna === "consegna" ? `<div><strong>Indirizzo:</strong> ${order.cliente_indirizzo}</div>` : ''}
+            ${order.tipo_consegna === "tavolo" && order.table_name ? `<div><strong>Tavolo:</strong> ${order.table_name}</div>` : ''}
             ${order.note ? `<div><strong>Note:</strong> ${order.note}</div>` : ''}
           </div>
 
@@ -436,7 +439,9 @@ export default function PrintOrders() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="font-bold text-lg">#{order.numero_ordine}</span>
-                        <Badge>{order.tipo_consegna === "consegna" ? "Consegna" : "Asporto"}</Badge>
+                        <Badge className={order.tipo_consegna === "tavolo" ? "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-100 dark:border-orange-900/40" : ""}>
+                          {order.tipo_consegna === "tavolo" ? `Tavolo ${order.table_name}` : order.tipo_consegna === "consegna" ? "Consegna" : "Asporto"}
+                        </Badge>
                         <span className="text-sm text-muted-foreground">
                           {safeFormatDate(order.created_date, "HH:mm")}
                         </span>

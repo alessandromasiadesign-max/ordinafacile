@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge"; // Assuming this exists in shadcn/ui
 
-export default function CartDrawer({ open, onClose, cart, restaurant, deliveryType, onUpdateQuantity, onRemove, onClearCart, startInCheckout = false }) {
+export default function CartDrawer({ open, onClose, cart, restaurant, deliveryType, onUpdateQuantity, onRemove, onClearCart, startInCheckout = false, table = null }) {
   const safeCart = Array.isArray(cart) ? cart : [];
   const [showCheckout, setShowCheckout] = useState(false);
   const startInCheckoutAppliedRef = useRef(false);
@@ -142,9 +142,10 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
             <p><strong>Numero Ordine:</strong> #${orderWithItems.numero_ordine}</p>
             <p><strong>Ristorante:</strong> ${restaurant.nome}</p>
             <p><strong>Totale:</strong> €${orderWithItems.totale.toFixed(2)}</p>
-            <p><strong>Tipo:</strong> ${orderWithItems.tipo_consegna === 'consegna' ? 'Consegna' : 'Asporto'}</p>
+            <p><strong>Tipo:</strong> ${orderWithItems.tipo_consegna === 'tavolo' ? `Ordine al tavolo${orderWithItems.table_name ? ` ${orderWithItems.table_name}` : ''}` : orderWithItems.tipo_consegna === 'consegna' ? 'Consegna' : 'Asporto'}</p>
             ${orderWithItems.tipo_consegna === 'consegna' ? `<p><strong>Indirizzo:</strong> ${orderWithItems.cliente_indirizzo}</p>` : ''}
-            <p><strong>Metodo Pagamento:</strong> ${orderWithItems.metodo_pagamento === 'contanti' ? 'Contanti alla consegna' : orderWithItems.metodo_pagamento === 'paypal' ? 'PayPal' : 'Carta di Credito'}</p>
+            ${orderWithItems.tipo_consegna === 'tavolo' && orderWithItems.table_name ? `<p><strong>Tavolo:</strong> ${orderWithItems.table_name}</p>` : ''}
+            <p><strong>Metodo Pagamento:</strong> ${orderWithItems.metodo_pagamento === 'contanti' ? (orderWithItems.tipo_consegna === 'tavolo' ? 'Contanti al tavolo' : 'Contanti alla consegna') : orderWithItems.metodo_pagamento === 'paypal' ? 'PayPal' : 'Carta di Credito'}</p>
             <br>
             <h3>Prodotti:</h3>
             <ul>
@@ -167,9 +168,10 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
           `*${restaurant.nome}*`,
           `Ordine: #${orderWithItems.numero_ordine}`,
           `Totale: €${orderWithItems.totale.toFixed(2)}`,
-          `Tipo: ${orderWithItems.tipo_consegna === 'consegna' ? 'Consegna' : 'Asporto'}`,
+          `Tipo: ${orderWithItems.tipo_consegna === 'tavolo' ? `Ordine al tavolo${orderWithItems.table_name ? ` ${orderWithItems.table_name}` : ''}` : orderWithItems.tipo_consegna === 'consegna' ? 'Consegna' : 'Asporto'}`,
           orderWithItems.tipo_consegna === 'consegna' ? `Indirizzo: ${orderWithItems.cliente_indirizzo}` : null,
-          `Pagamento: ${orderWithItems.metodo_pagamento === 'contanti' ? 'Contanti alla consegna' : orderWithItems.metodo_pagamento === 'paypal' ? 'PayPal' : 'Carta di Credito'}`,
+          orderWithItems.tipo_consegna === 'tavolo' && orderWithItems.table_name ? `Tavolo: ${orderWithItems.table_name}` : null,
+          `Pagamento: ${orderWithItems.metodo_pagamento === 'contanti' ? (orderWithItems.tipo_consegna === 'tavolo' ? 'Contanti al tavolo' : 'Contanti alla consegna') : orderWithItems.metodo_pagamento === 'paypal' ? 'PayPal' : 'Carta di Credito'}`,
           ``,
           `Segui lo stato dell'ordine: ${trackOrderUrl}`,
           ``,
@@ -432,6 +434,8 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
       cliente_email: customerData.email,
       cliente_indirizzo: deliveryType === "consegna" ? customerData.indirizzo : "",
       tipo_consegna: deliveryType,
+      table_id: table?.id || null,
+      table_name: table?.name || null,
       stato: "nuovo",
       metodo_pagamento: paymentMethod, // Add payment method
       pagamento_stato: computedPaymentStatus, // Set payment status (legacy/IT)
@@ -607,7 +611,8 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
 
   if (showCheckout) {
     // Determine if address validation is required for delivery
-    const addressValidationRequired = deliveryType === "consegna" && restaurant?.zone_consegna?.length > 0;
+    const isTableOrder = deliveryType === "tavolo" || table?.id;
+    const addressValidationRequired = !isTableOrder && deliveryType === "consegna" && restaurant?.zone_consegna?.length > 0;
     const isAddressValidated = validatedAddress !== null;
     const disableCheckoutButton = createOrderMutation.isPending || !acceptTerms || (addressValidationRequired && !isAddressValidated);
 
@@ -617,10 +622,23 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Completa l'Ordine</DialogTitle>
+            <DialogTitle>{isTableOrder ? "Ordine dal Tavolo" : "Completa l'Ordine"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCheckout}>
             <div className="space-y-4 py-4">
+              {isTableOrder && table && (
+                <div className="rounded-lg bg-orange-100 dark:bg-orange-900/30 p-3 text-center">
+                  <p className="text-sm font-semibold text-orange-800 dark:text-orange-100">
+                    🍽️ Tavolo {table.name}
+                  </p>
+                  {table.description && (
+                    <p className="text-xs text-orange-700/80 dark:text-orange-200/70 mt-1">
+                      {table.description}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Render AddressValidator if delivery and zones are configured and not yet validated */}
               {addressValidationRequired && !isAddressValidated && (
                 <AddressValidator
@@ -636,6 +654,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   value={customerData.nome}
                   onChange={(e) => setCustomerData(prev => ({ ...prev, nome: e.target.value }))}
                   required
+                  placeholder={isTableOrder ? "Come ti chiami?" : "Il tuo nome"}
                 />
               </div>
               <div className="space-y-2">
@@ -646,6 +665,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   value={customerData.telefono}
                   onChange={(e) => setCustomerData(prev => ({ ...prev, telefono: e.target.value }))}
                   required
+                  placeholder={isTableOrder ? "Per chiamarti al tavolo" : "Il tuo telefono"}
                 />
               </div>
               <div className="space-y-2">
@@ -655,6 +675,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   type="email"
                   value={customerData.email}
                   onChange={(e) => setCustomerData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder={isTableOrder ? "Opzionale, per la copia dell'ordine" : "Opzionale"}
                 />
               </div>
               {deliveryType === "consegna" && (
@@ -717,7 +738,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   <SelectContent>
                     {paymentSettings.cash_enabled && (
                       <SelectItem value="contanti">
-                        💵 Contanti alla Consegna
+                        💵 {isTableOrder ? "Contanti al tavolo" : "Contanti alla Consegna"}
                       </SelectItem>
                     )}
                     {paymentSettings.paypal_enabled && (
@@ -908,6 +929,13 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
         {!!restaurant && safeCart.length > 0 && (
           <>
             <div className="border-t pt-4 space-y-3">
+              {table?.id && (
+                <div className="rounded-lg bg-orange-100 dark:bg-orange-900/30 p-3 text-center">
+                  <p className="text-sm font-semibold text-orange-800 dark:text-orange-100">
+                    🍽️ Ordine per il tavolo {table.name}
+                  </p>
+                </div>
+              )}
               <div className="flex justify-between text-base">
                 <span className="text-muted-foreground">Subtotale</span>
                 <span className="font-semibold">€{subtotal.toFixed(2)}</span>

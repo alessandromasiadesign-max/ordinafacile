@@ -1,4 +1,4 @@
-import { Restaurant, MenuItem, Category, Promotion, Event } from '@/api/entities';
+import { Restaurant, MenuItem, Category, Promotion, Event, Table } from '@/api/entities';
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +25,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Table as TableIcon,
 } from "lucide-react";
 
 import OrderModal from "../components/public/OrderModal";
@@ -89,17 +90,24 @@ export default function RestaurantPublic() {
   const urlParams = new URLSearchParams(window.location.search);
   const restaurantId = params?.restaurantId ?? urlParams.get('id');
   const eventId = urlParams.get('event'); // Added eventId
+  const tableId = urlParams.get('table');
 
   const favoritesStorageKey = useMemo(() => {
     if (!restaurantId) return null;
-    return `favorites_${restaurantId}_${eventId || "std"}`;
-  }, [restaurantId, eventId]);
+    return `favorites_${restaurantId}_${eventId || "std"}_${tableId || "notable"}`;
+  }, [restaurantId, eventId, tableId]);
   
   const [restaurant, setRestaurant] = useState(null);
   const [event, setEvent] = useState(null); // Added event state
-  const [deliveryType, setDeliveryType] = useState("consegna");
+  const [table, setTable] = useState(null);
+  const [deliveryType, setDeliveryType] = useState(tableId ? "tavolo" : "consegna");
+  const cartStorageKey = useMemo(() => {
+    if (!restaurantId) return null;
+    return `cart_${restaurantId}_${tableId || "notable"}`;
+  }, [restaurantId, tableId]);
+
   const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem(`cart_${restaurantId}`);
+    const savedCart = localStorage.getItem(cartStorageKey || `cart_${restaurantId}`);
     return savedCart ? JSON.parse(savedCart) : [];
   });
   const [showCart, setShowCart] = useState(false);
@@ -140,10 +148,10 @@ export default function RestaurantPublic() {
   };
 
   useEffect(() => {
-    if (restaurantId) {
-      localStorage.setItem(`cart_${restaurantId}`, JSON.stringify(cart));
+    if (cartStorageKey) {
+      localStorage.setItem(cartStorageKey, JSON.stringify(cart));
     }
-  }, [cart, restaurantId]);
+  }, [cart, cartStorageKey]);
 
   useEffect(() => {
     setActiveCategoryId(null);
@@ -194,8 +202,10 @@ export default function RestaurantPublic() {
     expiry.setHours(0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return expiry < today;
-  }, [restaurant]);
+    if (expiry < today) return true;
+    if (table?.is_active === false) return true;
+    return false;
+  }, [restaurant, table]);
 
   useEffect(() => {
     if (!isRestaurantBlocked) return;
@@ -306,7 +316,9 @@ export default function RestaurantPublic() {
       });
       if (restaurants.length > 0) {
         setRestaurant(restaurants[0]);
-        if (restaurants[0].modalita_consegna?.length > 0) {
+        if (tableId) {
+          setDeliveryType("tavolo");
+        } else if (restaurants[0].modalita_consegna?.length > 0) {
           setDeliveryType(restaurants[0].modalita_consegna[0]);
         }
       }
@@ -315,6 +327,13 @@ export default function RestaurantPublic() {
         const events = await Event.filter({ id: eventId });
         if (events.length > 0) {
           setEvent(events[0]);
+        }
+      }
+
+      if (tableId) {
+        const tables = await Table.filter({ id: tableId, restaurant_id: restaurantId });
+        if (tables.length > 0) {
+          setTable(tables[0]);
         }
       }
     } catch (error) {
@@ -683,6 +702,22 @@ export default function RestaurantPublic() {
         </div>
       )}
 
+      {tableId && !table && !loading && (
+        <div className="max-w-6xl mx-auto px-4 mt-4">
+          <div className="rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/30 p-4 text-sm text-blue-900 dark:text-blue-100">
+            Stai ordinando dal <strong>tavolo {tableId.slice(0, 8)}</strong>. Indica al personale il numero d'ordine alla conferma.
+          </div>
+        </div>
+      )}
+
+      {tableId && table && table.is_active === false && !loading && (
+        <div className="max-w-6xl mx-auto px-4 mt-4">
+          <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-900 dark:text-amber-100">
+            Il tavolo <strong>{table.name}</strong> è temporaneamente disattivato. Contatta il personale per ordinare.
+          </div>
+        </div>
+      )}
+
       {deliveryType === "consegna" && (restaurant?.zone_consegna?.length || 0) > 0 && !isRestaurantBlocked && (
         <div className="max-w-6xl mx-auto px-4 mt-4">
           <Card className="border-2 border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30">
@@ -711,7 +746,21 @@ export default function RestaurantPublic() {
         </div>
       )}
 
-      {restaurant.modalita_consegna?.length > 0 && (
+      {deliveryType === "tavolo" && table && (
+        <div ref={deliveryBarRef} className="bg-orange-500 text-white py-3 px-4 sticky top-0 z-10">
+          <div className="max-w-6xl mx-auto flex items-center justify-center gap-2">
+            <TableIcon className="w-5 h-5" />
+            <span className="font-semibold">
+              Stai ordinando dal tavolo: {table.name}
+            </span>
+            {table.description && (
+              <span className="text-white/80 text-sm hidden sm:inline">({table.description})</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {restaurant.modalita_consegna?.length > 0 && deliveryType !== "tavolo" && (
         <div ref={deliveryBarRef} className="bg-background border-b border-border py-4 px-4 sticky top-0 z-10">
           <div className="max-w-6xl mx-auto flex justify-center gap-4">
             {restaurant.modalita_consegna.includes("consegna") && (
@@ -1485,8 +1534,9 @@ export default function RestaurantPublic() {
         onRemove={removeFromCart}
         onClearCart={() => {
           setCart([]);
-          localStorage.removeItem(`cart_${restaurantId}`);
+          if (cartStorageKey) localStorage.removeItem(cartStorageKey);
         }}
+        table={table || (tableId ? { id: tableId, name: null, is_active: true } : null)}
         eventId={eventId}
         startInCheckout={cartOpenMode === "checkout"}
       />

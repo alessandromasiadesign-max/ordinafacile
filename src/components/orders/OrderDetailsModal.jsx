@@ -8,7 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-import { Phone, MapPin, Package, Truck } from "lucide-react";
+import { Phone, MapPin, Package, Truck, Table as TableIcon } from "lucide-react";
 
 const statusColors = {
   nuovo: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-100",
@@ -64,12 +64,16 @@ export default function OrderDetailsModal({ order, onClose }) {
               <h3 className="font-semibold text-sm text-muted-foreground">Dettagli Ordine</h3>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  {tipoConsegna === "consegna" ? (
+                  {tipoConsegna === "tavolo" ? (
+                    <TableIcon className="w-4 h-4" />
+                  ) : tipoConsegna === "consegna" ? (
                     <Truck className="w-4 h-4" />
                   ) : (
                     <Package className="w-4 h-4" />
                   )}
-                  <span className="capitalize">{tipoConsegna}</span>
+                  <span className="capitalize">
+                    {tipoConsegna === "tavolo" && order.table_name ? `Tavolo ${order.table_name}` : tipoConsegna}
+                  </span>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {createdAt ? format(new Date(createdAt), "d MMMM yyyy, HH:mm", { locale: it }) : ''}
@@ -78,6 +82,12 @@ export default function OrderDetailsModal({ order, onClose }) {
                   <div className="flex items-start gap-2 text-sm">
                     <MapPin className="w-4 h-4 mt-0.5" />
                     <span>{order.cliente_indirizzo}</span>
+                  </div>
+                )}
+                {tipoConsegna === "tavolo" && order.table_name && (
+                  <div className="flex items-start gap-2 text-sm">
+                    <TableIcon className="w-4 h-4 mt-0.5" />
+                    <span>Ordine dal tavolo {order.table_name}</span>
                   </div>
                 )}
               </div>

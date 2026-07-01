@@ -1,4 +1,4 @@
-# OrdinaFacile
+# OrdinaFacile.food
 
 ## Avvio in locale
 

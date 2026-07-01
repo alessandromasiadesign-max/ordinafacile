@@ -42,7 +42,11 @@ const getStatusFromRecord = (order) => {
   return statusIt || rawStatus || rawStato;
 };
 
-const getTypeFromRecord = (order) => order?.tipo_consegna ?? order?.delivery_type ?? "";
+const getTypeFromRecord = (order) => {
+  const raw = order?.tipo_consegna ?? order?.delivery_type ?? "";
+  if (raw === "table") return "tavolo";
+  return raw;
+};
 
 const getTotalFromRecord = (order) => {
   const raw = order?.totale ?? order?.total;
@@ -72,6 +76,7 @@ const typeLabel = (raw) => {
   const t = String(raw ?? "").toLowerCase();
   if (t === "consegna" || t === "delivery") return "Consegna";
   if (t === "asporto" || t === "pickup") return "Asporto";
+  if (t === "tavolo" || t === "table") return "Al Tavolo";
   return t || "—";
 };
 

@@ -28,6 +28,7 @@ import {
   Phone,
   PauseCircle,
   PlayCircle,
+  Table as TableIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -58,6 +59,7 @@ const navigationItems = [
   { title: "Ordini",           url: createPageUrl("Orders"),          icon: ShoppingBag, tour: "nav-orders" },
   { title: "Storico",          url: createPageUrl("OrderHistory"),    icon: History },
   { title: "Menu",             url: createPageUrl("MenuManagement"),  icon: UtensilsCrossed, tour: "nav-menu" },
+  { title: "Tavoli",           url: createPageUrl("Tables"),          icon: TableIcon },
   { title: "Sedi",             url: createPageUrl("Locations"),       icon: Building2 },
   { title: "Eventi",           url: createPageUrl("Events"),          icon: Calendar, tour: "nav-events" },
   { title: "Promozioni",       url: createPageUrl("Promotions"),      icon: Tag, tour: "nav-promotions" },
