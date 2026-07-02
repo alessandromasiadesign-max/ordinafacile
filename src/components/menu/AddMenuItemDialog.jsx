@@ -191,7 +191,7 @@ export default function AddMenuItemDialog({ open, onClose, category, restaurantI
             <Button type="button" variant="outline" onClick={onClose}>
               Annulla
             </Button>
-            <Button type="submit" className="bg-red-600 hover:bg-red-700">
+            <Button type="submit" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20">
               Aggiungi Prodotto
             </Button>
           </DialogFooter>

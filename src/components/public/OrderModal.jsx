@@ -232,7 +232,7 @@ export default function OrderModal({ item, onClose, onAdd }) {
             </Button>
             <Button 
               onClick={handleAdd} 
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
               disabled={!canAdd}
               size="lg"
             >

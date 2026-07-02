@@ -290,7 +290,7 @@ export default function AddEventDialog({ open, onClose, restaurantId }) {
             </Button>
             <Button
               type="submit"
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
               disabled={createMutation.isPending || !restaurantId}
             >
               {createMutation.isPending ? "Creazione..." : "Crea Evento"}

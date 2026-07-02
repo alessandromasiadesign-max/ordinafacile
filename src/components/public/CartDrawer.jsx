@@ -532,7 +532,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
 
             <Button
               type="button"
-              className="w-full bg-red-600 hover:bg-red-700"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
               onClick={() => {
                 const orderNum = completedOrder?.numero_ordine;
                 if (!orderNum) return;
@@ -604,7 +604,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
               Segui stato ordine
             </Button>
             <Button
-              className="w-full bg-red-600 hover:bg-red-700"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
               onClick={() => {
                 if (onClearCart) onClearCart();
                 resetAllStates();
@@ -820,7 +820,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
               </Button>
               <Button 
                 type="submit" 
-                className="bg-red-600 hover:bg-red-700" 
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20" 
                 disabled={disableCheckoutButton}
               >
                 {createOrderMutation.isPending ? "Invio..." : payAtCounter ? `Invia Ordine al Tavolo - €${total.toFixed(2)}` : `Conferma Ordine - €${total.toFixed(2)}`}
@@ -983,7 +983,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
             <DialogFooter>
               <Button
                 onClick={() => setShowCheckout(true)}
-                className="w-full bg-red-600 hover:bg-red-700 text-white text-lg py-6"
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-lg py-6 shadow-lg shadow-orange-500/20"
               >
                 Procedi all'Ordine
               </Button>

@@ -378,7 +378,7 @@ export default function Dashboard() {
                   </div>
                   <Button
                     type="button"
-                    className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20 w-full sm:w-auto"
                     onClick={() => navigate(`${createPageUrl('MenuManagement')}?onboarding=1`)}
                   >
                     Vai a Gestione Menu

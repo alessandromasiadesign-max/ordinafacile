@@ -586,7 +586,7 @@ export default function MenuManagement() {
                 </Button>
                 <Button
                   type="button"
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                   disabled={!copyTargetEventId || !copySourceCategory || copyToEventMutation.isPending}
                   onClick={() => copyToEventMutation.mutate({ category: copySourceCategory, targetEventId: copyTargetEventId })}
                 >
@@ -702,7 +702,7 @@ export default function MenuManagement() {
                         <Button
                           type="button"
                           size="sm"
-                          className="mt-2 bg-red-600 hover:bg-red-700"
+                          className="mt-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                           onClick={() => setShowAddCategory(true)}
                         >
                           <Plus className="w-3 h-3 mr-1" />
@@ -717,7 +717,7 @@ export default function MenuManagement() {
                         <Button
                           type="button"
                           size="sm"
-                          className="mt-2 bg-red-600 hover:bg-red-700"
+                          className="mt-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                           onClick={() => {
                             const firstCat = categories?.[0];
                             if (!firstCat) return;
@@ -797,7 +797,7 @@ export default function MenuManagement() {
                     </Button>
                     <Button
                       type="button"
-                      className="bg-red-600 hover:bg-red-700"
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                       onClick={async () => {
                         const url = getPublicMenuUrl();
                         if (!url) return;
@@ -861,7 +861,7 @@ export default function MenuManagement() {
                 </p>
                 <Button 
                   onClick={() => setShowAddCategory(true)}
-                  className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20 w-full sm:w-auto"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Crea Prima Categoria

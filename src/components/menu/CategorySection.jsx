@@ -556,7 +556,7 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                         </p>
                       )}
                       <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
-                        <span className="text-xl font-bold text-red-600">
+                        <span className="text-xl font-bold gradient-text">
                           €{formatPrice(item?.prezzo)}
                         </span>
                         <div className="flex gap-2 items-center">

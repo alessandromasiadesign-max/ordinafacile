@@ -548,7 +548,7 @@ export default function ChatBot({ restaurant }) {
                   <Button
                     type="submit" // Set type to submit for form submission
                     disabled={!message.trim() || isTyping}
-                    className="bg-red-600 hover:bg-red-700 flex-shrink-0 px-3 md:px-4"
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white flex-shrink-0 px-3 md:px-4"
                   >
                     {isTyping ? (
                       <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />

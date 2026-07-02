@@ -349,7 +349,7 @@ export default function TrackOrder() {
                     {error && <div className="text-sm text-red-600">{error}</div>}
 
                     <Button
-                      className="w-full bg-red-600 hover:bg-red-700"
+                      className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                       onClick={verifyAndLoad}
                       disabled={loading}
                     >
