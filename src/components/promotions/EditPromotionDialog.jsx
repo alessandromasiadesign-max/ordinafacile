@@ -320,7 +320,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
                       key={giorno.value}
                       className={`px-4 py-2 rounded-lg border-2 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                         formData.regole.giorni_settimana?.includes(giorno.value)
-                          ? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-100'
+                          ? 'border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-100'
                           : 'border-border hover:bg-accent/60'
                       }`}
                       onClick={() => toggleGiorno(giorno.value)}
@@ -329,7 +329,7 @@ export default function EditPromotionDialog({ open, onClose, promotion }) {
                       <div className="flex items-center gap-2">
                         <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
                           formData.regole.giorni_settimana?.includes(giorno.value)
-                            ? 'border-red-500 bg-red-500'
+                            ? 'border-orange-500 bg-orange-500'
                             : 'border-border'
                         }`}>
                           {formData.regole.giorni_settimana?.includes(giorno.value) && (

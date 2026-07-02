@@ -188,7 +188,7 @@ export default function Locations() {
           </div>
 
           <div className="grid gap-4 md:gap-6 mb-6 md:mb-8">
-            <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white">
+            <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
               <CardContent className="p-4 md:p-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3 md:gap-4">
@@ -197,7 +197,7 @@ export default function Locations() {
                       <h2 className="text-xl md:text-2xl font-bold">
                         {restaurant?.nome ?? restaurant?.name}
                       </h2>
-                      <p className="text-sm md:text-base text-red-100">Sede Principale</p>
+                      <p className="text-sm md:text-base text-orange-100">Sede Principale</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 md:gap-3 w-full sm:w-auto">

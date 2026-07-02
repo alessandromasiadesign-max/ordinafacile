@@ -419,7 +419,7 @@ export default function ChatBot({ restaurant }) {
       {/* Floating Button with Chef Avatar - Mobile Friendly */}
       {/* This button toggles the chat window open/close. It's always rendered. */}
       <motion.button
-        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 bg-gradient-to-br from-red-500 to-red-600 text-white p-3 md:p-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 bg-gradient-to-br from-orange-500 to-orange-600 text-white p-3 md:p-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300"
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -448,9 +448,9 @@ export default function ChatBot({ restaurant }) {
             // Responsive positioning and sizing for mobile/tablet
             className="fixed bottom-36 right-4 md:bottom-40 md:right-6 z-40 w-[calc(100vw-2rem)] sm:w-96 max-w-md"
           >
-            <Card className="shadow-2xl border-2 border-red-200 overflow-hidden">
+            <Card className="shadow-2xl border-2 border-orange-200 overflow-hidden">
               {/* Header */}
-              <div className="bg-gradient-to-r from-red-500 to-red-600 p-3 md:p-4 text-white">
+              <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-3 md:p-4 text-white">
                 <div className="flex items-center gap-2 md:gap-3">
                   <div className="relative">
                     <div className="w-10 h-10 md:w-12 md:h-12 bg-background rounded-full flex items-center justify-center">
@@ -460,7 +460,7 @@ export default function ChatBot({ restaurant }) {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-base md:text-lg">Chef Virtuale</h3>
-                    <p className="text-xs md:text-sm text-red-100">Il tuo assistente personale</p>
+                    <p className="text-xs md:text-sm text-orange-100">Il tuo assistente personale</p>
                   </div>
                   <Button
                     size="sm"

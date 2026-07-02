@@ -169,7 +169,7 @@ export default function AddMenuItemDialog({ open, onClose, category, restaurantI
                     key={allergene.value}
                     className={`flex items-center gap-2 p-2 rounded border-2 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                       formData.allergeni.includes(allergene.value)
-                        ? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-100'
+                        ? 'border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-100'
                         : 'border-border bg-muted hover:bg-accent/60'
                     }`}
                     onClick={() => toggleAllergene(allergene.value)}

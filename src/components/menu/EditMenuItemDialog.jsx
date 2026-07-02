@@ -398,7 +398,7 @@ export default function EditMenuItemDialog({ open, onClose, menuItem }) {
                         key={allergene.value}
                         className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                           (formData.allergeni || []).includes(allergene.value)
-                            ? 'bg-red-50 dark:bg-red-950/30 border-2 border-red-500'
+                            ? 'bg-orange-50 dark:bg-orange-950/30 border-2 border-orange-500'
                             : 'bg-muted border-2 border-border hover:bg-accent'
                         }`}
                         onClick={() => toggleAllergene(allergene.value)}
