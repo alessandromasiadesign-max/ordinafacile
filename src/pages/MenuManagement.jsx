@@ -5,7 +5,7 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, UtensilsCrossed, ChevronDown, ChevronUp, Copy, CopyPlus, Trash2, Calendar, Search, X } from "lucide-react";
+import { Plus, UtensilsCrossed, ChevronDown, ChevronUp, Copy, CopyPlus, Trash2, Calendar, Search, X, Pencil } from "lucide-react";
 
 import {
   AlertDialog,
@@ -907,18 +907,8 @@ export default function MenuManagement() {
 
                 return (
                   <Card key={category.id} className="hover:shadow-md hover:shadow-orange-500/5 transition-all border-border/50">
-                    <div className="p-4 md:p-6 relative">
-                      <button
-                        type="button"
-                        className="absolute inset-0 z-0 rounded-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                        onClick={() => {
-                          if (trimmedSearch) return;
-                          toggleCategory(category.id);
-                        }}
-                        aria-expanded={trimmedSearch ? true : expandedCategories.has(category.id)}
-                        aria-label={`Espandi o comprimi categoria ${category.nome}`}
-                      />
-                      <div className="relative z-10">
+                    <div className="p-4 md:p-6">
+                      <div>
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
                           {category.immagine_url ? (
@@ -996,11 +986,43 @@ export default function MenuManagement() {
                             <Plus className="w-3 h-3 md:w-4 md:h-4 md:mr-1" />
                             <span className="hidden md:inline">Prodotto</span>
                           </Button>
-                          {isExpanded ? (
-                            <ChevronUp className="w-5 h-5 md:w-6 md:h-6 text-muted-foreground" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5 md:w-6 md:h-6 text-muted-foreground" />
-                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isExpanded) toggleCategory(category.id);
+                              // EditCategoryDialog is inside CategorySection, so we expand first then it triggers edit
+                              setTimeout(() => {
+                                const editBtn = document.querySelector(`[data-edit-category="${category.id}"]`);
+                                if (editBtn) editBtn.click();
+                              }, 100);
+                            }}
+                            className="text-xs md:text-sm hidden sm:flex h-9 md:h-10"
+                            title="Modifica categoria"
+                            aria-label="Modifica categoria"
+                          >
+                            <Pencil className="w-3 h-3 md:w-4 md:h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (trimmedSearch) return;
+                              toggleCategory(category.id);
+                            }}
+                            className="h-9 md:h-10 px-2"
+                            aria-expanded={isExpanded}
+                            aria-label={`Espandi o comprimi categoria ${category.nome}`}
+                            title={isExpanded ? "Comprimi" : "Espandi"}
+                          >
+                            {isExpanded ? (
+                              <ChevronUp className="w-5 h-5 md:w-6 md:h-6 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5 md:w-6 md:h-6 text-muted-foreground" />
+                            )}
+                          </Button>
                         </div>
                       </div>
 
@@ -1016,7 +1038,23 @@ export default function MenuManagement() {
                         Aggiungi Prodotto
                       </Button>
 
-                      <div className="grid grid-cols-2 gap-2 mt-2 sm:hidden">
+                      <div className="grid grid-cols-3 gap-2 mt-2 sm:hidden">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isExpanded) toggleCategory(category.id);
+                            setTimeout(() => {
+                              const editBtn = document.querySelector(`[data-edit-category="${category.id}"]`);
+                              if (editBtn) editBtn.click();
+                            }, 100);
+                          }}
+                          className="text-xs"
+                        >
+                          <Pencil className="w-3 h-3 mr-1" />
+                          Modifica
+                        </Button>
                         <Button
                           size="sm"
                           variant="outline"

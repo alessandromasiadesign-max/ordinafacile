@@ -448,6 +448,7 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
               onClick={() => setShowEditCategory(true)}
               aria-label="Modifica categoria"
               title="Modifica categoria"
+              data-edit-category={category?.id}
             >
               <Pencil className="w-4 h-4" />
             </Button>
