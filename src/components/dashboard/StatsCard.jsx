@@ -4,7 +4,7 @@ import { Card, CardHeader } from "@/components/ui/card";
 export default function StatsCard({ title, value, icon: Icon, bgColor, trend, onClick }) {
   return (
     <Card
-      className={`relative overflow-hidden hover:shadow-lg transition-shadow duration-200${onClick ? ' cursor-pointer' : ''}`}
+      className={`relative overflow-hidden hover:shadow-lg hover:shadow-orange-500/5 transition-all duration-200 border-border/50${onClick ? ' cursor-pointer' : ''}`}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
@@ -18,11 +18,11 @@ export default function StatsCard({ title, value, icon: Icon, bgColor, trend, on
         <div className="flex justify-between items-start">
           <div>
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <div className="text-3xl font-bold mt-2">
+            <div className="text-3xl font-extrabold gradient-text mt-2">
               {value}
             </div>
           </div>
-          <div className={`p-3 rounded-xl ${bgColor} bg-opacity-20`}>
+          <div className={`p-3 rounded-xl ${bgColor} bg-opacity-15`}>
             <Icon className={`w-6 h-6 ${bgColor.replace('bg-', 'text-')}`} />
           </div>
         </div>

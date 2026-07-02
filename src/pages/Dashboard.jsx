@@ -11,7 +11,8 @@ import {
   TrendingUp,
   Euro,
   Clock,
-  AlertCircle
+  AlertCircle,
+  ChefHat
 } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -342,6 +343,27 @@ export default function Dashboard() {
                 {shiftIndicatorText}
               </p>
             ) : null}
+          </div>
+
+          <div className="rounded-2xl p-6 md:p-8 mb-6 md:mb-8 bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-xl shadow-orange-500/20">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-3 max-w-xl">
+                <h2 className="text-2xl md:text-3xl font-bold">Ciao, {restaurant?.nome || 'ristoratore'} 👋</h2>
+                <p className="text-white/90 text-sm md:text-base">
+                  Oggi hai {visibleOrders.length} ordini e {pendingOrders.length} in attesa. Incasso giornaliero: €{todayRevenue.toFixed(2)}.
+                </p>
+                <Button
+                  type="button"
+                  className="mt-2 bg-white text-orange-600 hover:bg-white/90 font-semibold rounded-xl px-5 py-2.5 transition shadow-lg"
+                  onClick={() => navigate('/Orders')}
+                >
+                  Gestisci ordini →
+                </Button>
+              </div>
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+                <ChefHat className="w-8 h-8 md:w-10 md:h-10 text-white" />
+              </div>
+            </div>
           </div>
 
           {(menuCategories.length === 0 || menuItems.length === 0) && (

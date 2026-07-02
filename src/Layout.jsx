@@ -286,16 +286,17 @@ export default function Layout({ children }) {
         `}</style>
 
         <Sidebar className="border-r border-border">
-          <SidebarHeader className="border-b border-border p-4">
+          <SidebarHeader className="border-b border-border/50 p-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center shadow-lg shadow-orange-500/20">
                 <Store className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="font-bold truncate">
-                  {showMasterNavigation ? "Ordina Facile" : (restaurant?.name || restaurant?.nome || "Ordina Facile")}
+                  {showMasterNavigation ? "Ordina" : (restaurant?.name || restaurant?.nome || "Ordina")}
+                  <span className="text-orange-500">Facile</span>
                 </h2>
-                <p className="text-xs text-muted-foreground">Gestione Ordini</p>
+                <p className="text-xs text-muted-foreground">{showMasterNavigation ? "Pannello Master" : "Pannello Ristoratore"}</p>
                 {showRestaurantNavigation && restaurants.length > 1 && (
                   <div className="mt-2">
                     <Select value={restaurant?.id || ""} onValueChange={handleRestaurantChange}>
@@ -362,7 +363,7 @@ export default function Layout({ children }) {
                   {showMasterNavigation && (
                     <>
                       <SidebarMenuItem>
-                        <SidebarMenuButton asChild className={`hover:bg-red-50 hover:text-red-700 transition-colors duration-200 rounded-lg mb-1 ${location.pathname === createPageUrl("MasterDashboard") ? 'bg-red-50 text-red-700' : ''}`}>
+                        <SidebarMenuButton asChild className={`hover:bg-orange-50 hover:text-orange-700 transition-colors duration-200 rounded-xl mb-1 ${location.pathname === createPageUrl("MasterDashboard") ? 'bg-orange-500/10 text-orange-700' : ''}`}>
                           <Link to={createPageUrl("MasterDashboard")} className="flex items-center gap-3 px-3 py-2">
                             <Users className="w-4 h-4" />
                             <span className="font-medium">Master Dashboard</span>
@@ -370,7 +371,7 @@ export default function Layout({ children }) {
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                       <SidebarMenuItem>
-                        <SidebarMenuButton asChild className={`hover:bg-red-50 hover:text-red-700 transition-colors duration-200 rounded-lg mb-1 ${location.pathname === createPageUrl("SubscriptionSettings") ? 'bg-red-50 text-red-700' : ''}`}>
+                        <SidebarMenuButton asChild className={`hover:bg-orange-50 hover:text-orange-700 transition-colors duration-200 rounded-xl mb-1 ${location.pathname === createPageUrl("SubscriptionSettings") ? 'bg-orange-500/10 text-orange-700' : ''}`}>
                           <Link to={createPageUrl("SubscriptionSettings")} className="flex items-center gap-3 px-3 py-2">
                             <CreditCard className="w-4 h-4" />
                             <span className="font-medium">Gestione Abbonamenti</span>
@@ -378,7 +379,7 @@ export default function Layout({ children }) {
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                       <SidebarMenuItem>
-                        <SidebarMenuButton asChild className={`hover:bg-red-50 hover:text-red-700 transition-colors duration-200 rounded-lg mb-1 ${location.pathname === createPageUrl("SupportRequests") ? 'bg-red-50 text-red-700' : ''}`}>
+                        <SidebarMenuButton asChild className={`hover:bg-orange-50 hover:text-orange-700 transition-colors duration-200 rounded-xl mb-1 ${location.pathname === createPageUrl("SupportRequests") ? 'bg-orange-500/10 text-orange-700' : ''}`}>
                           <Link to={createPageUrl("SupportRequests")} className="flex items-center gap-3 px-3 py-2">
                             <Headphones className="w-4 h-4" />
                             <span className="font-medium">Richieste Assistenza</span>
@@ -386,7 +387,7 @@ export default function Layout({ children }) {
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                       <SidebarMenuItem>
-                        <SidebarMenuButton asChild className={`hover:bg-red-50 hover:text-red-700 transition-colors duration-200 rounded-lg mb-1 ${location.pathname === createPageUrl("DiscountCodes") ? 'bg-red-50 text-red-700' : ''}`}>
+                        <SidebarMenuButton asChild className={`hover:bg-orange-50 hover:text-orange-700 transition-colors duration-200 rounded-xl mb-1 ${location.pathname === createPageUrl("DiscountCodes") ? 'bg-orange-500/10 text-orange-700' : ''}`}>
                           <Link to={createPageUrl("DiscountCodes")} data-tour="nav-discount-codes" className="flex items-center gap-3 px-3 py-2">
                             <Ticket className="w-4 h-4" />
                             <span className="font-medium">Codici Sconto</span>
@@ -398,7 +399,7 @@ export default function Layout({ children }) {
                   {showRestaurantNavigation && isMasterAccount && (
                     <SidebarMenuItem>
                       <SidebarMenuButton
-                        className="hover:bg-red-50 hover:text-red-700 transition-colors duration-200 rounded-lg mb-1 cursor-pointer"
+                        className="hover:bg-orange-50 hover:text-orange-700 transition-colors duration-200 rounded-xl mb-1 cursor-pointer"
                         onClick={backToMasterView}
                       >
                         <div className="flex items-center gap-3 px-3 py-2">
@@ -412,7 +413,7 @@ export default function Layout({ children }) {
                     <SidebarMenuItem key={item.title}>
                       {item.special === "support" ? (
                         <SidebarMenuButton
-                          className="hover:bg-green-50 hover:text-green-700 transition-colors duration-200 rounded-lg mb-1 cursor-pointer"
+                          className="hover:bg-green-50 hover:text-green-700 transition-colors duration-200 rounded-xl mb-1 cursor-pointer"
                           onClick={() => setShowSupportDialog(true)}
                         >
                           <div className="flex items-center gap-3 px-3 py-2">
@@ -421,7 +422,7 @@ export default function Layout({ children }) {
                           </div>
                         </SidebarMenuButton>
                       ) : (
-                        <SidebarMenuButton asChild className={`hover:bg-red-50 hover:text-red-700 transition-colors duration-200 rounded-lg mb-1 ${location.pathname === item.url ? 'bg-red-50 text-red-700' : ''}`}>
+                        <SidebarMenuButton asChild className={`hover:bg-orange-50 hover:text-orange-700 transition-colors duration-200 rounded-xl mb-1 ${location.pathname === item.url ? 'bg-orange-500/10 text-orange-700' : ''}`}>
                           <Link to={item.url} data-tour={item.tour} className="flex items-center gap-3 px-3 py-2">
                             <item.icon className="w-4 h-4" />
                             <span className="font-medium">{item.title}</span>
@@ -457,12 +458,10 @@ export default function Layout({ children }) {
             )}
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-border p-4">
+          <SidebarFooter className="border-t border-border/50 p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center border border-border flex-shrink-0">
-                <span className="text-muted-foreground font-medium text-sm">
-                  {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || "U"}
-                </span>
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-red-600 text-white flex items-center justify-center font-semibold flex-shrink-0 shadow-md shadow-orange-500/10">
+                {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || "U"}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm truncate" title={user?.user_metadata?.full_name || user?.email || "Utente"}>
@@ -470,7 +469,7 @@ export default function Layout({ children }) {
                 </p>
                 <p className="text-xs text-muted-foreground truncate" title={user?.email}>{user?.email}</p>
                 {isMasterAccount && (
-                  <p className="text-xs text-red-600 font-semibold">Admin Master</p>
+                  <p className="text-xs text-orange-600 font-semibold">Admin Master</p>
                 )}
               </div>
             </div>
