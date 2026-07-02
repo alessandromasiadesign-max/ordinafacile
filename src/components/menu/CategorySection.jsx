@@ -451,7 +451,7 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
             >
               <Pencil className="w-4 h-4" />
             </Button>
-            <Button onClick={onAddItem} className="bg-red-600 hover:bg-red-700">
+            <Button onClick={onAddItem} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20">
               <Plus className="w-4 h-4 mr-2" />
               Aggiungi Prodotto
             </Button>
@@ -555,26 +555,26 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
                           {item.descrizione}
                         </p>
                       )}
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
                         <span className="text-xl font-bold text-red-600">
                           €{formatPrice(item?.prezzo)}
                         </span>
-                        <div className="flex gap-2">
-                          <Button 
+                        <div className="flex gap-2 items-center">
+                          <Button
                             variant={item.esaurito ? "default" : "outline"}
                             size="sm"
                             onClick={(e) => handleToggleEsaurito(item, e)}
                             className={item.esaurito ? "bg-green-600 hover:bg-green-700" : ""}
-                            disabled={toggleEsauritoMutation.isPending} // Disable button while mutation is in progress
+                            disabled={toggleEsauritoMutation.isPending}
                             aria-label={item.esaurito ? "Rendi disponibile" : "Segna come esaurito"}
                           >
-                            {toggleEsauritoMutation.isPending && toggleEsauritoMutation.variables?.id === item.id 
-                              ? "Aggiornamento..." 
+                            {toggleEsauritoMutation.isPending && toggleEsauritoMutation.variables?.id === item.id
+                              ? "Aggiornamento..."
                               : (item.esaurito ? "Rendi Disponibile" : "Segna come Esaurito")
                             }
                           </Button>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="icon"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -626,9 +626,9 @@ export default function CategorySection({ category, menuItems, onAddItem, isExpa
       {/* Floating Add Button - visible only when expanded */}
       {isExpanded && menuItems.length > 0 && (
         <div className="flex justify-center -mt-4 mb-4">
-          <Button 
+          <Button
             onClick={onAddItem}
-            className="bg-red-600 hover:bg-red-700 shadow-lg"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
             size="lg"
           >
             <Plus className="w-5 h-5 mr-2" />
