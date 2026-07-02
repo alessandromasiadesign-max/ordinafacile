@@ -262,7 +262,7 @@ export default function PrintOrders() {
     <div className="p-4 md:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Stampa Comande</h1>
+          <h1 className="text-3xl font-bold">Stampa <span className="gradient-text">Comande</span></h1>
           <p className="text-muted-foreground mt-1">Gestisci la stampa delle comande in arrivo</p>
         </div>
 
@@ -312,7 +312,7 @@ export default function PrintOrders() {
                   size="lg"
                   className={`text-lg px-8 py-6 ${
                     autoPrint 
-                      ? 'bg-red-600 hover:bg-red-700' 
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20'
                       : 'bg-green-600 hover:bg-green-700'
                   }`}
                 >
@@ -452,7 +452,7 @@ export default function PrintOrders() {
                     </div>
                     <Button
                       onClick={() => printOrder(order)}
-                      className="bg-red-600 hover:bg-red-700"
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                       size="lg"
                     >
                       <Printer className="w-5 h-5 mr-2" />

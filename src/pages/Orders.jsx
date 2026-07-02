@@ -475,27 +475,27 @@ export default function Orders() {
       <div className="p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6 md:mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold">Gestione Ordini</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Gestione <span className="gradient-text">Ordini</span></h1>
             <p className="text-sm md:text-base text-muted-foreground mt-1">Visualizza e gestisci tutti gli ordini</p>
           </div>
 
-          <Card className="mb-4 md:mb-6">
+          <Card className="mb-4 md:mb-6 border-border/50 shadow-sm">
             <CardContent className="p-4 md:p-6">
               <div className="flex flex-col gap-3 md:gap-4">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-sm text-muted-foreground">{filteredOrders.length} ordini</div>
+                  <div className="text-sm font-medium text-muted-foreground"><span className="gradient-text font-bold">{filteredOrders.length}</span> ordini</div>
                   <div className="flex items-center gap-2" data-tour="orders-view-toggle">
-                    <div className="inline-flex rounded-lg border border-border bg-slate-100/80 p-1 dark:bg-slate-900/50 dark:border-slate-700/60">
+                    <div className="inline-flex rounded-xl border border-border bg-muted/50 p-1">
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         aria-pressed={viewMode === "list"}
                         onClick={() => setViewMode("list")}
-                        className={`h-8 shadow-none ${
+                        className={`h-8 rounded-lg shadow-none ${
                           viewMode === "list"
-                            ? "bg-background text-slate-900 hover:bg-background dark:bg-slate-800 dark:text-white dark:hover:bg-slate-800"
-                            : "text-slate-700 hover:text-slate-900 hover:bg-background/70 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60"
+                            ? "bg-orange-500 text-white hover:bg-orange-600"
+                            : "text-muted-foreground hover:text-foreground hover:bg-background/70"
                         }`}
                       >
                         <LayoutList className="w-4 h-4 mr-2" />
@@ -507,10 +507,10 @@ export default function Orders() {
                         size="sm"
                         aria-pressed={viewMode === "kanban"}
                         onClick={() => setViewMode("kanban")}
-                        className={`h-8 shadow-none ${
+                        className={`h-8 rounded-lg shadow-none ${
                           viewMode === "kanban"
-                            ? "bg-background text-slate-900 hover:bg-background dark:bg-slate-800 dark:text-white dark:hover:bg-slate-800"
-                            : "text-slate-700 hover:text-slate-900 hover:bg-background/70 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-800/60"
+                            ? "bg-orange-500 text-white hover:bg-orange-600"
+                            : "text-muted-foreground hover:text-foreground hover:bg-background/70"
                         }`}
                       >
                         <Columns3 className="w-4 h-4 mr-2" />
@@ -683,15 +683,18 @@ export default function Orders() {
                 </CardContent>
               </Card>
             ) : filteredOrders.length === 0 ? (
-              <Card>
-                <CardContent className="p-6 md:p-8 text-center">
-                  <Package className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground/50 mx-auto mb-4" />
-                  <p className="text-sm md:text-base text-muted-foreground">Nessun ordine trovato</p>
+              <Card className="border-border/50 border-dashed">
+                <CardContent className="p-8 md:p-12 text-center">
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center mx-auto mb-5">
+                    <Package className="w-8 h-8 md:w-10 md:h-10 text-orange-500/60" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-1">Nessun ordine trovato</h3>
+                  <p className="text-sm text-muted-foreground">Prova a modificare i filtri o attendi nuovi ordini.</p>
                 </CardContent>
               </Card>
             ) : (
               filteredOrders.map((order) => (
-                <Card key={order.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+                <Card key={order.id} className="hover:shadow-lg hover:shadow-orange-500/5 transition-all duration-200 cursor-pointer border-border/50"
                   onClick={() => openOrderDetails(order)}>
                   <CardContent className="p-4 md:p-6">
                     <div className="flex flex-col gap-3 md:gap-4">
@@ -749,7 +752,7 @@ export default function Orders() {
 
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-border">
                         <div className="text-left sm:text-right">
-                          <p className="text-xl md:text-2xl font-bold text-red-600">
+                          <p className="text-xl md:text-2xl font-extrabold gradient-text">
                             €{Number(order.totale ?? 0).toFixed(2)}
                           </p>
                           <p className="text-xs md:text-sm text-muted-foreground">

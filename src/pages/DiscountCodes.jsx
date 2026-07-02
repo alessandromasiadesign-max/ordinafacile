@@ -107,14 +107,14 @@ export default function DiscountCodes() {
     <div className="p-4 md:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Codici Sconto Abbonamenti</h1>
+          <h1 className="text-3xl font-bold"><span className="gradient-text">Codici Sconto</span> Abbonamenti</h1>
           <p className="text-muted-foreground mt-1">Gestisci i codici sconto per gli abbonamenti dei ristoratori</p>
         </div>
 
         <div className="mb-6 flex justify-end">
           <Button
             onClick={() => setShowAddDialog(true)}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
           >
             <Plus className="w-4 h-4 mr-2" />
             Nuovo Codice Sconto
@@ -237,7 +237,7 @@ export default function DiscountCodes() {
                 <p className="text-muted-foreground mb-6">Crea il primo codice sconto per gli abbonamenti</p>
                 <Button
                   onClick={() => setShowAddDialog(true)}
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Crea Primo Codice

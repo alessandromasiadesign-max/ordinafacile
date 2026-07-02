@@ -124,7 +124,7 @@ export default function SupportRequests() {
     <div className="p-4 md:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Richieste Assistenza</h1>
+          <h1 className="text-3xl font-bold">Richieste <span className="gradient-text">Assistenza</span></h1>
           <p className="text-muted-foreground mt-1">Gestisci le richieste di supporto dei ristoratori</p>
         </div>
 
@@ -144,7 +144,7 @@ export default function SupportRequests() {
               </div>
               <Button
                 onClick={() => updateSettingsMutation.mutate(emailSettings || settings[0]?.email_assistenza)}
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
               >
                 Salva Email
               </Button>
@@ -322,7 +322,7 @@ export default function SupportRequests() {
                   Annulla
                 </Button>
                 <Button
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                   onClick={() => {
                     const note = document.getElementById('note-admin').value;
                     updateRequestMutation.mutate({

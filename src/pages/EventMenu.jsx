@@ -353,9 +353,9 @@ export default function EventMenu() {
           
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex items-start gap-3">
-              <Calendar className="w-8 h-8 text-red-600 shrink-0" />
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-500/20"><Calendar className="w-5 h-5 md:w-6 md:h-6 text-white" /></div>
               <div className="min-w-0">
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground truncate">{event?.nome}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground truncate gradient-text">{event?.nome}</h1>
                 <p className="text-sm md:text-base text-muted-foreground">Menu Evento</p>
               </div>
             </div>
@@ -400,7 +400,7 @@ export default function EventMenu() {
               }
               setShowAddItem(true);
             }}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
             disabled={categories.length === 0}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -417,7 +417,7 @@ export default function EventMenu() {
               </p>
               <Button
                 onClick={() => setShowAddCategory(true)}
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Crea Prima Categoria
@@ -536,7 +536,7 @@ export default function EventMenu() {
               </Button>
               <Button
                 type="button"
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                 disabled={!importCategoryId || !!copyBusyCategoryId}
                 onClick={async () => {
                   const source = (standardCategories || []).find((c) => c.id === importCategoryId);

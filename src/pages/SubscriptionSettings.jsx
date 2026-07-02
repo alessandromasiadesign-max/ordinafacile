@@ -185,7 +185,7 @@ export default function SubscriptionSettings() {
     <div className="p-4 md:p-8 bg-background min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Gestione Abbonamenti</h1>
+          <h1 className="text-3xl font-bold text-foreground">Gestione <span className="gradient-text">Abbonamenti</span></h1>
           <p className="text-muted-foreground mt-1">Configura piani e impostazioni di pagamento</p>
         </div>
 
@@ -430,7 +430,7 @@ export default function SubscriptionSettings() {
 
             <Button
               onClick={() => saveSettingsMutation.mutate(platformSettings)}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
             >
               <Save className="w-4 h-4 mr-2" />
               Salva Impostazioni Pagamento
@@ -445,7 +445,7 @@ export default function SubscriptionSettings() {
               <CardTitle>Piani Abbonamento</CardTitle>
               <Button
                 onClick={() => setShowAddPlan(true)}
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Nuovo Piano
@@ -797,7 +797,7 @@ function PlanDialog({ open, onClose, plan }) {
             <Button type="button" variant="outline" onClick={onClose}>
               Annulla
             </Button>
-            <Button type="submit" className="bg-red-600 hover:bg-red-700" disabled={saveMutation.isPending}>
+            <Button type="submit" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20" disabled={saveMutation.isPending}>
               {saveMutation.isPending ? 'Salvataggio...' : 'Salva Piano'}
             </Button>
           </DialogFooter>

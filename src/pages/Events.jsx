@@ -84,12 +84,12 @@ export default function Events() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Gestione Eventi</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Gestione <span className="gradient-text">Eventi</span></h1>
             <p className="text-sm md:text-base text-muted-foreground mt-1">Crea menu speciali per eventi e occasioni</p>
           </div>
-          <Button 
+          <Button
             data-tour="events-add"
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
             onClick={() => setShowAddDialog(true)}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -118,8 +118,8 @@ export default function Events() {
               <p className="text-muted-foreground mb-6">
                 Gestisci menu speciali per matrimoni, feste, banchetti e altre occasioni
               </p>
-              <Button 
-                className="bg-red-600 hover:bg-red-700"
+              <Button
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                 onClick={() => setShowAddDialog(true)}
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -143,18 +143,18 @@ export default function Events() {
               const weekdays = event?.giorni_settimana;
               
               return (
-                <Card key={event.id} className="transition-shadow hover:shadow-lg">
+                <Card key={event.id} className="transition-all hover:shadow-lg hover:shadow-orange-500/5 border-border/50 overflow-hidden">
                   <CardContent className="p-6">
                     {eventImageUrl && (
-                      <img 
+                      <img
                         src={eventImageUrl}
                         alt={eventName}
-                        className="w-full h-32 object-cover rounded-lg mb-4"
+                        className="w-full h-32 object-cover rounded-xl mb-4"
                       />
                     )}
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-lg md:text-xl font-bold mb-2 truncate">{eventName}</h3>
+                        <h3 className="text-lg md:text-xl font-bold mb-2 truncate gradient-text">{eventName}</h3>
                         <Badge
                           className={
                             isActive
@@ -264,7 +264,7 @@ export default function Events() {
                           </Button>
 
                           <Button
-                            className="w-full bg-red-600 hover:bg-red-700 justify-start"
+                            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white justify-start shadow-md shadow-orange-500/15"
                             onClick={() => window.location.href = createPageUrl(`EventMenu?id=${event.id}`)}
                           >
                             <Menu className="w-4 h-4 mr-2" />

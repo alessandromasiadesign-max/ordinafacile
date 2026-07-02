@@ -346,7 +346,7 @@ export default function MasterDashboard() {
     <div className="p-4 md:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Dashboard Master</h1>
+          <h1 className="text-3xl font-bold">Dashboard <span className="gradient-text">Master</span></h1>
           <p className="text-muted-foreground mt-1">Gestisci tutti i ristoranti della piattaforma</p>
         </div>
 
@@ -354,7 +354,7 @@ export default function MasterDashboard() {
           <Button
             variant={activeTab === "overview" ? "default" : "ghost"}
             onClick={() => setActiveTab("overview")}
-            className={activeTab === "overview" ? "bg-red-600 hover:bg-red-700" : ""}
+            className={activeTab === "overview" ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md shadow-orange-500/20" : ""}
           >
             <TrendingUp className="w-4 h-4 mr-2" />
             Panoramica
@@ -362,7 +362,7 @@ export default function MasterDashboard() {
           <Button
             variant={activeTab === "restaurants" ? "default" : "ghost"}
             onClick={() => setActiveTab("restaurants")}
-            className={activeTab === "restaurants" ? "bg-red-600 hover:bg-red-700" : ""}
+            className={activeTab === "restaurants" ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md shadow-orange-500/20" : ""}
           >
             <Store className="w-4 h-4 mr-2" />
             Ristoranti
@@ -370,7 +370,7 @@ export default function MasterDashboard() {
           <Button
             variant={activeTab === "support" ? "default" : "ghost"}
             onClick={() => setActiveTab("support")}
-            className={activeTab === "support" ? "bg-red-600 hover:bg-red-700" : ""}
+            className={activeTab === "support" ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md shadow-orange-500/20" : ""}
           >
             <Headphones className="w-4 h-4 mr-2" />
             Assistenza
@@ -381,7 +381,7 @@ export default function MasterDashboard() {
           <Button
             variant={activeTab === "settings" ? "default" : "ghost"}
             onClick={() => setActiveTab("settings")}
-            className={activeTab === "settings" ? "bg-red-600 hover:bg-red-700" : ""}
+            className={activeTab === "settings" ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md shadow-orange-500/20" : ""}
           >
             <Settings className="w-4 h-4 mr-2" />
             Impostazioni
@@ -481,7 +481,7 @@ export default function MasterDashboard() {
             <CardContent>
               <div className="flex justify-end mb-4">
                 <Button
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                   onClick={() => startManagingRestaurant(selectedRestaurant)}
                 >
                   Gestisci questo ristorante
@@ -743,7 +743,7 @@ export default function MasterDashboard() {
                     <Button
                       onClick={() => savePhoneMutation.mutate()}
                       disabled={savePhoneMutation.isPending || !phoneNumber}
-                      className="bg-red-600 hover:bg-red-700"
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                     >
                       <Save className="w-4 h-4 mr-2" />
                       {savePhoneMutation.isPending ? "Salvataggio..." : "Salva"}
@@ -891,7 +891,7 @@ export default function MasterDashboard() {
             </Button>
             <Button
               type="button"
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
               disabled={updateRestaurantMutation.isPending}
               onClick={saveSubscription}
             >
@@ -1094,7 +1094,7 @@ function SupportRequestsSection({ supportRequests, restaurants }) {
             </Button>
             <Button
               onClick={handleAddNote}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
               disabled={updateNoteMutation.isPending}
             >
               {updateNoteMutation.isPending ? "Salvataggio..." : "Salva Note"}

@@ -261,7 +261,7 @@ export default function Tables() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Gestione Tavoli</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Gestione <span className="gradient-text">Tavoli</span></h1>
             <p className="text-sm md:text-base text-muted-foreground mt-1">
               Crea i QR code per ogni tavolo e ricevi ordini direttamente dai clienti
             </p>

@@ -617,13 +617,13 @@ export default function MenuManagement() {
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Gestione Menu</h1>
+              <h1 className="text-2xl md:text-3xl font-bold">Gestione <span className="gradient-text">Menu</span></h1>
               <p className="text-sm md:text-base text-muted-foreground mt-1">Organizza il tuo menu in categorie</p>
             </div>
-            <Button 
+            <Button
               data-tour="menu-add-category"
               onClick={() => setShowAddCategory(true)}
-              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto text-sm md:text-base"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white w-full sm:w-auto text-sm md:text-base shadow-lg shadow-orange-500/20"
             >
               <Plus className="w-4 h-4 mr-2" />
               Aggiungi Categoria
@@ -631,7 +631,7 @@ export default function MenuManagement() {
           </div>
 
           {categories.length > 0 && (
-            <Card className="mb-4 md:mb-6">
+            <Card className="mb-4 md:mb-6 border-border/50 shadow-sm">
               <CardContent className="p-4 md:p-6">
                 <div className="flex flex-col gap-3">
                   <div className="relative">
@@ -906,11 +906,11 @@ export default function MenuManagement() {
                 const isExpanded = trimmedSearch ? true : expandedCategories.has(category.id);
 
                 return (
-                  <Card key={category.id} className="hover:shadow-md transition-shadow">
+                  <Card key={category.id} className="hover:shadow-md hover:shadow-orange-500/5 transition-all border-border/50">
                     <div className="p-4 md:p-6 relative">
                       <button
                         type="button"
-                        className="absolute inset-0 z-0 rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        className="absolute inset-0 z-0 rounded-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         onClick={() => {
                           if (trimmedSearch) return;
                           toggleCategory(category.id);
@@ -921,15 +921,19 @@ export default function MenuManagement() {
                       <div className="relative z-10">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                          {category.immagine_url && (
-                            <img 
-                              src={category.immagine_url} 
+                          {category.immagine_url ? (
+                            <img
+                              src={category.immagine_url}
                               alt={category.nome}
-                              className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-lg flex-shrink-0"
+                              className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-xl flex-shrink-0"
                             />
+                          ) : (
+                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 flex items-center justify-center flex-shrink-0">
+                              <UtensilsCrossed className="w-6 h-6 md:w-8 md:h-8 text-orange-600 dark:text-orange-400" />
+                            </div>
                           )}
                           <div className="min-w-0 flex-1">
-                            <h3 className="text-lg md:text-2xl font-bold truncate">{category.nome}</h3>
+                            <h3 className="text-lg md:text-2xl font-bold truncate gradient-text">{category.nome}</h3>
                             {category.descrizione && (
                               <p className="text-xs md:text-sm text-muted-foreground mt-1 line-clamp-1">{category.descrizione}</p>
                             )}
@@ -987,7 +991,7 @@ export default function MenuManagement() {
                               e.stopPropagation();
                               handleAddItem(category);
                             }}
-                            className="bg-red-600 hover:bg-red-700 text-xs md:text-sm hidden sm:flex h-9 md:h-10"
+                            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs md:text-sm hidden sm:flex h-9 md:h-10 shadow-md shadow-orange-500/15"
                           >
                             <Plus className="w-3 h-3 md:w-4 md:h-4 md:mr-1" />
                             <span className="hidden md:inline">Prodotto</span>
@@ -1006,7 +1010,7 @@ export default function MenuManagement() {
                           e.stopPropagation();
                           handleAddItem(category);
                         }}
-                        className="bg-red-600 hover:bg-red-700 w-full mt-3 sm:hidden text-xs"
+                        className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white w-full mt-3 sm:hidden text-xs"
                       >
                         <Plus className="w-3 h-3 mr-1" />
                         Aggiungi Prodotto

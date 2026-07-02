@@ -175,12 +175,12 @@ export default function Locations() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Gestione Sedi</h1>
+              <h1 className="text-2xl md:text-3xl font-bold">Gestione <span className="gradient-text">Sedi</span></h1>
               <p className="text-sm md:text-base text-muted-foreground mt-1">Gestisci le tue filiali e punti vendita</p>
             </div>
             <Button
               onClick={() => setShowAddDialog(true)}
-              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20 w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nuova Sede

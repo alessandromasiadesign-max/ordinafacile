@@ -284,7 +284,7 @@ export default function Promotions() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Gestione Promozioni</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Gestione <span className="gradient-text">Promozioni</span></h1>
             <p className="text-sm md:text-base text-muted-foreground mt-1">Crea e gestisci sconti e offerte speciali</p>
           </div>
           {/* Removed the old Template Pronti and Nuova Promozione buttons */}
@@ -297,7 +297,7 @@ export default function Promotions() {
             onClick={() => setActiveTab('mine')}
             className={
               activeTab === 'mine'
-                ? 'bg-red-600 text-white hover:bg-red-700'
+                ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-md shadow-orange-500/20'
                 : 'border border-border text-muted-foreground hover:bg-accent/60'
             }
           >
@@ -308,7 +308,7 @@ export default function Promotions() {
             onClick={() => setActiveTab('templates')}
             className={
               activeTab === 'templates'
-                ? 'bg-red-600 text-white hover:bg-red-700'
+                ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-md shadow-orange-500/20'
                 : 'border border-border text-muted-foreground hover:bg-accent/60'
             }
           >
@@ -323,7 +323,7 @@ export default function Promotions() {
             }}
             className={
               activeTab === 'create'
-                ? 'bg-red-600 text-white hover:bg-red-700'
+                ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-md shadow-orange-500/20'
                 : 'border border-border text-muted-foreground hover:bg-accent/60'
             }
           >
@@ -359,7 +359,7 @@ export default function Promotions() {
                   <Button 
                     onClick={() => setActiveTab('templates')} // Changed to set activeTab
                     variant="outline"
-                    className="border-red-600 text-red-600 hover:bg-red-50"
+                    className="border-orange-500 text-orange-600 hover:bg-orange-50"
                   >
                     <Copy className="w-4 h-4 mr-2" />
                     Usa Template
@@ -369,7 +369,7 @@ export default function Promotions() {
                       setActiveTab('create');
                       setShowAddDialog(true);
                     }}
-                    className="bg-red-600 hover:bg-red-700"
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Crea Promozione
@@ -521,7 +521,7 @@ export default function Promotions() {
                   </div>
                   <Button 
                     onClick={() => createFromTemplateMutation.mutate(template)}
-                    className="w-full mt-4 bg-red-600 hover:bg-red-700"
+                    className="w-full mt-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md shadow-orange-500/20"
                     disabled={createFromTemplateMutation.isPending}
                   >
                     <Copy className="w-4 h-4 mr-2" />

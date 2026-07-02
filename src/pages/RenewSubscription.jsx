@@ -538,7 +538,7 @@ export default function RenewSubscription() {
     <div className="p-4 md:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-5xl mx-auto">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold">Rinnova il tuo Abbonamento</h1>
+          <h1 className="text-3xl font-bold">Rinnova il tuo <span className="gradient-text">Abbonamento</span></h1>
           <p className="text-muted-foreground mt-1">Scegli il piano più adatto alle tue esigenze</p>
           {restaurant && (
             <Badge className="mt-2 bg-yellow-500">
@@ -585,7 +585,7 @@ export default function RenewSubscription() {
             <button
               className={`px-6 py-2 rounded-md transition-all ${
                 billingPeriod === "mensile"
-                  ? "bg-red-600 text-white"
+                  ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/20"
                   : "text-muted-foreground hover:text-foreground"
               }`}
               onClick={() => setBillingPeriod("mensile")}
@@ -595,7 +595,7 @@ export default function RenewSubscription() {
             <button
               className={`px-6 py-2 rounded-md transition-all ${
                 billingPeriod === "annuale"
-                  ? "bg-red-600 text-white"
+                  ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/20"
                   : "text-muted-foreground hover:text-foreground"
               }`}
               onClick={() => setBillingPeriod("annuale")}
@@ -682,7 +682,7 @@ export default function RenewSubscription() {
 
                   {isSelected && (
                     <div className="mt-4 text-center">
-                      <Badge className="bg-red-600">Piano Selezionato</Badge>
+                      <Badge className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">Piano Selezionato</Badge>
                     </div>
                   )}
                 </CardContent>
@@ -816,7 +816,7 @@ export default function RenewSubscription() {
 
               {paymentMethod === 'paypal' && paypalClientId && Number.isFinite(finalPrice) && finalPrice <= 0 ? (
                 <Button
-                  className="w-full bg-red-600 hover:bg-red-700"
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                   size="lg"
                   onClick={() => paypalCaptureMutation.mutate({ orderId: null })}
                   disabled={paypalCaptureMutation.isPending}
@@ -826,7 +826,7 @@ export default function RenewSubscription() {
                 </Button>
               ) : paymentMethod === 'paypal' && paypalClientId ? null : (
                 <Button
-                  className="w-full bg-red-600 hover:bg-red-700"
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20"
                   size="lg"
                   onClick={handleRenew}
                   disabled={renewMutation.isPending || stripeCheckoutMutation.isPending}

@@ -529,7 +529,7 @@ export default function Settings() {
     <div className="p-4 md:p-8 bg-background text-foreground min-h-screen">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold">Impostazioni Ristorante</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Impostazioni <span className="gradient-text">Ristorante</span></h1>
           <p className="text-sm md:text-base text-muted-foreground mt-1">Configura i dettagli del tuo ristorante</p>
         </div>
 
@@ -551,7 +551,7 @@ export default function Settings() {
                     }}
                     className={`inline-flex items-center rounded-full border px-3 py-1 text-sm whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                       isActive
-                        ? 'border-red-600 bg-red-600 text-white hover:bg-red-700'
+                        ? 'border-orange-500 bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-md shadow-orange-500/20'
                         : 'border-border bg-background text-foreground hover:bg-accent/60'
                     }`}
                   >
@@ -1523,9 +1523,9 @@ export default function Settings() {
           )}
 
           <div className="flex justify-end mt-6 sticky bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 -mx-4 px-4 md:static md:border-0 md:bg-transparent md:backdrop-blur-none md:py-0 md:mx-0 md:px-0">
-            <Button 
-              type="submit" 
-              className="bg-red-600 hover:bg-red-700 w-full md:w-auto text-sm md:text-base"
+            <Button
+              type="submit"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white w-full md:w-auto text-sm md:text-base shadow-lg shadow-orange-500/20"
               disabled={saveMutation.isPending || uploading.logo || uploading.header || uploading.background}
             >
               <Save className="w-4 h-4 mr-2" />

@@ -260,7 +260,7 @@ export default function OrderHistory() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Storico Ordini</h1>
+            <h1 className="text-3xl font-bold">Storico <span className="gradient-text">Ordini</span></h1>
             <p className="text-muted-foreground mt-1">Visualizza, analizza e scarica i tuoi ordini</p>
           </div>
 
