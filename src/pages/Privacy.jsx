@@ -11,7 +11,7 @@ export default function Privacy() {
 
         <Link 
           to={createPageUrl("Dashboard")}
-          className="flex items-center gap-2 text-red-600 hover:text-red-700 mb-6"
+          className="flex items-center gap-2 text-orange-600 hover:text-orange-700 mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Torna alla Dashboard
@@ -20,7 +20,7 @@ export default function Privacy() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3 mb-2">
-              <Shield className="w-8 h-8 text-red-600" />
+              <Shield className="w-8 h-8 text-orange-600" />
               <CardTitle className="text-3xl">Informativa Privacy (Ristoratori)</CardTitle>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -49,7 +49,7 @@ export default function Privacy() {
               <p className="text-muted-foreground">
                 Se sei un cliente finale e stai effettuando un ordine presso un ristorante, il Titolare del trattamento dei
                 dati dell'ordine è il ristorante presso cui stai ordinando. Puoi consultare l'informativa dedicata alla pagina
-                <Link to={createPageUrl("PrivacyClienti")} className="text-red-600 hover:underline ml-1">
+                <Link to={createPageUrl("PrivacyClienti")} className="text-orange-600 hover:underline ml-1">
                   Privacy (Clienti)
                 </Link>.
               </p>
@@ -167,7 +167,7 @@ export default function Privacy() {
                 Il sito utilizza cookies tecnici necessari al funzionamento e cookies analitici
                 per migliorare l'esperienza utente. Puoi gestire le preferenze cookies tramite
                 le impostazioni del browser. Per maggiori informazioni, consulta la nostra
-                <Link to={createPageUrl("Cookies")} className="text-red-600 hover:underline ml-1">
+                <Link to={createPageUrl("Cookies")} className="text-orange-600 hover:underline ml-1">
                   Cookie Policy
                 </Link>.
               </p>

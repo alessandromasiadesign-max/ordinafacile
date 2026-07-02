@@ -635,14 +635,14 @@ export default function RenewSubscription() {
               <Card
                 key={plan.id}
                 className={`cursor-pointer transition-all hover:shadow-lg ${
-                  isSelected ? 'border-4 border-red-600' : ''
+                  isSelected ? 'border-4 border-orange-500' : ''
                 }`}
                 onClick={() => setSelectedPlan(plan)}
               >
                 <CardContent className="p-6">
                   <div className="text-center mb-4">
                     <h3 className="text-2xl font-bold mb-2">{plan.nome}</h3>
-                    <div className="text-4xl font-bold text-red-600 mb-1">€{price}</div>
+                    <div className="text-4xl font-bold text-orange-600 mb-1">€{price}</div>
                     <div className="text-sm text-muted-foreground">/{billingPeriod === "mensile" ? "mese" : "anno"}</div>
                     {billingPeriod === "annuale" && plan.prezzo_annuale > 0 && (
                       <Badge variant="outline" className="mt-2">
@@ -762,7 +762,7 @@ export default function RenewSubscription() {
                     <p><strong>Intestatario:</strong> {paymentInfo.intestatario}</p>
                     <p><strong>Banca:</strong> {paymentInfo.banca}</p>
                     <p><strong>Causale:</strong> Rinnovo Abbonamento {restaurant?.nome}</p>
-                    <p className="text-red-600 font-semibold mt-2">Importo: €{Number.isFinite(finalPrice) ? finalPrice.toFixed(2) : '0.00'}</p>
+                    <p className="text-orange-600 font-semibold mt-2">Importo: €{Number.isFinite(finalPrice) ? finalPrice.toFixed(2) : '0.00'}</p>
                   </div>
                 </div>
               )}
@@ -770,7 +770,7 @@ export default function RenewSubscription() {
               {paymentMethod === "paypal" && paymentInfo.paypal_email && !paypalClientId && (
                 <div className="bg-blue-50 border border-blue-200 dark:bg-blue-950/30 dark:border-blue-900 rounded-lg p-4">
                   <p className="text-sm"><strong>Email PayPal:</strong> {paymentInfo.paypal_email}</p>
-                  <p className="text-sm mt-2 text-red-600 font-semibold">Importo: €{Number.isFinite(finalPrice) ? finalPrice.toFixed(2) : '0.00'}</p>
+                  <p className="text-sm mt-2 text-orange-600 font-semibold">Importo: €{Number.isFinite(finalPrice) ? finalPrice.toFixed(2) : '0.00'}</p>
                 </div>
               )}
 
@@ -809,7 +809,7 @@ export default function RenewSubscription() {
                   </div>
                   <div className="flex justify-between border-t pt-2 text-lg font-bold">
                     <span>Totale:</span>
-                    <span className="text-red-600">€{Number.isFinite(finalPrice) ? finalPrice.toFixed(2) : '0.00'}</span>
+                    <span className="text-orange-600">€{Number.isFinite(finalPrice) ? finalPrice.toFixed(2) : '0.00'}</span>
                   </div>
                 </div>
               </div>

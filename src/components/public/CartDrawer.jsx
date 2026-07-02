@@ -515,7 +515,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Totale:</span>
-                <span className="font-bold text-red-600 text-xl">
+                <span className="font-bold text-orange-600 text-xl">
                   €{completedOrder.totale.toFixed(2)}
                 </span>
               </div>
@@ -718,7 +718,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="note" className="text-red-600 font-bold text-base">
+                <Label htmlFor="note" className="text-orange-600 font-bold text-base">
                   🍽️ Aggiungi richieste speciali (senza cipolla, cottura, ecc.)
                 </Label>
                 <Textarea
@@ -727,7 +727,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   onChange={(e) => setCustomerData(prev => ({ ...prev, note: e.target.value }))}
                   placeholder="Es: senza cipolla, cottura media, no lattosio, extra piccante..."
                   rows={4}
-                  className="border-2 border-red-200 focus:border-red-500 bg-red-50 dark:border-red-900/40 dark:bg-red-950/20"
+                  className="border-2 border-orange-200 focus:border-orange-500 bg-orange-50 dark:border-orange-900/40 dark:bg-orange-950/20"
                 />
                 <p className="text-xs text-muted-foreground">
                   Comunicaci qui tutte le tue preferenze e richieste speciali
@@ -781,7 +781,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                 type="button"
                 className={`flex w-full items-start space-x-3 p-3 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   acceptTerms 
-                    ? 'border-red-500 bg-red-50 dark:bg-red-950/20' 
+                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/20' 
                     : 'border-border hover:bg-accent/60'
                 }`}
                 onClick={() => setAcceptTerms(prev => !prev)}
@@ -789,7 +789,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
               >
                 <div className={`w-5 h-5 flex-shrink-0 flex items-center justify-center border-2 rounded transition-all mt-0.5 ${
                   acceptTerms 
-                    ? 'border-red-500 bg-red-500' 
+                    ? 'border-orange-500 bg-orange-500' 
                     : 'border-border'
                 }`}>
                   {acceptTerms && <Check className="w-3 h-3 text-white" />}
@@ -798,7 +798,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   Accetto i
                   <Link
                     to={createPageUrl("Terms")}
-                    className="ml-1 text-red-600 hover:underline"
+                    className="ml-1 text-orange-600 hover:underline"
                     onClick={(e) => e.stopPropagation()}
                   >
                     termini e condizioni
@@ -806,7 +806,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   <span> e la </span>
                   <Link
                     to={createPageUrl("PrivacyClienti")}
-                    className="text-red-600 hover:underline"
+                    className="text-orange-600 hover:underline"
                     onClick={(e) => e.stopPropagation()}
                   >
                     privacy policy
@@ -854,7 +854,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                       <div className="mt-2 space-y-1">
                         {item.modificatori.map((mod, i) => (
                           <div key={i} className="text-sm text-muted-foreground flex items-center gap-1">
-                            <span className="text-red-600">•</span>
+                            <span className="text-orange-600">•</span>
                             <span>{formatModifier(mod)}</span>
                           </div>
                         ))}
@@ -897,7 +897,7 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-muted-foreground">€{item.prezzo_totale.toFixed(2)} cad.</div>
-                    <div className="text-xl font-bold text-red-600">
+                    <div className="text-xl font-bold text-orange-600">
                       €{(item.prezzo_totale * item.quantita).toFixed(2)}
                     </div>
                   </div>
@@ -974,9 +974,9 @@ export default function CartDrawer({ open, onClose, cart, restaurant, deliveryTy
                   <span className="font-bold">-€{discount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-2xl font-bold pt-3 border-t bg-red-50 dark:bg-red-950/20 -mx-4 px-4 py-3 rounded-lg">
+              <div className="flex justify-between text-2xl font-bold pt-3 border-t bg-orange-50 dark:bg-orange-950/20 -mx-4 px-4 py-3 rounded-lg">
                 <span>Totale</span>
-                <span className="text-red-600">€{total.toFixed(2)}</span>
+                <span className="text-orange-600">€{total.toFixed(2)}</span>
               </div>
             </div>
 

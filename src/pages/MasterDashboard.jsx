@@ -956,9 +956,9 @@ function SupportRequestsSection({ supportRequests, restaurants }) {
         <CardHeader>
           <CardTitle>Richieste di Assistenza Tecnica</CardTitle>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <div className="bg-red-50 border border-red-200 dark:bg-red-950/30 dark:border-red-900 rounded-lg p-4 text-center">
+            <div className="bg-orange-50 border border-orange-200 dark:bg-orange-950/30 dark:border-orange-900 rounded-lg p-4 text-center">
               <p className="text-sm text-muted-foreground">Nuove</p>
-              <p className="text-3xl font-bold text-red-600">
+              <p className="text-3xl font-bold text-orange-600">
                 {supportRequests.filter(r => r.stato === "aperta").length}
               </p>
             </div>

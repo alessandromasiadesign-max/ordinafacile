@@ -1,0 +1,14 @@
+﻿npx : Vercel CLI 54.18.6 (Node.js 18.20.5)
+In riga:1 car:1
++ npx vercel --yes --cwd d:\Lavori\ordinafacile 2>&1 | Out-File d:\Lavo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Vercel CLI 54.18.6 (Node.js 18.20.5):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Retrieving projectÔÇª
+Deploying alessandros-projects-105fd6d0/ordinafacile
+Uploading [--------------------] (0.0B/1017.7KB)
+Uploading [=====---------------] (264.4KB/1017.7KB)
+Uploading [==========----------] (516.8KB/1017.7KB)
+Uploading [===============-----] (778.4KB/1017.7KB)
+Uploading [====================] (1017.7KB/1017.7KB)

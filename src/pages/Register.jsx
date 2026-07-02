@@ -62,7 +62,7 @@ export default function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-4">
       <div className="w-full max-w-md rounded-xl border border-border bg-card text-card-foreground shadow p-6">
-        <h1 className="text-xl font-semibold tracking-tight">Crea un account</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Crea un account su <span className="gradient-text">OrdinaFacile</span></h1>
 
         {success ? (
           <div className="mt-6 space-y-4">
@@ -75,7 +75,7 @@ export default function Register() {
 
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 w-full bg-foreground text-background hover:bg-foreground/90"
+              className="inline-flex items-center justify-center rounded-xl text-sm font-medium h-10 px-4 py-2 w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20 transition-all"
               onClick={() => (window.location.href = createPageUrl("Login"))}
             >
               Vai al login
@@ -129,7 +129,7 @@ export default function Register() {
 
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 w-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-xl text-sm font-medium h-10 px-4 py-2 w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20 disabled:opacity-50 transition-all"
               disabled={loading}
             >
               {loading ? "Creazione account..." : "Registrati"}

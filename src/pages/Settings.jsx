@@ -1328,14 +1328,14 @@ export default function Settings() {
                   type="button"
                   className={`flex w-full items-center gap-3 rounded-lg border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                     formData.modalita_consegna?.includes("consegna")
-                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
+                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/30'
                       : 'border-border hover:bg-accent/60'
                   }`}
                   onClick={() => toggleModalita("consegna")}
                 >
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                     formData.modalita_consegna?.includes("consegna") 
-                      ? 'border-red-500 bg-red-500' 
+                      ? 'border-orange-500 bg-orange-500' 
                       : 'border-border'
                   }`}>
                     {formData.modalita_consegna?.includes("consegna") && (
@@ -1351,14 +1351,14 @@ export default function Settings() {
                   type="button"
                   className={`flex w-full items-center gap-3 rounded-lg border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                     formData.modalita_consegna?.includes("asporto")
-                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
+                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/30'
                       : 'border-border hover:bg-accent/60'
                   }`}
                   onClick={() => toggleModalita("asporto")}
                 >
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                     formData.modalita_consegna?.includes("asporto") 
-                      ? 'border-red-500 bg-red-500' 
+                      ? 'border-orange-500 bg-orange-500' 
                       : 'border-border'
                   }`}>
                     {formData.modalita_consegna?.includes("asporto") && (
@@ -1398,7 +1398,7 @@ export default function Settings() {
                 type="button"
                 className={`flex w-full items-center gap-3 rounded-lg border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   formData.settings?.order_capacity?.enabled
-                    ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
+                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/30'
                     : 'border-border hover:bg-accent/60'
                 }`}
                 onClick={() => setFormData(prev => ({
@@ -1414,7 +1414,7 @@ export default function Settings() {
               >
                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                   formData.settings?.order_capacity?.enabled
-                    ? 'border-red-500 bg-red-500'
+                    ? 'border-orange-500 bg-orange-500'
                     : 'border-border'
                 }`}>
                   {formData.settings?.order_capacity?.enabled && (

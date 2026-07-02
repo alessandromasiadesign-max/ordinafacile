@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 
-export function LoadingSpinner({ size = "md", color = "red" }) {
+export function LoadingSpinner({ size = "md", color = "orange" }) {
   const sizeClasses = {
     sm: "w-4 h-4",
     md: "w-8 h-8",
@@ -11,6 +11,7 @@ export function LoadingSpinner({ size = "md", color = "red" }) {
   };
 
   const colorClasses = {
+    orange: "text-orange-600",
     red: "text-red-600",
     white: "text-white",
     gray: "text-muted-foreground"

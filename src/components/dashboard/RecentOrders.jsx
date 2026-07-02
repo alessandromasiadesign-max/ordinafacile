@@ -70,7 +70,7 @@ export default function RecentOrders({ orders, isLoading }) {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-red-600">
+                  <div className="text-2xl font-bold text-orange-600">
                     €{order.totale.toFixed(2)}
                   </div>
                   <div className="text-sm text-muted-foreground">

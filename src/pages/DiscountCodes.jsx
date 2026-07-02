@@ -134,7 +134,7 @@ export default function DiscountCodes() {
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
-                        <Ticket className="w-6 h-6 text-red-600" />
+                        <Ticket className="w-6 h-6 text-orange-600" />
                         <div>
                           <h3 className="text-xl font-bold">{code.codice}</h3>
                           {code.descrizione && (
@@ -149,7 +149,7 @@ export default function DiscountCodes() {
                           <div className="font-semibold">
                             {tipoScontoLabels[code.tipo_sconto]}
                             {code.valore_sconto && (
-                              <span className="ml-2 text-red-600">
+                              <span className="ml-2 text-orange-600">
                                 {code.tipo_sconto === "percentuale" ? `${code.valore_sconto}%` :
                                  code.tipo_sconto === "fisso" ? `€${code.valore_sconto}` :
                                  code.tipo_sconto === "mesi_gratis" ? `${code.valore_sconto} mesi` : 

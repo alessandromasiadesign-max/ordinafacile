@@ -11,7 +11,7 @@ export default function Cookies() {
       <div className="max-w-4xl mx-auto">
         <Link 
           to={createPageUrl("Dashboard")}
-          className="flex items-center gap-2 text-red-600 hover:text-red-700 mb-6"
+          className="flex items-center gap-2 text-orange-600 hover:text-orange-700 mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Torna alla Dashboard
@@ -20,7 +20,7 @@ export default function Cookies() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3 mb-2">
-              <Cookie className="w-8 h-8 text-red-600" />
+              <Cookie className="w-8 h-8 text-orange-600" />
               <CardTitle className="text-3xl">Cookie Policy</CardTitle>
             </div>
             <p className="text-sm text-muted-foreground">

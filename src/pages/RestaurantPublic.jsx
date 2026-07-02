@@ -806,7 +806,7 @@ export default function RestaurantPublic() {
 
       {/* Promozioni in Evidenza */}
       {featuredPromotions.length > 0 && (
-        <div className="bg-gradient-to-r from-red-500 to-red-600 text-white py-4 px-4">
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 px-4">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-4 overflow-x-auto">
               {featuredPromotions.map(promo => (
@@ -931,7 +931,7 @@ export default function RestaurantPublic() {
               <Filter className="w-4 h-4 mr-2" />
               Filtra per Allergeni
               {selectedAllergeni.length > 0 && (
-                <Badge className="ml-2 bg-red-500">{selectedAllergeni.length}</Badge>
+                <Badge className="ml-2 bg-orange-500">{selectedAllergeni.length}</Badge>
               )}
             </Button>
 
@@ -943,7 +943,7 @@ export default function RestaurantPublic() {
                     key={allergene.value}
                     className={`flex items-center gap-2 p-2 rounded border-2 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                       selectedAllergeni.includes(allergene.value)
-                        ? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-100'
+                        ? 'border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-100'
                         : 'border-border bg-muted hover:bg-accent/60'
                     }`}
                     onClick={() => toggleAllergene(allergene.value)}

@@ -488,7 +488,7 @@ export default function SubscriptionSettings() {
                     <p className="text-muted-foreground text-sm mb-4">{plan.descrizione}</p>
 
                     <div className="space-y-2 mb-4">
-                      <div className="text-3xl font-bold text-red-600">
+                      <div className="text-3xl font-bold text-orange-600">
                         €{plan.prezzo_mensile}
                         <span className="text-sm text-muted-foreground">/mese</span>
                       </div>

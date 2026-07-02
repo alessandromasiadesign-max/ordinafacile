@@ -59,13 +59,13 @@ export const Toast = ({ id, title, description, type, onClose }) => {
   const styles = {
     success: "bg-green-50 border-green-200 text-green-900",
     error: "bg-red-50 border-red-200 text-red-900",
-    info: "bg-red-50 border-red-200 text-red-900"
+    info: "bg-orange-50 border-orange-200 text-orange-900"
   };
 
   const iconColors = {
     success: "text-green-600",
     error: "text-red-600",
-    info: "text-red-600"
+    info: "text-orange-600"
   };
 
   return (

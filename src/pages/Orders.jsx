@@ -606,7 +606,7 @@ export default function Orders() {
                                     <div className="text-xs text-muted-foreground mt-1">{safeFormatDate(order.created_date)}</div>
                                   </div>
                                   <div className="text-right flex-shrink-0">
-                                    <div className="font-bold text-sm text-red-600">{Number(order.totale ?? 0).toFixed(2)}</div>
+                                    <div className="font-bold text-sm text-orange-600">{Number(order.totale ?? 0).toFixed(2)}</div>
                                     <div className="text-xs text-muted-foreground">{order.items_count ?? (order.items?.length || 0)} prod.</div>
                                   </div>
                                 </div>

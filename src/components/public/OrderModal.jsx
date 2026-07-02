@@ -132,7 +132,7 @@ export default function OrderModal({ item, onClose, onAdd }) {
           <div className="border-t pt-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-lg font-semibold">Prezzo base</span>
-              <span className="text-xl font-bold text-red-600">€{Number(item?.prezzo ?? 0).toFixed(2)}</span>
+              <span className="text-xl font-bold text-orange-600">€{Number(item?.prezzo ?? 0).toFixed(2)}</span>
             </div>
           </div>
 
@@ -162,7 +162,7 @@ export default function OrderModal({ item, onClose, onAdd }) {
                           key={i} 
                           className={`flex w-full items-center justify-between p-4 border-2 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                             isSelected 
-                              ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
+                              ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/30' 
                               : 'border-border hover:bg-accent'
                           }`}
                           onClick={() => {
@@ -179,7 +179,7 @@ export default function OrderModal({ item, onClose, onAdd }) {
                               modifier.tipo === "singolo" ? 'rounded-full' : 'rounded'
                             } ${
                               isSelected 
-                                ? 'border-red-500 bg-red-500' 
+                                ? 'border-orange-500 bg-orange-500' 
                                 : 'border-border'
                             }`}>
                               {isSelected && <Check className="w-4 h-4 text-white" />}
@@ -187,7 +187,7 @@ export default function OrderModal({ item, onClose, onAdd }) {
                             <span className="font-medium">{option.nome}</span>
                           </div>
                           {option.prezzo_extra > 0 && (
-                            <span className="text-red-600 font-bold">
+                            <span className="text-orange-600 font-bold">
                               +€{option.prezzo_extra.toFixed(2)}
                             </span>
                           )}
@@ -222,7 +222,7 @@ export default function OrderModal({ item, onClose, onAdd }) {
         <DialogFooter className="border-t pt-4 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-sm text-muted-foreground">Totale</span>
-            <span className="text-3xl font-bold text-red-600">
+            <span className="text-3xl font-bold text-orange-600">
               €{totalPrice.toFixed(2)}
             </span>
           </div>

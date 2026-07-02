@@ -416,7 +416,7 @@ export default function Promotions() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Sconto:</span>
-                        <span className="font-bold text-red-600">
+                        <span className="font-bold text-orange-600">
                           {promo.tipo_sconto === "percentuale" 
                             ? `${promo.valore_sconto}%`
                             : `€${promo.valore_sconto.toFixed(2)}`
@@ -501,7 +501,7 @@ export default function Promotions() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Sconto:</span>
-                      <span className="font-bold text-red-600">
+                      <span className="font-bold text-orange-600">
                         {template.tipo_sconto === "percentuale" 
                           ? `${template.valore_sconto}%`
                           : `€${template.valore_sconto.toFixed(2)}`

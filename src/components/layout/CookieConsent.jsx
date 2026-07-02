@@ -102,7 +102,7 @@ export default function CookieConsent() {
                   Usiamo cookie tecnici necessari al funzionamento. Puoi accettare anche cookie analitici per migliorare l’esperienza.
                   <Link
                     to={createPageUrl("Cookies")}
-                    className="ml-1 text-red-600 hover:underline"
+                    className="ml-1 text-orange-600 hover:underline"
                   >
                     Leggi la Cookie Policy
                   </Link>
@@ -180,7 +180,7 @@ export default function CookieConsent() {
             <div className="text-xs text-muted-foreground">
               <Link
                 to={createPageUrl("Cookies")}
-                className="text-red-600 hover:underline"
+                className="text-orange-600 hover:underline"
               >
                 Consulta la Cookie Policy
               </Link>

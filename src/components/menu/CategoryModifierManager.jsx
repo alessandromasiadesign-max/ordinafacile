@@ -156,7 +156,7 @@ export default function CategoryModifierManager({ category, onClose }) {
                     <div key={i} className="flex justify-between text-sm border-b pb-1">
                       <span>{opt.nome}</span>
                       {Number(opt.prezzo_extra ?? 0) > 0 && (
-                        <span className="text-red-600 font-semibold">
+                        <span className="text-orange-600 font-semibold">
                           +€{Number(opt.prezzo_extra ?? 0).toFixed(2)}
                         </span>
                       )}
@@ -235,7 +235,7 @@ export default function CategoryModifierManager({ category, onClose }) {
                     <span>{opt.nome}</span>
                     <div className="flex items-center gap-3">
                       {Number(opt.prezzo_extra ?? 0) > 0 && (
-                        <span className="text-red-600 font-semibold">
+                        <span className="text-orange-600 font-semibold">
                           +€{Number(opt.prezzo_extra ?? 0).toFixed(2)}
                         </span>
                       )}

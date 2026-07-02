@@ -133,7 +133,7 @@ export default function ModifierManager({ menuItem, onClose }) {
                     <div key={i} className="flex justify-between text-sm border-b pb-1">
                       <span>{opt.nome}</span>
                       {opt.prezzo_extra > 0 && (
-                        <span className="text-red-600 font-semibold">
+                        <span className="text-orange-600 font-semibold">
                           +€{opt.prezzo_extra.toFixed(2)}
                         </span>
                       )}
@@ -211,7 +211,7 @@ export default function ModifierManager({ menuItem, onClose }) {
                     <span>{opt.nome}</span>
                     <div className="flex items-center gap-3">
                       {opt.prezzo_extra > 0 && (
-                        <span className="text-red-600 font-semibold">
+                        <span className="text-orange-600 font-semibold">
                           +€{opt.prezzo_extra.toFixed(2)}
                         </span>
                       )}

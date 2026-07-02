@@ -151,7 +151,7 @@ export default function OrderDetailsModal({ order, onClose }) {
               )}
               <div className="flex justify-between text-lg font-bold pt-2 border-t">
                 <span>Totale</span>
-                <span className="text-red-600">€{order.totale.toFixed(2)}</span>
+                <span className="text-orange-600">€{order.totale.toFixed(2)}</span>
               </div>
             </div>
           </div>

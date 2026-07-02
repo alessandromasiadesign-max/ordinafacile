@@ -11,7 +11,7 @@ export default function Terms() {
 
         <Link 
           to={createPageUrl("Dashboard")}
-          className="flex items-center gap-2 text-red-600 hover:text-red-700 mb-6"
+          className="flex items-center gap-2 text-orange-600 hover:text-orange-700 mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Torna alla Dashboard

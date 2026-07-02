@@ -379,7 +379,7 @@ export default function EventMenu() {
               setShowImportDialog(true);
             }}
             variant="outline"
-            className="border-red-600 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/30"
+            className="border-orange-500 text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-950/30"
           >
             <Copy className="w-4 h-4 mr-2" />
             Importa dal Menu Standard
@@ -388,7 +388,7 @@ export default function EventMenu() {
           <Button
             onClick={() => setShowAddCategory(true)}
             variant="outline"
-            className="border-red-600 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/30"
+            className="border-orange-500 text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-950/30"
           >
             <Plus className="w-4 h-4 mr-2" />
             Nuova Categoria
